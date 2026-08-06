@@ -166,6 +166,20 @@ def main() -> int:
     opening = _load_json(article_dir / "opening-meta-gate.json")
     record("opening_meta", opening_rc == 0 and _hard_ok(opening), f"exit={opening_rc}")
 
+    desc_rc = run_cmd(
+        root,
+        [
+            py,
+            str(scripts / "excalibur_blog_description_gate.py"),
+            "--article-dir",
+            str(article_dir),
+            "-o",
+            "description-gate.json",
+        ],
+    )
+    desc = _load_json(article_dir / "description-gate.json")
+    record("description", desc_rc == 0 and _hard_ok(desc), f"exit={desc_rc}")
+
     failed = [check["name"] for check in checks if not check["ok"]]
     report = {
         "gate": "structure",

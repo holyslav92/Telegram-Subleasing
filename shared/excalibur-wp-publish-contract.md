@@ -49,12 +49,14 @@ python3 scripts/excalibur_blog_wp_publish.py \
    - **не** используй blanket `--skip-gates` (INC-20260723-1235);
    - алиас только freshness: `--allow-stale-freshness`
 3. `wp_insert_post` / `wp_update_post` — title, slug, content, excerpt
-   - **HARD (Dzen/RSS):** `post_excerpt` must **not** be a truncated copy of
-     the opening paragraphs. RSS emits excerpt as `<description>` and the
-     body as `<content:encoded>`; Dzen/RSSLint often shows both → duplicate
-     lead (INC-20260805-2240). Publish uses `rss_safe_excerpt()`: if
-     description clones the opening, fall back to H1/title. Meta description
-     for SEO may still exist, but excerpt for WP/RSS stays distinct.
+   - **HARD (Dzen/RSS):** `post_excerpt` = тизер от агента **Description**
+     (`description-brief.json` → meta.description). RSS emits excerpt as
+     `<description>` (карточка в ленте Дзена — см.
+     `shared/dzen-description-rules.md` / rss-modify.html) and the body as
+     `<content:encoded>`.
+   - Excerpt must **not** clone the opening (INC-20260805-2240) and must
+     **not** near-duplicate the title (иначе на карточке заголовок дважды).
+   - `rss_safe_excerpt()` **raises** on bad excerpt — never falls back to H1.
 4. Featured image из `cover/cover.png` + **Media Library meta**:
    - **Атрибут alt** ← `cover-registry.json` `alt` / `cover_alt_text` / asset `alt`
    - **Подпись (caption)** ← осмысленный alt → `post_excerpt`; deprecated `meme_caption_ru` игнорировать (он обязан быть пуст)

@@ -37,11 +37,11 @@ def _plain(text: str) -> str:
 
 
 def _first_sentences(text: str, max_chars: int = 220) -> str:
-    """Truncate plain text. Do NOT use body opening as WP/RSS excerpt.
+    """Truncate plain text. Do NOT use as WP/RSS excerpt / Dzen card text.
 
-    Cloning the lead into post_excerpt makes Dzen/RSSLint show the same
-    lines twice (RSS <description> + <content:encoded>). Prefer H1 for
-    auto description / excerpt fallbacks (INC-20260805-2240).
+    Cloning the lead into post_excerpt makes Dzen show the same lines twice
+    (RSS <description> + <content:encoded>). Description agent writes a
+    distinct teaser (see shared/dzen-description-rules.md).
     """
     plain = _plain(text)
     if not plain:
@@ -54,14 +54,48 @@ def _first_sentences(text: str, max_chars: int = 220) -> str:
     return cut.rstrip(".,;:") + "…"
 
 
+def _norm_desc(text: str) -> str:
+    t = _plain(text).casefold()
+    t = re.sub(r"[\"«»„“”]+", "", t)
+    t = re.sub(r"[.!?…]+$", "", t).strip()
+    return re.sub(r"\s+", " ", t)
+
+
 def description_clones_opening(description: str, body_html: str, *, min_chars: int = 48) -> bool:
     """True when meta/excerpt is a truncated copy of the article opening."""
     desc = _plain(description).rstrip("…").rstrip(".,;:").strip()
-    body = _plain(body_html)
-    if len(desc) < min_chars or not body:
+    if len(desc) < min_chars:
         return False
-    probe = desc[: min(len(desc), 80)]
-    return body.startswith(probe)
+    # Prefer first <p> — that is what readers see after the Dzen card.
+    m = re.search(r"<p\b[^>]*>(.*?)</p>", body_html or "", flags=re.I | re.S)
+    first_p = _plain(m.group(1)) if m else ""
+    body = first_p or _plain(body_html)
+    if not body:
+        return False
+    desc_n = _norm_desc(desc)
+    body_n = _norm_desc(body)
+    probe = desc_n[: min(len(desc_n), 80)]
+    if body_n.startswith(probe) or desc_n.startswith(body_n[: min(len(body_n), 80)]):
+        return True
+    # Soft punctuation drift: compare alnum-only prefixes.
+    da = re.sub(r"[^a-zа-яё0-9]+", "", desc.casefold())
+    ba = re.sub(r"[^a-zа-яё0-9]+", "", body.casefold())
+    if len(da) < 40 or len(ba) < 40:
+        return False
+    return ba.startswith(da[: min(len(da), 72)]) or da.startswith(ba[: min(len(ba), 72)])
+
+
+def description_near_title(description: str, title: str) -> bool:
+    """True when RSS/Dzen description duplicates the post title."""
+    d, t = _norm_desc(description), _norm_desc(title)
+    if not d or not t:
+        return False
+    if d == t:
+        return True
+    shorter, longer = (d, t) if len(d) <= len(t) else (t, d)
+    if len(shorter) < 24:
+        return False
+    return longer.startswith(shorter) and len(shorter) / len(longer) >= 0.82
 
 
 def validate_article_canon(article_dir: Path, root: Path) -> list[str]:
@@ -128,13 +162,31 @@ def stamp_article(article_dir: Path, root: Path) -> None:
         or title_brief.get("topic_id")
         or article_dir.name.split("-", 1)[0]
     )
-    # Auto description must NOT clone the opening paragraphs: WP maps it to
-    # post_excerpt → RSS <description>, and Dzen shows description + body.
+    # Description comes from Description agent (description-brief.json).
+    # NEVER fall back to H1/title: Dzen card shows title + description → duplicate.
+    # NEVER use body opening: RSS <description> + <content:encoded> → duplicate lead
+    # (INC-20260805-2240 and follow-up title-as-description).
+    desc_brief = load_json(article_dir / "description-brief.json") or {}
+    brief_desc = str(desc_brief.get("description") or "").strip()
     existing_desc = str(meta.get("description") or "").strip()
-    if existing_desc and description_clones_opening(existing_desc, body):
-        description = h1 or existing_desc
-    else:
-        description = existing_desc or h1 or ""
+    description = brief_desc or existing_desc
+    if not description:
+        raise ValueError(
+            "description missing: run Task(excalibur-blog-description) before stamp "
+            "(see shared/dzen-description-rules.md)"
+        )
+    if description_clones_opening(description, body):
+        raise ValueError(
+            "description clones article opening; rewrite description-brief.json"
+        )
+    if h1 and description_near_title(description, h1):
+        raise ValueError(
+            "description near-duplicates title/h1; rewrite description-brief.json"
+        )
+    if len(description) < 80 or len(description) > 180:
+        raise ValueError(
+            f"description length {len(description)} out of range 80–180"
+        )
 
     if h1:
         meta.setdefault("title", h1)
@@ -148,22 +200,24 @@ def stamp_article(article_dir: Path, root: Path) -> None:
         if tenant_author:
             meta["author_id"] = tenant_author
     meta.setdefault("article_mode", meta.get("article_mode") or "B")
-    if description:
-        meta["description"] = description
+    meta["description"] = description
     meta.setdefault("meta_ab", {})
     if isinstance(meta["meta_ab"], dict):
         if h1:
             meta["meta_ab"].setdefault("title_seo", h1)
             meta["meta_ab"].setdefault("title_ctr", h1)
             meta["meta_ab"].setdefault("title_aeo", h1)
-        if description:
-            # Force-replace SEO desc copies that clone the opening (Dzen RSS).
-            for key in ("description_seo", "description_ctr", "description_aeo"):
-                cur = str(meta["meta_ab"].get(key) or "").strip()
-                if not cur or description_clones_opening(cur, body):
-                    meta["meta_ab"][key] = description
-                else:
-                    meta["meta_ab"].setdefault(key, description)
+        # Always sync SEO desc slots from Description agent (distinct teaser).
+        for key in ("description_seo", "description_ctr", "description_aeo"):
+            cur = str(meta["meta_ab"].get(key) or "").strip()
+            if (
+                not cur
+                or description_clones_opening(cur, body)
+                or (h1 and description_near_title(cur, h1))
+            ):
+                meta["meta_ab"][key] = description
+            else:
+                meta["meta_ab"].setdefault(key, description)
     meta.setdefault(
         "theme_blocks",
         {"faq": "skip", "quiz": "skip", "side_stickers": "skip"},

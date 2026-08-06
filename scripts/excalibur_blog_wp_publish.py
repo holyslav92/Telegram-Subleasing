@@ -27,6 +27,7 @@ from excalibur_blog_live_page_gate import inspect as inspect_live_page
 from excalibur_blog_pipeline_canon import (
     _plain,
     description_clones_opening,
+    description_near_title,
     validate_article_canon,
 )
 
@@ -376,26 +377,40 @@ def rss_safe_excerpt(
     content_html: str,
     title: str,
 ) -> str:
-    """WP post_excerpt → RSS <description>; must not clone the opening.
+    """WP post_excerpt → RSS <description> (Dzen card text).
 
-    Dzen/RSSLint often render <description> then <content:encoded>. If excerpt
-    is a truncated copy of the lead, readers see the first lines twice
-    (INC-20260805-2240). Fall back to the post title/H1.
+    Must be a distinct teaser from Description agent:
+    - not empty
+    - not a clone of the opening (INC-20260805-2240)
+    - not a near-duplicate of title (title+description both show on Dzen card)
+
+    Never fall back to title — that recreates the duplicate-title card bug.
     """
     desc = (description or "").strip()
     title_n = (title or "").strip()
     if not desc:
-        return title_n
+        raise ValueError(
+            "RSS excerpt empty: need description-brief from excalibur-blog-description"
+        )
+    if description_near_title(desc, title_n):
+        raise ValueError(
+            "RSS excerpt near-duplicates title; rewrite description (Dzen card)"
+        )
     if description_clones_opening(desc, content_html):
-        return title_n
-    # Also block when excerpt is almost the whole first paragraph.
+        raise ValueError(
+            "RSS excerpt clones opening; rewrite description (INC-20260805-2240)"
+        )
     first_p = ""
     m = re.search(r"<p\b[^>]*>(.*?)</p>", content_html or "", flags=re.I | re.S)
     if m:
         first_p = _plain(m.group(1))
     probe = _plain(desc).rstrip("…").rstrip(".,;:").strip()
     if first_p and probe and (first_p.startswith(probe[:60]) or probe.startswith(first_p[:60])):
-        return title_n
+        raise ValueError(
+            "RSS excerpt matches first paragraph; rewrite description"
+        )
+    if len(desc) < 80 or len(desc) > 180:
+        raise ValueError(f"RSS excerpt length {len(desc)} out of range 80–180")
     return desc
 
 

@@ -16,15 +16,18 @@
 
 ```text
 Scout? → research_start → Research → Title → Writer(смысл)
-→ Sol(слог) → Cover-text || Schema → Cover → Indexer(llms)
-→ Publish → Fixer → merge → Content-learner
+→ Sol(слог) → Description(Дзен-карточка) → Cover-text || Schema → Cover
+→ Indexer(llms) → Publish → Fixer → merge → Content-learner
 ```
 
 **Writer** → `drafts/writer.html` (факты и смысл).  
 **Sol** (`excalibur-blog-sol`) → финальный `article.html` слогом тенанта
 (`shared/SOUL.md` + `shared/soul-examples/`).  
-После Sol — stamp `pipeline_canon` + structural checks. Прозу после Sol
-не переписывают (кроме возврата Sol при FAIL гейтов слога).
+**Description** (`excalibur-blog-description`) → `description-brief.json`
+(тизер карточки Дзена / RSS; `shared/dzen-description-rules.md`).  
+≠ title, ≠ opening. После Description — stamp `pipeline_canon` + structural
+checks. Прозу после Sol не переписывают (кроме возврата Sol при FAIL гейтов
+слога; FAIL description → снова Description).
 
 **Title** → `title-brief.json`.
 
@@ -42,6 +45,7 @@ python3 scripts/excalibur_blog_research_start.py --topic-id B111 --title "…"
 
 - Второй автор / rewrite-loop **поверх Sol** (Sol — единственный стилевой рерайт)
 - Термин-дамп / research-брифинг в открытии финала
+- Description = title или обрезка лида (двойная карточка в Дзене)
 - topics / SEO-хвосты
 - Writer/Sol читают старые article.html / live-сайт как образец
 - Publish без pipeline_canon stamp

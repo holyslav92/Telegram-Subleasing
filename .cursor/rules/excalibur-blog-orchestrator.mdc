@@ -31,11 +31,12 @@ alwaysApply: false
 2. `excalibur-blog-title`
 3. `excalibur-blog-writer` → `drafts/writer.html` (смысл)
 4. `excalibur-blog-sol` → `article.html` (слог SOUL + examples)
-5. shell: `pipeline_canon --stamp` + opening_meta + html_linter
-6. **ПАРАЛЛЕЛЬНО** cover-text + schema → cover
-7. `excalibur-blog-indexer`
-8. `excalibur-blog-publish`
-9. fixer(open) → merge_to_main → content-learner
+5. `excalibur-blog-description` → `description-brief.json` (Дзен/RSS карточка)
+6. shell: `pipeline_canon --stamp` + opening_meta + description_gate + html_linter
+7. **ПАРАЛЛЕЛЬНО** cover-text + schema → cover
+8. `excalibur-blog-indexer`
+9. `excalibur-blog-publish`
+10. fixer(open) → merge_to_main → content-learner
 
 Канон: `shared/pipeline-canon.json`.
 **Не возвращать** Critic/Panel/Thesis/Voice/Headline/Glavred/Visual QA.

@@ -20,6 +20,7 @@
 | ①b | title | H1 |
 | ② | writer | Смысл → `drafts/writer.html` |
 | ②b | **sol** | **Финал `article.html` (слог SOUL)** |
+| ②c | **description** | **Дзен/RSS карточка → `description-brief.json`** |
 | ④a | cover-text | RU надписи |
 | ④b | schema | JSON-LD |
 | ④c | cover | Image API + figures |
@@ -28,6 +29,7 @@
 | ⑦ | fixer | Incidents |
 | ⑦b | content-learner | Metrika |
 
-После **Sol**: shell `pipeline_canon --stamp` + opening_meta / html_linter.
+После **Sol** → **Description** → shell `pipeline_canon --stamp` +
+opening_meta / description_gate / html_linter.
 
 Пока setup не complete — только Setup (+ setup-voice/visual).

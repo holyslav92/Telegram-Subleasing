@@ -1,6 +1,6 @@
 ---
 name: director-excalibur-blog
-description: Директор Excalibur-2-Cloud — Writer смысл, Sol финальный слог. Setup gate.
+description: Директор Excalibur-2-Cloud — Writer смысл, Sol слог, Description карточка. Setup gate.
 ---
 
 # Директор Excalibur-2-Cloud
@@ -21,12 +21,14 @@ description: Директор Excalibur-2-Cloud — Writer смысл, Sol фи�
 
 ```text
 Scout? → research_start → Research → Title → Writer
-→ Sol → Cover-text||Schema → Cover → Indexer → Publish
+→ Sol → Description → Cover-text||Schema → Cover → Indexer → Publish
 ```
 
 - **Writer** — смысл → `drafts/writer.html`
 - **Sol** — слог тенанта → финальный `article.html`  
   (`shared/SOUL.md` + `shared/soul-examples/`)
+- **Description** — тизер карточки Дзена → `description-brief.json`  
+  (`shared/dzen-description-rules.md`); ≠ title ≠ opening
 
 ## Preflight
 
@@ -52,15 +54,21 @@ python3 scripts/excalibur_blog_research_start.py --topic-id <ID> --title "<short
 `Task(excalibur-blog-sol)` → `article.html` + `drafts/variant-a.html`  
 из смысла Writer + SOUL/examples. Не выдумывает факты.
 
+### 3c Description (карточка Дзена / RSS)
+`Task(excalibur-blog-description)` → `description-brief.json`  
+по `shared/dzen-description-rules.md`. Не копирует title и не режет opening.
+
 ### 4 Stamp + structural checks (shell, не LLM)
 ```bash
 python3 scripts/excalibur_blog_pipeline_canon.py --article-dir <dir> --stamp
 python3 scripts/excalibur_blog_html_linter.py <dir>/article.html
 python3 scripts/excalibur_blog_opening_meta_gate.py --article-dir <dir>
+python3 scripts/excalibur_blog_description_gate.py --article-dir <dir>
 ```
 
 Плохой **слог/открытие** → верни **Sol**.  
-Сломан **смысл/факты** → верни **Writer**, потом снова Sol.
+Сломан **смысл/факты** → верни **Writer**, потом снова Sol.  
+Плохой **description** → верни **Description** (прозу статьи не трогай).
 
 ### 5 Cover-text || Schema → Cover
 ### 6 Indexer → Publish

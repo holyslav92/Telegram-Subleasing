@@ -1,6 +1,10 @@
 {
   "version": "human-first-v2",
-  "description": "Research → Title → Writer(meaning) → Sol(style) → Cover||Schema → Indexer → Publish",
+  "description": "Research → Title → Writer(meaning) → Sol(style) → Description(Dzen card) → Cover||Schema → Indexer → Publish",
+  "description_agent": "excalibur-blog-description",
+  "description_output": "description-brief.json",
+  "description_rules": "shared/dzen-description-rules.md",
+  "description_gate": "scripts/excalibur_blog_description_gate.py",
   "writer_allowed_sources": [
     "shared/writer-master-prompt.md",
     "research-notes.md",

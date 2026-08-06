@@ -22,12 +22,13 @@ is_background: false
 
 ```text
 Scout? → research_start → Research → Title → Writer
-→ Sol → Cover-text || Schema → Cover → Indexer → Publish
+→ Sol → Description → Cover-text || Schema → Cover → Indexer → Publish
 → Fixer → merge → Content-learner
 ```
 
 Writer = смысл (`drafts/writer.html`).  
 Sol = финальный слог (`article.html`) по SOUL + soul-examples.  
+Description = Дзен/RSS карточка (`description-brief.json`) ≠ title ≠ opening.  
 Не возвращать Voice/Thesis/Critic и прочий старый рой.
 
 ## Алгоритм
@@ -35,8 +36,8 @@ Sol = финальный слог (`article.html`) по SOUL + soul-examples.
 0. Setup gate (выше). Затем при `dzen_rf_pack`: `shared/dzen-content-rules.md` +
    `shared/rf-blocked-entities.json` (Meta/Instagram/… — не тема).
 1. Scout? + research_start
-2. Research → Title → Writer → **Sol**
-3. shell `pipeline_canon --stamp` + opening_meta + html_linter
+2. Research → Title → Writer → **Sol** → **Description**
+3. shell `pipeline_canon --stamp` + opening_meta + description_gate + html_linter
 4. cover-text || schema → Cover
 5. indexer → publish
 6. Fixer → merge → content-learner
