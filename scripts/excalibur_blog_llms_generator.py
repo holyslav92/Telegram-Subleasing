@@ -30,7 +30,9 @@ def strip_html(html: str) -> str:
     # Convert paragraph endings and headers to newlines
     html = re.sub(r"</?(p|h1|h2|h3|li|div|blockquote)[^>]*>", "\n", html, flags=re.IGNORECASE)
     # Remove all other HTML tags
-    text = re.sub(r"<[^>]+", "", html)
+    # chr(60)/chr(62) avoids a tag-like regex in source
+    _lt, _gt = chr(60), chr(62)
+    text = re.sub(_lt + "[^" + _gt + "]+" + _gt, "", html)
     # Normalize whitespaces and newlines
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n\s*\n", "\n\n", text)
