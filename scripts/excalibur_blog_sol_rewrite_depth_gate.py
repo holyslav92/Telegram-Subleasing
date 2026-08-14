@@ -59,7 +59,9 @@ BODY_MAX_LATIN = 14
 BODY_MAX_JARGON = 4
 
 SPLIT_RE = re.compile(r"</(?:p|h2|h3|li|blockquote)>", re.I)
-TAG_RE = re.compile(r"<[^>]+")
+# chr(60)/chr(62) so source has no tag-shaped regex for HTML transports.
+_LT, _GT = chr(60), chr(62)
+TAG_RE = re.compile(_LT + "[^" + _GT + "]+" + _GT)
 TOKEN_RE = re.compile(r"[а-яёa-z0-9%./+-]+", re.I)
 FIRST_H2_RE = re.compile(r"<h2\b", re.I)
 
