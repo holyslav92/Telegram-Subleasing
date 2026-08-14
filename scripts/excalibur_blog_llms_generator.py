@@ -244,12 +244,9 @@ def main() -> int:
 
     print(f"Loaded {len(articles)} articles to index for LLMs (mode={args.mode}).")
 
-    # redact_site_base: full PUBLIC_SITE_URL → {{SITE_BASE}}, bare host in prose
-    # (legacy article excerpts in llms-full) → {{SITE_HOST}} via env / public base.
     llms_txt = redact_site_base(
         build_llms_txt(args.site_name, args.site_desc, articles, site_base, args.blog_path)
     )
-    # llms-full: only rows that have plain_text (current article); never re-dump history
     full_rows = [a for a in articles if str(a.get("plain_text") or "").strip()]
     if not full_rows:
         llms_full_txt = (
