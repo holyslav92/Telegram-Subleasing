@@ -1,6 +1,7 @@
 ---
 name: setup-voice-excalibur-blog
 description: Синтез SOUL и soul-examples из материалов тенанта.
+disable-model-invocation: true
 ---
 
 # Setup Voice

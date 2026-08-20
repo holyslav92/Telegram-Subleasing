@@ -1,10 +1,19 @@
 ---
 name: excalibur-blog-cover-text
-description: "Текст обложки: точные надписи по-русски в cover-text.json и gate PASS до генерации картинки."
-model: inherit
+description: "Текст обложки: точные надписи по-русски в cover-text.json и gate PASS до генерации картинки. Director-chain only; no nested Task/cloud."
+model: gemini-3.7-flash-high
 readonly: false
 is_background: false
 ---
+
+## Цепочка (HARD)
+
+Канон: `shared/subagent-chain.md` + `shared/pipeline-model-policy.json`.
+Ты один шаг в **том же окне** Директора, не отдельный Cloud Agent.
+
+- Запрещено: `Task(excalibur-blog-*)`, `/in-cloud`, `/babysit`, `environment: cloud`.
+- Запрещено начинать Scout→Publish заново.
+- Если тебя открыли как главного агента чата — остановись: нужен Директор.
 
 **Язык:** русский.
 

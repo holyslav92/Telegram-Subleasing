@@ -1,6 +1,7 @@
 ---
 name: title-excalibur-blog
 description: Invent one catchy human H1 with clear subject. No SEO tails, no label heads.
+disable-model-invocation: true
 ---
 
 # Title Agent — цепкий заголовок с понятной темой

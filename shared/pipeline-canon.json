@@ -108,5 +108,8 @@
     "max_len": 70,
     "style": "shared/article-style.md",
     "soul": "shared/SOUL.md"
-  }
+  },
+  "subagent_chain": "shared/subagent-chain.md",
+  "model_policy": "shared/pipeline-model-policy.json",
+  "text_model": "gemini-3.7-flash-high"
 }

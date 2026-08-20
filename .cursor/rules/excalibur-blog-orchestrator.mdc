@@ -1,5 +1,5 @@
 ---
-description: Excalibur-2-Cloud — оркестратор, Setup gate, Task(subagents), Cloud handoff
+description: Excalibur-2-Cloud — оркестратор, Setup gate, Task(subagents) в одном окне
 alwaysApply: false
 ---
 
@@ -11,6 +11,8 @@ alwaysApply: false
 - Fragments: `.cursor/excalibur-blog-fragments/` для cover||schema
 - Task agents: `.cursor/agents/excalibur-blog-*`
 - Preflight: `scripts/excalibur_blog_today.py`, `excalibur_blog_research_start.py`
+- Цепочка: `shared/subagent-chain.md`, модели: `shared/pipeline-model-policy.json`
+- Cursor docs: `docs/cursor/README.md`
 - См. `AGENTS.md`, `CLOUD-FIRST-RUN.md`, `CLOUD-AUTOMATION.md`, `SETUP.md`
 
 ## Setup gate
@@ -22,18 +24,19 @@ alwaysApply: false
 
 - **Setup** — чат (не Task): `agents/excalibur-blog-setup.md`
 - **Директор** — чат (не Task): `agents/excalibur-blog-director.md`
-- **Субагенты** — `Task(<name>)`, см. `agents/FOR-AGENTS.md`
+- **Субагенты** — foreground `Task(<name>)` в том же окне, см. `agents/FOR-AGENTS.md`
+- Текст: Gemini 3.7 Flash (`gemini-3.7-flash-high`). Остальное: inherit automation.
 
 ## Пайплайн (после setup)
 
 0. Scout Task при `needs_scout`, затем shell `research_start`
-1. `excalibur-blog-research`
-2. `excalibur-blog-title`
-3. `excalibur-blog-writer` → `drafts/writer.html` (смысл)
-4. `excalibur-blog-sol` → `article.html` (слог SOUL + examples)
-5. `excalibur-blog-description` → `description-brief.json` (Дзен/RSS карточка)
+1. `excalibur-blog-research` (inherit)
+2. `excalibur-blog-title` (Gemini)
+3. `excalibur-blog-writer` → `drafts/writer.html` (смысл, Gemini)
+4. `excalibur-blog-sol` → `article.html` (слог SOUL + examples, Gemini)
+5. `excalibur-blog-description` → `description-brief.json` (Gemini)
 6. shell: `pipeline_canon --stamp` + opening_meta + description_gate + html_linter
-7. **ПАРАЛЛЕЛЬНО** cover-text + schema → cover
+7. **ПАРАЛЛЕЛЬНО** cover-text (Gemini) + schema (inherit) → cover (inherit)
 8. `excalibur-blog-indexer`
 9. `excalibur-blog-publish`
 10. fixer(open) → merge_to_main → content-learner
@@ -45,6 +48,7 @@ alwaysApply: false
 
 - `Task(excalibur-blog-director)` / `Task(excalibur-blog-setup)`
 - субагенты не запускают вложенные Task (кроме Setup → setup-voice/visual)
+- `environment: cloud`, `/in-cloud`, `/babysit`, `best-of-n-runner` на шаге статьи
 - cover||schema без **Sol** `article.html` + canon stamp
 - rewrite-loop поверх Sol
 - пайплайн до завершения Setup

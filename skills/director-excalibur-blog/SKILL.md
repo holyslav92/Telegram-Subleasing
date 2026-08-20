@@ -1,6 +1,6 @@
 ---
 name: director-excalibur-blog
-description: Директор Excalibur-2-Cloud — Writer смысл, Sol слог, Description карточка. Setup gate.
+description: Директор Excalibur-2-Cloud — одно окно, цепочка Task. Writer смысл, Sol слог, Description карточка. Setup gate.
 ---
 
 # Директор Excalibur-2-Cloud
@@ -8,6 +8,8 @@ description: Директор Excalibur-2-Cloud — Writer смысл, Sol сл�
 **Язык:** русский.
 
 Ты — **Директор**. Не пишешь статью сам. Не вызываешь `Task(excalibur-blog-director)`.
+Канон запуска: `shared/subagent-chain.md` + `shared/pipeline-model-policy.json`.
+Не `/in-cloud`, не `environment: cloud`, не isolated worktree.
 
 ## Setup gate (HARD)
 
@@ -46,16 +48,19 @@ python3 scripts/excalibur_blog_research_start.py --topic-id <ID> --title "<short
 ## Шаги
 
 ### 0 Scout? (только после Дзен+РФ при pack)
+`Task(excalibur-blog-scout)` · `model: inherit` · foreground.
 ### 1–2 Research → Title
+`Task(excalibur-blog-research)` · `model: inherit`.  
+`Task(excalibur-blog-title)` · `model: gemini-3.7-flash-high`.
 ### 3 Writer (смысл)
-`Task(excalibur-blog-writer)` → `drafts/writer.html`.
+`Task(excalibur-blog-writer)` · `model: gemini-3.7-flash-high` → `drafts/writer.html`.
 
 ### 3b Sol (финальный слог)
-`Task(excalibur-blog-sol)` → `article.html` + `drafts/variant-a.html`  
+`Task(excalibur-blog-sol)` · `model: gemini-3.7-flash-high` → `article.html` + `drafts/variant-a.html`  
 из смысла Writer + SOUL/examples. Не выдумывает факты.
 
 ### 3c Description (карточка Дзена / RSS)
-`Task(excalibur-blog-description)` → `description-brief.json`  
+`Task(excalibur-blog-description)` · `model: gemini-3.7-flash-high` → `description-brief.json`  
 по `shared/dzen-description-rules.md`. Не копирует title и не режет opening.
 
 ### 4 Stamp + structural checks (shell, не LLM)
@@ -71,7 +76,12 @@ python3 scripts/excalibur_blog_description_gate.py --article-dir <dir>
 Плохой **description** → верни **Description** (прозу статьи не трогай).
 
 ### 5 Cover-text || Schema → Cover
+В одном сообщении (параллель):  
+`Task(excalibur-blog-cover-text)` · Gemini; `Task(excalibur-blog-schema)` · inherit.  
+Потом `Task(excalibur-blog-cover)` · inherit. Cover **не** зовёт Cover-text.
 ### 6 Indexer → Publish
+`model: inherit`.
 ### 7 Fixer → merge → learner
+`model: inherit`.
 
 Карта: `shared/pipeline-task-map.md`.

@@ -1,6 +1,7 @@
 ---
 name: scout-excalibur-blog
 description: Pick topic from live channel/news hype, not invented series clones.
+disable-model-invocation: true
 ---
 
 # Scout — тема из живого сигнала, не из головы

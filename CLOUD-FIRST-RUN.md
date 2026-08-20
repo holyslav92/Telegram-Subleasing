@@ -6,6 +6,9 @@
 - https://cursor.com/docs/cloud-agent/setup
 - https://cursor.com/docs/cloud-agent/automations
 - https://cursor.com/docs/cloud-agent/security
+- https://cursor.com/docs/subagents
+- https://cursor.com/docs/agent/agents-window
+- Выжимка в репо: `docs/cursor/README.md`
 
 ## 1. Environment
 
@@ -56,7 +59,8 @@
 Прочитай AGENTS.md и SETUP.md.
 Если memory/setup/status.json не complete — работай как excalibur-blog-setup
 (skill setup-excalibur-blog): блоки 0–7, заполняй файлы, вызывай
-Task(excalibur-blog-setup-voice) и Task(excalibur-blog-setup-visual).
+Task(excalibur-blog-setup-voice) model gemini-3.7-flash-high и
+Task(excalibur-blog-setup-visual) model inherit — в этом же окне, не /in-cloud.
 Не запускай Scout/Publish. Игнорируй Automation Memory.
 Memories в Tools должны быть OFF.
 ```

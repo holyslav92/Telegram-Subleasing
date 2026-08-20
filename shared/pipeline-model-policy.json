@@ -1,0 +1,64 @@
+{
+  "version": "1",
+  "docs_fetched_at": "2026-08-20",
+  "docs_index": "docs/cursor/README.md",
+  "chain_canon": "shared/subagent-chain.md",
+  "text_model": "gemini-3.7-flash-high",
+  "text_model_id": "gemini-3.7-flash",
+  "text_model_display": "Gemini 3.7 Flash",
+  "text_model_source": "https://cursor.com/docs/models/gemini-3-7-flash",
+  "inherit_means": "Модель родителя = модель Cursor Automation / выбранная пользователем. Не подменять Gemini.",
+  "text_agents": [
+    "excalibur-blog-title",
+    "excalibur-blog-writer",
+    "excalibur-blog-sol",
+    "excalibur-blog-description",
+    "excalibur-blog-cover-text",
+    "excalibur-blog-setup-voice"
+  ],
+  "inherit_agents": [
+    "excalibur-blog-director",
+    "excalibur-blog-setup",
+    "excalibur-blog-setup-visual",
+    "excalibur-blog-scout",
+    "excalibur-blog-research",
+    "excalibur-blog-schema",
+    "excalibur-blog-cover",
+    "excalibur-blog-indexer",
+    "excalibur-blog-publish",
+    "excalibur-blog-fixer",
+    "excalibur-blog-content-learner"
+  ],
+  "orchestrators": [
+    "excalibur-blog-director",
+    "excalibur-blog-setup"
+  ],
+  "never_as_task": [
+    "excalibur-blog-director",
+    "excalibur-blog-setup"
+  ],
+  "setup_may_task": [
+    "excalibur-blog-setup-voice",
+    "excalibur-blog-setup-visual"
+  ],
+  "parallel_pairs": [
+    ["excalibur-blog-cover-text", "excalibur-blog-schema"]
+  ],
+  "forbidden_task_fields": {
+    "environment": ["cloud"],
+    "run_in_background": [true],
+    "isolated": true
+  },
+  "forbidden_subagent_types": [
+    "best-of-n-runner"
+  ],
+  "builtin_subagents_allowed": [
+    "explore",
+    "bash",
+    "shell",
+    "browser",
+    "debug",
+    "computerUse",
+    "docs-researcher"
+  ]
+}

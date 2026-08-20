@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "python3 scripts/excalibur_blog_subagent_hook.py",
+        "matcher": "Task"
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "python3 scripts/excalibur_blog_subagent_hook.py"
+      }
+    ]
+  }
+}

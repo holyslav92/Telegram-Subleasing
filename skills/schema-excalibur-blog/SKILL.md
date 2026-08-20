@@ -1,6 +1,7 @@
 ---
 name: schema-excalibur-blog
 description: Excalibur BLOG Schema — BlogPosting + optional FAQPage, author registry.
+disable-model-invocation: true
 ---
 
 # Excalibur BLOG — Schema

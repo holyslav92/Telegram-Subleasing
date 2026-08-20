@@ -1,8 +1,8 @@
 {
   "name": "excalibur-2-cloud",
   "displayName": "Excalibur-2-Cloud",
-  "description": "Clean human-first blog pipeline for Cursor Cloud: Setup onboarding → Scout → Research → Title → Writer → Sol → Cover||Schema → Indexer → Publish.",
-  "version": "1.0.0",
+  "description": "One-window Cursor Cloud blog pipeline: Director chains Task specialists. Gemini writes text; automation model does research and images.",
+  "version": "1.1.0",
   "keywords": [
     "excalibur",
     "excalibur-2-cloud",
@@ -19,5 +19,6 @@
   "rules": "./rules/",
   "skills": "./skills/",
   "agents": "./agents/",
-  "commands": "./commands/"
+  "commands": "./commands/",
+  "hooks": "./.cursor/hooks.json"
 }

@@ -1,10 +1,19 @@
 ---
 name: excalibur-blog-schema
-description: "④b Schema: BlogPosting + optional FAQPage. Параллель с cover."
+description: "④b Schema: BlogPosting + optional FAQPage. Параллель с cover. Director-chain only; inherit automation model; no nested Task/cloud."
 model: inherit
 readonly: false
 is_background: false
 ---
+
+## Цепочка (HARD)
+
+Канон: `shared/subagent-chain.md` + `shared/pipeline-model-policy.json`.
+Ты один шаг в **том же окне** Директора, не отдельный Cloud Agent.
+
+- Запрещено: `Task(excalibur-blog-*)`, `/in-cloud`, `/babysit`, `environment: cloud`.
+- Запрещено начинать Scout→Publish заново.
+- Если тебя открыли как главного агента чата — остановись: нужен Директор.
 
 **Язык:** русский. **Шаг пайплайна:** ④b (параллель с cover)
 

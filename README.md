@@ -17,12 +17,15 @@ Title → Writer → Sol → Cover/Schema → Indexer → Publish.
    automation из [`CLOUD-AUTOMATION.md`](CLOUD-AUTOMATION.md).
 
 Карта анкеты: [`SETUP.md`](SETUP.md). Канон агентов: [`AGENTS.md`](AGENTS.md).
+Цепочка субагентов: [`shared/subagent-chain.md`](shared/subagent-chain.md).
+Выжимка Cursor Docs: [`docs/cursor/README.md`](docs/cursor/README.md).
 
 ## Что внутри
 
 | Путь | Роль |
 |------|------|
 | `agents/` + `.cursor/agents/` | Director, Setup, Sol, Cover, Publish… |
+| `docs/cursor/` | Выжимка Cursor Docs (subagents, automations, модели) |
 | `skills/` | Runbook'и субагентов |
 | `shared/` | Контракты, SOUL (после setup), tenant-config |
 | `memory/setup/` | Статус онбординга, inbox примеров |

@@ -1,12 +1,14 @@
 ---
 name: writer-excalibur-blog
-description: Write meaning draft drafts/writer.html; Sol applies tenant SOUL style.
+description: Write meaning draft drafts/writer.html; Sol applies tenant SOUL style. Director-chain specialist.
+disable-model-invocation: true
 ---
 
 # Writer Skill — смысл статьи (черновик)
 
 Ты пишешь **смысл**: факты, тезисы, ограничения, CTA.  
 Финал слога делает **Sol** (`excalibur-blog-sol`) по SOUL + examples.
+Ты Sol **не** запускаешь — Директор вызовет его следующим Task.
 
 Выход: **`drafts/writer.html`** (чистый HTML-фрагмент без `<h1>`).  
 Можно положить ту же копию во временный `article.html`, но канон —

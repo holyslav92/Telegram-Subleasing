@@ -1,6 +1,7 @@
 ---
 name: indexer-excalibur-blog
 description: Excalibur BLOG Indexer — llms.txt for AI crawlers; no article.html edits.
+disable-model-invocation: true
 ---
 
 # Indexer — llms only

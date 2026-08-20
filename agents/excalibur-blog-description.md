@@ -1,10 +1,19 @@
 ---
 name: excalibur-blog-description
-description: "Description: Дзен/RSS карточный тизер ≠ title ≠ opening. Субагент Task после Sol, до stamp."
-model: inherit
+description: "Description: Дзен/RSS карточный тизер ≠ title ≠ opening. Субагент Task после Sol, до stamp. Director-chain only; no nested Task/cloud."
+model: gemini-3.7-flash-high
 readonly: false
 is_background: false
 ---
+
+## Цепочка (HARD)
+
+Канон: `shared/subagent-chain.md` + `shared/pipeline-model-policy.json`.
+Ты один шаг в **том же окне** Директора, не отдельный Cloud Agent.
+
+- Запрещено: `Task(excalibur-blog-*)`, `/in-cloud`, `/babysit`, `environment: cloud`.
+- Запрещено начинать Scout→Publish заново.
+- Если тебя открыли как главного агента чата — остановись: нужен Директор.
 
 # Excalibur-2-Cloud — Description
 

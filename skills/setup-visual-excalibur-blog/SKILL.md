@@ -1,6 +1,7 @@
 ---
 name: setup-visual-excalibur-blog
 description: Синтез cover prompt-системы из референсов тенанта.
+disable-model-invocation: true
 ---
 
 # Setup Visual

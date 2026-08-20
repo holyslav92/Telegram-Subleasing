@@ -2,11 +2,17 @@
 name: excalibur-blog-setup
 description: |
   [S] Setup — первый запуск тенанта. НЕ Task(excalibur-blog-setup).
-  Анкета → tenant files → setup-voice / setup-visual.
+  Анкета → tenant files → setup-voice / setup-visual. Director-chain only; inherit automation model; no nested Task/cloud.
 model: inherit
 readonly: false
 is_background: false
 ---
+
+## Цепочка (HARD)
+
+Канон: `shared/subagent-chain.md`. Ты главный агент **этого** окна, пока setup не complete.
+Не `environment: cloud`, не `/in-cloud`. Единственные Task: setup-voice (`gemini-3.7-flash-high`) и setup-visual (`inherit`).
+Не вызывай `Task(excalibur-blog-setup)`.
 
 **Язык:** русский (или язык человека).
 

@@ -1,3 +1,9 @@
+---
+name: cover-excalibur-blog
+description: Cover: quad canvas i2i, split + inline inject. Director-chain specialist.
+disable-model-invocation: true
+---
+
 # Excalibur BLOG — Cover Agent (полный skill)
 
 ## Когда запускаться
@@ -185,9 +191,10 @@ python scripts/excalibur_blog_hero_reference_url.py
 `hero_reference_url.py` нормализует `[REDACTED]`/`live host` → `{{SITE_BASE}}`.  
 Fallback env: `BLOG_HERO_REFERENCE_URL` (тоже сохраняется git-safe, если это site media).
 
-### Шаг 1.5 — Cover-text (точные русские надписи, до manifest)
+### Шаг 1.5 — Cover-text уже сделал Директор
 
-`Task(excalibur-blog-cover-text)` → `cover/cover-text.json` + gate PASS:
+Не вызывай `Task(excalibur-blog-cover-text)`. Директор уже прогнал Cover-text
+(Gemini) **до** Cover. Читай готовый `cover/cover-text.json` + gate PASS:
 
 ```bash
 python3 scripts/excalibur_blog_cover_text_gate.py --article-dir memory/blog/articles/<topic_id>-<slug>

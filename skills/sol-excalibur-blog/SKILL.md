@@ -1,6 +1,7 @@
 ---
 name: sol-excalibur-blog
 description: "Sol: rewrite Writer draft into tenant-SOUL final article.html."
+disable-model-invocation: true
 ---
 
 # Sol — душа слога (финальная проза)

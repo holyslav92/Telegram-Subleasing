@@ -66,3 +66,16 @@ python3 scripts/excalibur_blog_research_start.py --topic-id <id> --title "<short
 
 Директор: `.cursor/agents/excalibur-blog-director.md` (не Task).  
 Setup: `.cursor/agents/excalibur-blog-setup.md` (не Task).
+
+## Одно окно + модели
+
+Канон запуска: `shared/subagent-chain.md`.
+Доки Cursor: `docs/cursor/README.md`.
+Политика моделей: `shared/pipeline-model-policy.json`.
+
+- Один Cloud Agent / automation = Директор (или Setup). Не `/in-cloud`.
+- Специалисты — foreground Task в этом прогоне, без вложенных `Task(excalibur-blog-*)`.
+- Текст (title, writer, sol, description, cover-text, setup-voice):
+  `model: gemini-3.7-flash-high` (Gemini 3.7 Flash).
+- Research, scout, cover/картинки, schema, publish и оркестратор:
+  `model: inherit` (модель automation, которую выбрал человек).

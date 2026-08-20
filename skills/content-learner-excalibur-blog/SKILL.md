@@ -1,6 +1,7 @@
 ---
 name: content-learner-excalibur-blog
 description: Evidence + Metrika → named lessons and durable improvements.
+disable-model-invocation: true
 ---
 
 # Excalibur BLOG — Content Learner v2

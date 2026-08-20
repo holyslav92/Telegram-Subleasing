@@ -1,6 +1,7 @@
-﻿---
+---
 name: excalibur-research
-description: Current-date facts from live sources; no invented series continuation.
+description: Current-date facts from live sources; no invented series continuation. Director-chain specialist.
+disable-model-invocation: true
 ---
 
 # Research — факты сейчас, не выдумка

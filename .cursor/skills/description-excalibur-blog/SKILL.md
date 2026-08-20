@@ -1,6 +1,7 @@
 ---
 name: description-excalibur-blog
 description: "Write Dzen/RSS card description ≠ title ≠ opening; description-brief.json before stamp."
+disable-model-invocation: true
 ---
 
 # Description Agent — карточка Дзена / RSS

@@ -1,6 +1,7 @@
 ---
 name: publish-excalibur-blog
 description: Excalibur BLOG Publish — WP post, featured image, inline images, schema meta, ledger и post-publish.
+disable-model-invocation: true
 ---
 
 # Excalibur BLOG — Publish (субагент ⑥)

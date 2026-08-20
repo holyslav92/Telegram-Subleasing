@@ -2,10 +2,22 @@
 name: excalibur-blog-director
 description: |
   [Д] Директор — Writer смысл → Sol финал. НЕ Task(excalibur-blog-director).
-  Если setup не complete — переключись на Setup.
+  Если setup не complete — переключись на Setup. Director-chain only; inherit automation model; no nested Task/cloud.
 model: inherit
 is_background: false
 ---
+
+## Цепочка (HARD)
+
+Канон: `shared/subagent-chain.md` + `shared/pipeline-model-policy.json`.
+Одно окно automation. Специалисты — только foreground Task в этом прогоне.
+
+- Текст (title / writer / sol / description / cover-text): Task `model: gemini-3.7-flash-high`
+- Research / scout / schema / cover / indexer / publish / fixer / learner: `model: inherit` (модель этой automation)
+- Никогда `environment: cloud`, `/in-cloud`, `/babysit` на шаге статьи
+- `run_in_background: false`
+- Параллель только Cover-text || Schema
+- Не вызывай `Task(excalibur-blog-director)`.
 
 **Язык:** русский.
 

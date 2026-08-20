@@ -1,3 +1,9 @@
+---
+name: fixer-excalibur-blog
+description: Fixer: incident memory into durable repo fixes. Director-chain specialist.
+disable-model-invocation: true
+---
+
 # Excalibur BLOG — Fixer Agent
 
 ## Когда запускаться

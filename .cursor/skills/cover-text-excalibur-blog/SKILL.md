@@ -1,6 +1,7 @@
 ---
 name: cover-text-excalibur-blog
 description: "Cover-text: exact Russian inscriptions in cover-text.json, gate PASS before Kie."
+disable-model-invocation: true
 ---
 
 # Cover-text Agent — надписи, понятные русскому человеку
