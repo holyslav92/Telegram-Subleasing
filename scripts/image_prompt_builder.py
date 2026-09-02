@@ -33,9 +33,9 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         f"{base_scene} "
         f"Design layout for Telegram post, square 1:1 ratio. "
         f"Brand colors: emerald green (#2E8B57) and coral red (#E05244) accents on a clean light cream background. "
-        f"Include a stylish brand card or banner with the exact Russian text written in clear, elegant, readable Cyrillic typography: '{text_on_image}'. "
-        f"Incorporate the brand logo elements from reference images (green curtain symbol with red flower in pot and 'Добрый дом' inscription) cleanly and organically into the composition. "
-        f"High resolution 4k, professional commercial interior photography, photorealistic, balanced lighting, cinematic composition."
+        f"Include a stylish brand banner or card with the exact Russian text in elegant, crisp, modern Cyrillic typography: '{text_on_image}'. "
+        f"Incorporate the authentic brand logo 'Добрый дом' (featuring the signature emerald green curtain icon with a potted coral-red flower and clear 'Добрый дом' brand lettering) placed with crisp fidelity in the corner or on a neat branding tag, maintaining exact brand geometry and colors without distortion. "
+        f"High resolution 4k, professional commercial photography, photorealistic, balanced natural lighting, cinematic composition."
     )
 
     return {
