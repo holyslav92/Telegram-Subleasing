@@ -19,8 +19,13 @@
 
 ## Продукт и CTA
 
-- Бронирование на официальном сайте: `https://добрый-дом-тюмень.рф`
-- Бронирование / связь с заботливым администратором: `+7 (993) 574-83-22` / Telegram `@dobrydom72`
+- Сайт для брони: [добрыйдом-72.рф](https://добрыйдом-72.рф/)
+- Менеджер в Telegram: [@Dobriy_dom_Tyumen](https://t.me/Dobriy_dom_Tyumen)
+- Официальный Telegram-канал: [@Dobriy_dom_72](https://t.me/Dobriy_dom_72)
+- Макс: [max.ru/id660300569233_biz](https://max.ru/id660300569233_biz)
+- Авито (отзывы и все квартиры): [Профиль Добрый дом на Авито](https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4)
+- ВКонтакте: [vk.com/dobryi_dom_tyumen](https://vk.com/dobryi_dom_tyumen)
+- Яндекс Дзен: [dzen.ru/dobryidom72](https://dzen.ru/dobryidom72)
 
 ## Редакция и контент-стратегия для Telegram
 

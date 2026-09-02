@@ -87,9 +87,18 @@
     }
   ],
   "default_cta": {
-    "website": "https://добрый-дом-тюмень.рф",
-    "telegram": "https://t.me/dobrydom72",
-    "phone": "+7 (993) 574-83-22",
-    "text": "📲 Забронируйте любимую квартиру прямо сейчас на сайте добрый-дом-тюмень.рф или напишите нашему администратору в Telegram!"
+    "website": "https://добрыйдом-72.рф/",
+    "manager_tg": "https://t.me/Dobriy_dom_Tyumen",
+    "channel_tg": "https://t.me/Dobriy_dom_72",
+    "max": "https://max.ru/id660300569233_biz",
+    "avito": "https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4",
+    "vk": "https://vk.com/dobryi_dom_tyumen",
+    "dzen": "https://dzen.ru/dobryidom72",
+    "buttons": [
+      [
+        {"text": "Забронировать", "url": "https://добрыйдом-72.рф/"},
+        {"text": "Менеджер", "url": "https://t.me/Dobriy_dom_Tyumen"}
+      ]
+    ]
   }
 }

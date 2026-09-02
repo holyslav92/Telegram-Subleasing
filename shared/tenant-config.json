@@ -13,14 +13,27 @@
   "cta_required": true,
   "cta_links": [
     {
-      "title": "Официальный сайт и бронирование",
-      "url": "https://добрый-дом-тюмень.рф"
+      "title": "Забронировать на сайте",
+      "url": "https://добрыйдом-72.рф/"
     },
     {
-      "title": "Написать в WhatsApp/Telegram для брони",
-      "url": "https://t.me/dobrydom72"
+      "title": "Менеджер",
+      "url": "https://t.me/Dobriy_dom_Tyumen"
     }
   ],
+  "social_links": {
+    "website": "https://добрыйдом-72.рф/",
+    "manager_tg": "https://t.me/Dobriy_dom_Tyumen",
+    "channel_tg": "https://t.me/Dobriy_dom_72",
+    "dzen": "https://dzen.ru/dobryidom72",
+    "vk": "https://vk.com/dobryi_dom_tyumen",
+    "max": "https://max.ru/id660300569233_biz",
+    "avito": "https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4"
+  },
+  "telegram_bot": {
+    "bot_token": "8724220345:AAH--Vc3ovIGDTlyr-yWRI6oqwHerrys-hU",
+    "target_chat": "@SMM_ddom"
+  },
   "phone": "+7 (993) 574-83-22",
   "cover_mode": "illustrative",
   "dzen_rf_pack": true,
