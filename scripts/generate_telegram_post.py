@@ -104,6 +104,18 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
 Следить за акциями можно также в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b> и в <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">профиле Авито</a></b>."""
 
+    elif category_id == "host_story":
+        title = topic or "Уют в деталях: почему мы встречаем гостей как старых друзей"
+        body = f"""<b>{title}</b>
+
+Каждый раз, когда мы готовим квартиру к новому заезду, мы задаем себе один простой вопрос: «А нам самим было бы здесь уютно и тепло?»
+
+Для нас сервис — это не просто выдать ключи. Это когда вы заходите после долгой дороги или сибирского морозца, а в квартире уже приятно пахнет чистотой, на кровати ждет <b>белоснежное отельное белье</b>, в ванной — пушистые полотенца и свежие наборы гигиены, а на кухне можно сразу налить чашку чая с конфеткой.
+
+Никаких лишних звонков и подстраиваний под график администратора: с нашим <b>бесконтактным заездом 24/7</b> вы заходите в квартиру за считанные минуты в любое время суток.
+
+Выбирайте любую из наших 60+ уютных квартир на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b> — там всегда <b>прямые цены без наценок</b> и комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости — в нашем канале <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
+
     else:
         title = topic or "Гид по Тюмени: термальные воды, экскурсионные туры и гастрономия"
         body = f"""<b>{title}</b>
@@ -111,10 +123,10 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 Тюмень — первый русский город Сибири и термальная столица страны. Что обязательно включить в маршрут:
 
 1️⃣ <b>Термальные источники</b> — горячие минеральные бассейны на свежем воздухе в «ЛетоЛето» и «Верхнем бору».
-2️⃣ <b>Экскурсии по городу и окрестностям</b> — тематические пешеходные и автобусные маршруты от наших партнеров собраны на странице <a href="https://добрыйдом-72.рф/excursions/">экскурсий</a>.
+2️⃣ <b>Экскурсии по городу и окрестностям</b> — тематические пешеходные и автобусные маршруты от наших партнеров собраны на странице <b><a href="https://добрыйдом-72.рф/excursions/">экскурсий</a></b>.
 3️⃣ <b>Сибирская кухня</b> — строганина, блюда из дичи и сибирские десерты в заведениях исторического центра.
 
-Для комфортного проживания выбирайте любую из 60+ квартир «Доброго дома». Прямые цены без наценок всегда ждут вас на <a href="https://добрыйдом-72.рф/">официальном сайте</a>."""
+Для комфортного проживания выбирайте любую из 60+ квартир «Доброго дома». <b>Прямые цены</b> без наценок всегда ждут вас на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>, а наши новости читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
 
     image_meta = build_image_prompt(category_id, topic, image_title)
 
@@ -205,6 +217,8 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
 
 def generate_image_grsai(prompt: str, api_key: str = None) -> str:
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
+    if not key:
+        raise ValueError("Ключ GRSAI_API_KEY не задан в переменных окружения (Secrets).")
     api_base = os.environ.get("GRSAI_API_BASE", "")
     if not api_base:
         api_base = "https://" + "grsaiapi" + ".com/v1"
@@ -241,7 +255,7 @@ def save_post(post_data: dict) -> Path:
 
 def main():
     parser = argparse.ArgumentParser(description="Генератор и публикатор постов в Telegram (Добрый дом Тюмень)")
-    parser.add_argument("--category", default="afisha", choices=["afisha", "district_guide", "service_lifehack", "special_offers", "city_guide"])
+    parser.add_argument("--category", default="afisha", choices=["afisha", "district_guide", "service_lifehack", "special_offers", "city_guide", "host_story"])
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--details", default="", help="Детали поста")
     parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")

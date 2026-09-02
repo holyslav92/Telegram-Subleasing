@@ -15,7 +15,8 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
             "district_guide": "Квартиры в лучших ЖК Тюмени",
             "service_lifehack": "Бесконтактный заезд 24/7",
             "special_offers": "Скидки до 10% на проживание",
-            "city_guide": "Гид по Тюмени: термы и прогулки"
+            "city_guide": "Гид по Тюмени: термы и прогулки",
+            "host_story": "С заботой о каждом госте"
         }
         text_on_image = titles_map.get(category_id, "Добрый дом Тюмень")
 
@@ -24,7 +25,8 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         "district_guide": "Modern premium Scandinavian style studio apartment in Tyumen residential complex Novin or Evropeyskiy, floor-to-ceiling windows, king-size bed with crisp white luxury hotel bedding, designer emerald green curtains, warm ambient evening lights.",
         "service_lifehack": "Smart door lock with electronic keypad on modern apartment entrance door in Tyumen, hotel welcome tray with neat keys, fluffy towels, disposable hygiene amenities, cup of coffee, clean minimalistic aesthetic.",
         "special_offers": "Bright stylish studio apartment interior with comfortable sofa and laptop open on clean work desk, warm welcoming atmosphere, bouquet of flowers in a pot, warm sunlight.",
-        "city_guide": "Outdoor thermal mineral spring pool with soothing steam in winter or autumn forest in Tyumen, cozy relaxation area with wooden loungers and warm blankets."
+        "city_guide": "Outdoor thermal mineral spring pool with soothing steam in winter or autumn forest in Tyumen, cozy relaxation area with wooden loungers and warm blankets.",
+        "host_story": "Warm, welcoming, sunlit dining area and kitchen of a premium Tyumen apartment, a cup of fresh morning coffee and a vase with small flowers on a wooden table, genuine home warmth and impeccable hotel cleanliness. Professional atmospheric photography."
     }
 
     base_scene = scene_prompts.get(category_id, scene_prompts["afisha"])

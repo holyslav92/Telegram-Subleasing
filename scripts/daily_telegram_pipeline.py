@@ -14,6 +14,7 @@ import json
 import os
 import random
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -24,13 +25,13 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post
 
 CATEGORIES_SCHEDULE = [
-    "afisha",            # Понедельник
-    "district_guide",    # Вторник
-    "service_lifehack",  # Среда
-    "city_guide",        # Четверг
-    "afisha",            # Пятница
-    "special_offers",    # Суббота
-    "city_guide"         # Воскресенье
+    "afisha",            # Понедельник: афиша и события
+    "district_guide",    # Вторник: гид по районам и ЖК
+    "host_story",        # Среда: живой диалог и заметки радушного хозяина
+    "service_lifehack",  # Четверг: сервис и бесконтактный заезд 24/7
+    "afisha",            # Пятница: планы на выходные и отдых
+    "special_offers",    # Суббота: скидки и тарифы
+    "city_guide"         # Воскресенье: гид по термам и сибирским прогулкам
 ]
 
 def get_today_category():
@@ -47,16 +48,30 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     
     photo_url = None
     prompt = post["image_prompt"]["prompt"]
-    print("Генерация изображения через GRSAI API...")
-    try:
-        photo_url = generate_image_grsai(prompt)
-        print(f"Изображение успешно получено: {photo_url}")
-    except Exception as e:
-        print(f"Предупреждение: Не удалось сгенерировать изображение через GRSAI ({e}).")
-        # Если GRSAI недоступен, попробуем использовать дефолтное фото/логотип
-        fallback_logo = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
-        if fallback_logo.exists():
-            print(f"Используем запасной файл: {fallback_logo}")
+    print("Генерация изображения через GRSAI API (до 3 попыток)...")
+    
+    max_retries = 3
+    retry_delay_seconds = 5
+    for attempt in range(1, max_retries + 1):
+        try:
+            print(f"Попытка генерации {attempt} из {max_retries}...")
+            photo_url = generate_image_grsai(prompt)
+            if photo_url:
+                print(f"Изображение успешно получено: {photo_url}")
+                break
+            else:
+                print(f"Попытка {attempt}: API не вернул URL изображения.")
+        except Exception as e:
+            print(f"Попытка {attempt} завершилась с ошибкой: {e}")
+        
+        if attempt < max_retries:
+            print(f"Ожидание {retry_delay_seconds} сек перед следующей попыткой...")
+            time.sleep(retry_delay_seconds)
+
+    if not photo_url:
+        print("КРИТИЧЕСКАЯ ОШИБКА: Не удалось сгенерировать изображение после 3 попыток.")
+        print("В соответствии с правилами качества бренда публикация 'сухого' поста без сгенерированного фото или с одиночным логотипом отменена.")
+        sys.exit(1)
     
     if send:
         bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
@@ -66,15 +81,13 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             sys.exit(1)
         print(f"Отправка единого поста в Telegram {target_chat}...")
         
-        fallback_photo_path = str(SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg") if not photo_url else None
-        
         res = send_to_telegram(
             bot_token=bot_token,
             chat_id=target_chat,
             text=post["text_html"],
             reply_markup=post["reply_markup"],
             photo_url=photo_url,
-            photo_path=fallback_photo_path if not photo_url else None,
+            photo_path=None,
             silent=True
         )
         if res.get("ok"):
