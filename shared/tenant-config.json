@@ -1,16 +1,33 @@
 {
   "version": "1.0",
-  "setup_complete": false,
-  "brand_name": "",
+  "setup_complete": true,
+  "brand_name": "Добрый дом Тюмень",
   "language": "ru",
-  "niche": "",
-  "content_goals": [],
-  "author_id": "",
-  "cta_required": false,
-  "cta_links": [],
-  "cover_mode": "unset",
+  "niche": "Посуточная аренда квартир и апартаментов в Тюмени",
+  "content_goals": [
+    "Привлечение гостей города и командировочных в сеть апартаментов",
+    "Формирование имиджа сервиса №1 по чистоте, удобству и выгодным ценам в Тюмени",
+    "Повышение прямых бронирований через сайт и Telegram-канал"
+  ],
+  "author_id": "dobryi_dom_tyumen",
+  "cta_required": true,
+  "cta_links": [
+    {
+      "title": "Официальный сайт и бронирование",
+      "url": "https://добрый-дом-тюмень.рф"
+    },
+    {
+      "title": "Написать в WhatsApp/Telegram для брони",
+      "url": "https://t.me/dobrydom72"
+    }
+  ],
+  "phone": "+7 (993) 574-83-22",
+  "cover_mode": "illustrative",
   "dzen_rf_pack": true,
-  "scout_signal_urls": [],
+  "scout_signal_urls": [
+    "https://visittyumen.ru",
+    "https://afisha.72.ru"
+  ],
   "interlink_old_articles": false,
   "style_files": {
     "soul": "shared/SOUL.md",
@@ -20,7 +37,7 @@
   "cover_files": {
     "hero": "memory/cover/blog-hero.json",
     "design_code": "memory/cover/cover-design-code.json",
-    "style_preset": ""
+    "style_preset": "modern_cozy_real_estate"
   },
-  "comment": "Filled by excalibur-blog-setup. Pipeline agents read this file. Do not put secrets here."
+  "comment": "Filled for 'Добрый дом Тюмень' (посуточная аренда 60+ апартаментов в Тюмени)."
 }
