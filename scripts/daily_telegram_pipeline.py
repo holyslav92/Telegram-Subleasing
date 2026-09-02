@@ -38,7 +38,7 @@ def get_today_category():
     weekday = datetime.now().weekday()  # 0: Monday, 6: Sunday
     return CATEGORIES_SCHEDULE[weekday]
 
-def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True):
+def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True, photo_file: str = None):
     cat = category or get_today_category()
     print(f"=== Запуск ежедневного пайплайна [Категория: {cat}] ===")
     
@@ -47,31 +47,34 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     print(f"Черновик поста сохранен в: {saved_path}")
     
     photo_url = None
-    prompt = post["image_prompt"]["prompt"]
-    print("Генерация изображения через GRSAI API (до 3 попыток)...")
+    local_photo_path = photo_file
     
-    max_retries = 3
-    retry_delay_seconds = 5
-    for attempt in range(1, max_retries + 1):
-        try:
-            print(f"Попытка генерации {attempt} из {max_retries}...")
-            photo_url = generate_image_grsai(prompt)
-            if photo_url:
-                print(f"Изображение успешно получено: {photo_url}")
-                break
-            else:
-                print(f"Попытка {attempt}: API не вернул URL изображения.")
-        except Exception as e:
-            print(f"Попытка {attempt} завершилась с ошибкой: {e}")
+    if not local_photo_path:
+        prompt = post["image_prompt"]["prompt"]
+        print("Генерация изображения через GRSAI API (до 3 попыток)...")
         
-        if attempt < max_retries:
-            print(f"Ожидание {retry_delay_seconds} сек перед следующей попыткой...")
-            time.sleep(retry_delay_seconds)
-
-    if not photo_url:
-        print("КРИТИЧЕСКАЯ ОШИБКА: Не удалось сгенерировать изображение после 3 попыток.")
-        print("В соответствии с правилами качества бренда публикация 'сухого' поста без сгенерированного фото или с одиночным логотипом отменена.")
-        sys.exit(1)
+        max_retries = 3
+        retry_delay_seconds = 10
+        for attempt in range(1, max_retries + 1):
+            try:
+                print(f"Попытка генерации {attempt} из {max_retries}...")
+                photo_url = generate_image_grsai(prompt)
+                if photo_url:
+                    print(f"Изображение успешно получено: {photo_url}")
+                    break
+                else:
+                    print(f"Попытка {attempt}: API не вернул URL изображения.")
+            except Exception as e:
+                print(f"Попытка {attempt} завершилась с ошибкой: {e}")
+            
+            if attempt < max_retries:
+                print(f"Ожидание {retry_delay_seconds} сек перед следующей попыткой...")
+                time.sleep(retry_delay_seconds)
+    
+        if not photo_url:
+            print("КРИТИЧЕСКАЯ ОШИБКА: Не удалось сгенерировать изображение через GRSAI после 3 попыток.")
+            print("В соответствии с правилами качества бренда публикация 'сухого' поста без сгенерированного фото или с одиночным логотипом отменена.")
+            sys.exit(1)
     
     if send:
         bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
@@ -87,7 +90,7 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             text=post["text_html"],
             reply_markup=post["reply_markup"],
             photo_url=photo_url,
-            photo_path=None,
+            photo_path=local_photo_path,
             silent=True
         )
         if res.get("ok"):
@@ -103,7 +106,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Запуск ежедневного поста Добрый дом Тюмень")
     parser.add_argument("--category", default=None, help="Принудительно выбрать рубрику")
     parser.add_argument("--topic", default="", help="Тема поста")
+    parser.add_argument("--photo-file", default=None, help="Путь к локальному фото поста (если передано напрямую)")
     parser.add_argument("--no-send", action="store_true", help="Не отправлять в Telegram, только сформировать")
     args = parser.parse_args()
     
-    run_daily_pipeline(category=args.category, topic=args.topic, send=not args.no_send)
+    run_daily_pipeline(category=args.category, topic=args.topic, send=not args.no_send, photo_file=args.photo_file)

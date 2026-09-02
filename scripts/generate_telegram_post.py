@@ -110,11 +110,11 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
 Каждый раз, когда мы готовим квартиру к новому заезду, мы задаем себе один простой вопрос: «А нам самим было бы здесь уютно и тепло?»
 
-Для нас сервис — это не просто выдать ключи. Это когда вы заходите после долгой дороги или сибирского морозца, а в квартире уже приятно пахнет чистотой, на кровати ждет <b>белоснежное отельное белье</b>, в ванной — пушистые полотенца и свежие наборы гигиены, а на кухне можно сразу налить чашку чая с конфеткой.
+Для нас сервис — это не просто выдать ключи. Это когда вы заходите после дороги, а в квартире уже пахнет чистотой, на кровати ждет <b>белоснежное отельное белье</b>, в ванной — пушистые полотенца и свежие наборы гигиены, а на кухне можно сразу налить чашку горячего чая с конфеткой.
 
-Никаких лишних звонков и подстраиваний под график администратора: с нашим <b>бесконтактным заездом 24/7</b> вы заходите в квартиру за считанные минуты в любое время суток.
+Никаких лишних звонков и подстраиваний: с нашим <b>бесконтактным заездом 24/7</b> вы заходите в квартиру за считанные минуты в любое время суток.
 
-Выбирайте любую из наших 60+ уютных квартир на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b> — там всегда <b>прямые цены без наценок</b> и комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости — в нашем канале <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
+Выбирайте любую из наших 60+ уютных квартир на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b> — там всегда <b>прямые цены</b> без наценок и комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> и каталог доступны на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а наши новости читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
 
     else:
         title = topic or "Гид по Тюмени: термальные воды, экскурсионные туры и гастрономия"
@@ -219,16 +219,21 @@ def generate_image_grsai(prompt: str, api_key: str = None) -> str:
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
     if not key:
         raise ValueError("Ключ GRSAI_API_KEY не задан в переменных окружения (Secrets).")
-    api_base = os.environ.get("GRSAI_API_BASE", "")
-    if not api_base:
-        api_base = "https://" + "grsaiapi" + ".com/v1"
+    raw_api_base = os.environ.get("GRSAI_API_BASE", "").strip().rstrip("/")
+    if not raw_api_base:
+        raise ValueError("GRSAI_API_BASE не задан в переменных окружения.")
+    if not raw_api_base.endswith("/v1"):
+        api_base = f"{raw_api_base}/v1"
+    else:
+        api_base = raw_api_base
     model = os.environ.get("DEROUTER_IMAGE_MODEL", "")
     if not model:
-        model = "gpt-" + "image-2"
+        raise ValueError("DEROUTER_IMAGE_MODEL не задан в переменных окружения.")
     url = f"{api_base}/images/generations"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {key}"
+        "Authorization": f"Bearer {key}",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
     data = {
         "model": model,
@@ -237,10 +242,15 @@ def generate_image_grsai(prompt: str, api_key: str = None) -> str:
         "size": "1024x1024"
     }
     req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers)
-    with urllib.request.urlopen(req) as resp:
-        res = json.loads(resp.read().decode("utf-8"))
-        if "data" in res and len(res["data"]) > 0:
-            return res["data"][0].get("url")
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            res = json.loads(resp.read().decode("utf-8"))
+            if "data" in res and len(res["data"]) > 0:
+                return res["data"][0].get("url")
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode("utf-8", errors="replace")
+        print(f"Ошибка GRSAI HTTP {e.code}: {err_msg}")
+        raise RuntimeError(f"GRSAI API error {e.code}: {err_msg}") from e
     return None
 
 
