@@ -19,11 +19,12 @@
 
 ## Продукт и CTA
 
-- Сайт для брони: [добрыйдом-72.рф](https://добрыйдом-72.рф/)
+- Сайт для брони (самые выгодные цены и удобный выбор): [добрыйдом-72.рф](https://добрыйдом-72.рф/)
+- Экскурсии и туры по Тюмени от партнеров: [добрыйдом-72.рф/excursions/](https://добрыйдом-72.рф/excursions/)
 - Менеджер в Telegram: [@Dobriy_dom_Tyumen](https://t.me/Dobriy_dom_Tyumen)
 - Официальный Telegram-канал: [@Dobriy_dom_72](https://t.me/Dobriy_dom_72)
 - Макс: [max.ru/id660300569233_biz](https://max.ru/id660300569233_biz)
-- Авито (отзывы и все квартиры): [Профиль Добрый дом на Авито](https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4)
+- Авито (отзывы и каталог): [Профиль Добрый дом на Авито](https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4)
 - ВКонтакте: [vk.com/dobryi_dom_tyumen](https://vk.com/dobryi_dom_tyumen)
 - Яндекс Дзен: [dzen.ru/dobryidom72](https://dzen.ru/dobryidom72)
 
