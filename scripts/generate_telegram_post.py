@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
 Скрипт генерации и отправки постов в Telegram канал/группу через Telegram Bot API.
-Требования к форматированию:
-1. Без эмодзи в тексте (разрешена только цифровая нумерация 1️⃣, 2️⃣, 3️⃣ и т.д.).
-2. Акцент на бронирование на официальном сайте (https://добрыйдом-72.рф/), где цены ниже и удобнее.
-3. Органичная интеграция партнеров (экскурсии https://добрыйдом-72.рф/excursions/), Авито, Макс и соцсетей.
-4. Две обязательные inline-кнопки: "Забронировать" (https://добрыйдом-72.рф/) и "Менеджер" (https://t.me/Dobriy_dom_Tyumen).
-5. Бесшумный режим отправки по умолчанию (disable_notification=True).
+Поддерживает:
+1. Генерацию текста по рубрикам с гармоничным вшиванием ссылок (Сайт, Экскурсии, Max, Авито, соцсети).
+2. Две обязательные inline-кнопки: "Забронировать" (https://добрыйдом-72.рф/) и "Менеджер" (https://t.me/Dobriy_dom_Tyumen).
+3. Промпт-генератор для GPT Image 2 (Kie.ai/GRSAI) с форматом 1:1, кириллицей и референсом логотипа.
+4. Отправку сообщения с фото (sendPhoto) или текстового сообщения (sendMessage) через бота в бесшумном режиме (disable_notification=True).
 """
 
 import argparse
@@ -17,6 +16,8 @@ import urllib.request
 import urllib.parse
 from datetime import datetime
 from pathlib import Path
+
+from image_prompt_builder import build_image_prompt
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
@@ -34,12 +35,19 @@ def load_templates():
         return json.load(f)
 
 
-def build_post(category_id: str, topic: str = "", details: str = "") -> dict:
+def load_tenant_config():
+    if not TENANT_CONFIG_PATH.exists():
+        return {}
+    with open(TENANT_CONFIG_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def build_post(category_id: str, topic: str = "", details: str = "", image_title: str = "") -> dict:
     templates_data = load_templates()
     categories = {cat["id"]: cat for cat in templates_data.get("categories", [])}
     cat = categories.get(category_id, categories.get("afisha", {}))
 
-    # Две кнопки внизу по строгому требованию
+    # Две обязательные кнопки внизу
     inline_keyboard = [
         [
             {"text": "Забронировать", "url": "https://добрыйдом-72.рф/"},
@@ -48,7 +56,7 @@ def build_post(category_id: str, topic: str = "", details: str = "") -> dict:
     ]
 
     if category_id == "afisha":
-        title = topic or "Куда сходить в Тюмени: термальные источники, экскурсии и прогулки по городу"
+        title = topic or "Куда сходить в Тюмени: термальные комплексы, экскурсии и отдых"
         body = f"""<b>{title}</b>
 
 Планируете визит в Тюмень или хотите насыщенно провести выходные? Собрали ключевые идеи для отдыха:
@@ -133,12 +141,15 @@ def build_post(category_id: str, topic: str = "", details: str = "") -> dict:
 
 Для комфортного проживания выбирайте любую из 60+ квартир «Доброго дома». Прямые цены без наценок всегда ждут вас на <a href="https://добрыйдом-72.рф/">официальном сайте</a>."""
 
+    image_meta = build_image_prompt(category_id, topic, image_title)
+
     post_data = {
         "title": title,
         "category_id": category_id,
         "category_name": cat.get("name", "Афиша и события"),
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "text_html": body,
+        "image_prompt": image_meta,
         "reply_markup": {
             "inline_keyboard": inline_keyboard
         }
@@ -146,15 +157,26 @@ def build_post(category_id: str, topic: str = "", details: str = "") -> dict:
     return post_data
 
 
-def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict = None, silent: bool = True) -> dict:
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "HTML",
-        "disable_notification": silent,
-        "disable_web_page_preview": False
-    }
+def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict = None, photo_url: str = None, silent: bool = True) -> dict:
+    if photo_url:
+        url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+        payload = {
+            "chat_id": chat_id,
+            "photo": photo_url,
+            "caption": text,
+            "parse_mode": "HTML",
+            "disable_notification": silent
+        }
+    else:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_notification": silent,
+            "disable_web_page_preview": False
+        }
+
     if reply_markup:
         payload["reply_markup"] = reply_markup
 
@@ -184,6 +206,7 @@ def main():
     parser.add_argument("--category", default="afisha", choices=["afisha", "district_guide", "service_lifehack", "special_offers", "city_guide"])
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--details", default="", help="Детали поста")
+    parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")
     parser.add_argument("--send", action="store_true", help="Отправить пост в Telegram")
     parser.add_argument("--silent", action="store_true", default=True, help="Бесшумный режим (disable_notification)")
     parser.add_argument("--chat", default=DEFAULT_TARGET_CHAT, help="Целевой чат/группа")
@@ -199,6 +222,8 @@ def main():
     print(f"ТЕКСТ ПОСТА ДЛЯ TELEGRAM ({post['category_name']}):")
     print("="*50)
     print(post["text_html"])
+    print("\nПромпт для генерации изображения (GPT Image 2):")
+    print(f"  [1:1 | 1K] {post['image_prompt']['prompt']}")
     print("\nИнлайн-кнопки:")
     for row in post["reply_markup"]["inline_keyboard"]:
         for btn in row:
@@ -206,13 +231,14 @@ def main():
     print("="*50 + "\n")
 
     if args.send:
-        print(f"Отправка в Telegram чат {args.chat} (бесшумный режим: {args.silent})...")
+        print(f"Отправка в Telegram чат {args.chat} (фото: {args.photo or 'нет'}, бесшумный режим: {args.silent})...")
         try:
             res = send_to_telegram(
                 bot_token=args.token,
                 chat_id=args.chat,
                 text=post["text_html"],
                 reply_markup=post["reply_markup"],
+                photo_url=args.photo or None,
                 silent=args.silent
             )
             if res.get("ok"):

@@ -1,27 +1,31 @@
 {
-  "design_code_id": "tenant_unset",
-  "status": "SETUP_REQUIRED",
-  "label_ru": "Заполняется Setup Visual из референсов тенанта",
-  "reference_notes": "Нет дефолтного чужого бренд-коллажа. Setup Visual пишет palette, motifs, cover/inline rules.",
+  "design_code_id": "dobry_dom_tyumen_v1",
+  "status": "READY",
+  "label_ru": "Брендбук визуала Добрый дом Тюмень",
+  "reference_notes": "Стиль: современный уютный интерьер премиум-класса, мягкий естественный свет, фирменные цвета бренда. Формат 1:1 для Telegram.",
   "cover_rules": [
-    "Один cover_hook разумной длины; meme_caption_ru по умолчанию пуст",
-    "Стиль и герой — только из blog-hero.json + этого design-code после Setup",
-    "Запрещён штамп пайплайна на PNG: «EXCALIBUR» / sword lockup"
+    "Один четкий заголовок кириллицей на изображении в верхней или нижней трети",
+    "Органичная перерисовка логотипа Добрый дом (шторка с цветком и надпись) из референсов",
+    "Формат 1:1, гармоничные цвета, без искажений"
   ],
   "inline_rules": [
-    "Только информация конкретного H2",
-    "Без людей/лиц на inline, если tenant не разрешил иное",
-    "Generated UI не выдавать за реальный screenshot"
+    "Только интерьеры, локации Тюмени (набережная, термы, ЖК), уютные детали",
+    "Без лиц крупным планом, акцент на пространстве, комфорте и сервисе"
   ],
-  "visual_motifs": [],
+  "visual_motifs": [
+    "зеленые шторы и комнатный цветок в горшке (фирменный знак)",
+    "уютная светлая гостиная с панорамными окнами",
+    "термальные бассейны с паром на открытом воздухе",
+    "чашка горячего чая, свежий белоснежный текстиль"
+  ],
   "color_palette": {
     "background": "#FFFFFF",
-    "ink": "#141821",
-    "accent_primary": "",
-    "usage": "Set by Setup Visual"
+    "ink": "#1E293B",
+    "accent_primary": "#2E8B57",
+    "accent_secondary": "#E05244",
+    "usage": "Фирменный зеленый (шторы/элементы) #2E8B57, коралловый (акценты/цветок) #E05244, сливочный/белый фон"
   },
-  "typography_reference": "",
-  "cover_panel_prompt_block": "",
-  "inline_information_block": "",
-  "global_negative": "sterile empty white, meme reaction cutouts, pipeline name watermark, stock banner, beige gradient spam"
+  "typography_reference": "Чистый, стильный гротеск / аккуратный заголовок на русском языке",
+  "cover_panel_prompt_block": "Professional real estate photography, cozy modern interior in Tyumen, soft warm natural lighting, high end hotel standard, stylish furniture, minimalist aesthetic, 1:1 aspect ratio, 4k detail",
+  "global_negative": "blurry, low quality, distorted text, ugly, dark gloomy atmosphere, chaotic clutter"
 }
