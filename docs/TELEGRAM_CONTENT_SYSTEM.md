@@ -43,9 +43,21 @@ python3 scripts/generate_telegram_post.py --category afisha --topic "Афиша 
 python3 scripts/generate_telegram_post.py --category district_guide --send --silent
 ```
 
-### Отправка поста с готовым изображением:
+### Отправка поста с фото как единое целое (sendPhoto + caption):
 ```bash
-python3 scripts/generate_telegram_post.py --category afisha --photo "https://url-к-изображению.jpg" --send --silent
+# С локальным файлом изображения
+python3 scripts/generate_telegram_post.py --category service_lifehack --topic "Бесконтактный заезд 24/7" --photo-file memory/branding/logo_full.jpg --send --silent
+
+# С URL сгенерированного изображения
+python3 scripts/generate_telegram_post.py --category afisha --topic "Афиша Тюмени" --photo "https://url-к-картинке.jpg" --send --silent
 ```
+
+---
+
+## 5. Режим больших статей (Longreads) в Telegram
+Система готова для работы с расширенными форматами:
+1. **Telegraph / Instant View**: Генерация полноценных иллюстрированных лонгридов (гайды по ЖК, гиды по горячим источникам на 5-10 тыс. символов) с моментальным открытием внутри Telegram без задержек.
+2. **Анонс в канал**: Формируется лаконичный пост с изображением 1:1, а кнопка «Читать полный гид» ведет на встроенную статью с красивой версткой.
+
 
 

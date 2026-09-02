@@ -157,8 +157,38 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
     return post_data
 
 
-def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict = None, photo_url: str = None, silent: bool = True) -> dict:
-    if photo_url:
+def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict = None, photo_url: str = None, photo_path: str = None, silent: bool = True) -> dict:
+    if photo_path and os.path.exists(photo_path):
+        url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_bytes = bytearray()
+        
+        # chat_id
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n{chat_id}\r\n".encode("utf-8"))
+        # caption
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"caption\"\r\n\r\n{text}\r\n".encode("utf-8"))
+        # parse_mode
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"parse_mode\"\r\n\r\nHTML\r\n".encode("utf-8"))
+        # disable_notification
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"disable_notification\"\r\n\r\n{str(silent).lower()}\r\n".encode("utf-8"))
+        # reply_markup
+        if reply_markup:
+            body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"reply_markup\"\r\n\r\n{json.dumps(reply_markup)}\r\n".encode("utf-8"))
+        
+        # photo file
+        filename = os.path.basename(photo_path)
+        with open(photo_path, "rb") as pf:
+            file_data = pf.read()
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"{filename}\"\r\nContent-Type: image/jpeg\r\n\r\n".encode("utf-8"))
+        body_bytes.extend(file_data)
+        body_bytes.extend(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+        
+        req = urllib.request.Request(
+            url,
+            data=bytes(body_bytes),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+        )
+    elif photo_url:
         url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
         payload = {
             "chat_id": chat_id,
@@ -167,6 +197,14 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
             "parse_mode": "HTML",
             "disable_notification": silent
         }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=req_data,
+            headers={"Content-Type": "application/json"}
+        )
     else:
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         payload = {
@@ -176,16 +214,14 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
             "disable_notification": silent,
             "disable_web_page_preview": False
         }
-
-    if reply_markup:
-        payload["reply_markup"] = reply_markup
-
-    req_data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        url,
-        data=req_data,
-        headers={"Content-Type": "application/json"}
-    )
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=req_data,
+            headers={"Content-Type": "application/json"}
+        )
     
     with urllib.request.urlopen(req) as resp:
         res_text = resp.read().decode("utf-8")
@@ -207,6 +243,7 @@ def main():
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--details", default="", help="Детали поста")
     parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")
+    parser.add_argument("--photo-file", default="", help="Локальный путь к файлу изображения для отправки с постом")
     parser.add_argument("--send", action="store_true", help="Отправить пост в Telegram")
     parser.add_argument("--silent", action="store_true", default=True, help="Бесшумный режим (disable_notification)")
     parser.add_argument("--chat", default=DEFAULT_TARGET_CHAT, help="Целевой чат/группа")
@@ -231,7 +268,7 @@ def main():
     print("="*50 + "\n")
 
     if args.send:
-        print(f"Отправка в Telegram чат {args.chat} (фото: {args.photo or 'нет'}, бесшумный режим: {args.silent})...")
+        print(f"Отправка единого поста в Telegram чат {args.chat} (фото: {args.photo_file or args.photo or 'нет'}, бесшумный режим: {args.silent})...")
         try:
             res = send_to_telegram(
                 bot_token=args.token,
@@ -239,6 +276,7 @@ def main():
                 text=post["text_html"],
                 reply_markup=post["reply_markup"],
                 photo_url=args.photo or None,
+                photo_path=args.photo_file or None,
                 silent=args.silent
             )
             if res.get("ok"):
