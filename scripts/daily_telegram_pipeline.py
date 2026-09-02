@@ -6,7 +6,7 @@
 2. Выполняет поиск актуальных событий / тем.
 3. Формирует привлекательный текст с кнопками бронирования и акцентами.
 4. Создает реалистичный промпт для GPT Image 2 / GRSAI с кириллицей и элементами бренда.
-5. Генерирует изображение через GRSAI API и отправляет единым постом (фото + текст + кнопки) в Telegram-группу @SMM_ddom.
+5. Генерирует изображение через GRSAI API и отправляет единым постом (фото + текст + кнопки) в целевой Telegram-канал/группу из настроек TELEGRAM_CHAT_ID.
 """
 
 import argparse
@@ -59,8 +59,11 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             print(f"Используем запасной файл: {fallback_logo}")
     
     if send:
-        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "8724220345:AAH--Vc3ovIGDTlyr-yWRI6oqwHerrys-hU")
-        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "@SMM_ddom")
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
+        if not bot_token or not target_chat:
+            print("Ошибка: Переменные TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID должны быть заданы в окружении (Secrets)!")
+            sys.exit(1)
         print(f"Отправка единого поста в Telegram {target_chat}...")
         
         fallback_photo_path = str(SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg") if not photo_url else None

@@ -24,8 +24,8 @@ TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
 TENANT_CONFIG_PATH = WORKSPACE_ROOT / "shared" / "tenant-config.json"
 OUTPUT_DIR = WORKSPACE_ROOT / "memory" / "telegram_posts"
 
-DEFAULT_BOT_TOKEN = "8724220345:AAH--Vc3ovIGDTlyr-yWRI6oqwHerrys-hU"
-DEFAULT_TARGET_CHAT = "@SMM_ddom"
+DEFAULT_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+DEFAULT_TARGET_CHAT = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 
 def load_templates():
@@ -280,11 +280,16 @@ def main():
     print("="*50 + "\n")
 
     if args.send:
-        print(f"Отправка единого поста в Telegram чат {args.chat} (фото: {args.photo_file or photo_url or 'нет'}, бесшумный режим: {args.silent})...")
+        bot_token = args.token or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        chat_id = args.chat or os.environ.get("TELEGRAM_CHAT_ID", "")
+        if not bot_token or not chat_id:
+            print("Ошибка: Токен бота и ID чата должны быть переданы через параметры или заданы в переменных окружения (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).")
+            sys.exit(1)
+        print(f"Отправка единого поста в Telegram чат {chat_id} (фото: {args.photo_file or photo_url or 'нет'}, бесшумный режим: {args.silent})...")
         try:
             res = send_to_telegram(
-                bot_token=args.token,
-                chat_id=args.chat,
+                bot_token=bot_token,
+                chat_id=chat_id,
                 text=post["text_html"],
                 reply_markup=post["reply_markup"],
                 photo_url=photo_url or None,
