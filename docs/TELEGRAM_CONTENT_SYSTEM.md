@@ -9,7 +9,7 @@
 - **Экскурсии партнеров:** `https://добрыйдом-72.рф/excursions/`
 - **Менеджер:** `@Dobriy_dom_Tyumen` (`https://t.me/Dobriy_dom_Tyumen`)
 - **Telegram-канал:** `@Dobriy_dom_72` (`https://t.me/Dobriy_dom_72`)
-- **Макс (обязательная реклама):** `https://max.ru/id660300569233_biz`
+- **Макс (новостной канал бренда):** `https://max.ru/id660300569233_biz`
 - **Авито (все квартиры и отзывы):** `https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4`
 - **ВКонтакте:** `https://vk.com/dobryi_dom_tyumen`
 - **Яндекс Дзен:** `https://dzen.ru/dobryidom72`
@@ -54,10 +54,15 @@ python3 scripts/generate_telegram_post.py --category afisha --topic "Афиша 
 
 ---
 
-## 5. Режим больших статей (Longreads) в Telegram
-Система готова для работы с расширенными форматами:
-1. **Telegraph / Instant View**: Генерация полноценных иллюстрированных лонгридов (гайды по ЖК, гиды по горячим источникам на 5-10 тыс. символов) с моментальным открытием внутри Telegram без задержек.
-2. **Анонс в канал**: Формируется лаконичный пост с изображением 1:1, а кнопка «Читать полный гид» ведет на встроенную статью с красивой версткой.
+## 6. Ежедневный запуск через Cursor Cloud Automations
+
+Для ежедневной автоматической публикации в 08:00 по Екатеринбургу (UTC+5, 03:00 UTC) создайте Automation в панели Cursor:
+- **Расписание (Cron):** `0 3 * * *` (03:00 UTC = 08:00 Екатеринбург).
+- **Команда запуска:**
+```bash
+python3 scripts/daily_telegram_pipeline.py
+```
+- **Секреты:** `TELEGRAM_BOT_TOKEN`, `GRSAI_API_KEY`.
 
 
 
