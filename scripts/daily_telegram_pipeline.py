@@ -21,7 +21,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post
+from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post, load_tenant_config
 
 CATEGORIES_SCHEDULE = [
     "afisha",            # Понедельник
@@ -59,8 +59,10 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             print(f"Используем запасной файл: {fallback_logo}")
     
     if send:
-        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "8724220345:AAH--Vc3ovIGDTlyr-yWRI6oqwHerrys-hU")
-        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "@SMM_ddom")
+        tenant_cfg = load_tenant_config()
+        tg_cfg = tenant_cfg.get("telegram_bot", {})
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip() or tg_cfg.get("bot_token", "")
+        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip() or tg_cfg.get("target_chat", "")
         print(f"Отправка единого поста в Telegram {target_chat}...")
         
         fallback_photo_path = str(SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg") if not photo_url else None
