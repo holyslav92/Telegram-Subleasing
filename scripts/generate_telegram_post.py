@@ -65,7 +65,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
 Если планируете приехать на фестиваль, комфортнее всего остановиться рядом. В апартаментах «Добрый дом» в <b>ЖК «Европейский»</b> и <b>«Европейский Берег»</b> вас ждет отельный уют: белоснежное белье, Wi-Fi, наборы для душа и <b>бесконтактный заезд 24/7</b> без ожидания.
 
-Бронировать на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> выгоднее — действуют <b>прямые цены</b> без комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> и квартиры также есть на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b> и на витрине <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а записаться на экскурсии можно на <b><a href="https://добрыйдом-72.рф/excursions/">странице туров</a></b>."""
+Бронировать на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> выгоднее — действуют <b>прямые цены</b> без комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> и квартиры также есть на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, следить за новостями можно в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а записаться на экскурсии — на <b><a href="https://добрыйдом-72.рф/excursions/">странице туров</a></b>."""
 
     elif category_id == "district_guide":
         title = topic or "Где остановиться в Тюмени: обзор районов и жилых комплексов"
@@ -77,7 +77,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
 В каждом объекте «Доброго дома» действует <b>бесконтактный заезд 24/7</b> без ожидания администратора.
 
-Прямое бронирование по самым выгодным ценам доступно на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> и каталог квартир также представлены на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b> и в каталоге <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
+Прямое бронирование по самым выгодным ценам доступно на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> и каталог квартир также представлены на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а наши новости читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
 
     elif category_id == "service_lifehack":
         title = topic or "Бесконтактный заезд 24/7: как заселиться в квартиру за 5 минут"
@@ -89,7 +89,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
 В каждом номере подготовлены <b>отельное постельное белье</b>, свежие полотенца, одноразовые наборы гигиены, Wi-Fi, фен, утюг, стиральная машина и <b>кассовый чек с QR-кодом</b> для бухгалтерии.
 
-<b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b> и на витрине <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а анонсы событий ждут вас в нашем канале <b><a href="https://t.me/Dobriy_dom_72">@Dobriy_dom_72</a></b>."""
+<b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, читайте нас в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а анонсы событий ждут вас в нашем канале <b><a href="https://t.me/Dobriy_dom_72">@Dobriy_dom_72</a></b>."""
 
     elif category_id == "special_offers":
         title = topic or "Специальные тарифы и скидки на проживание в Тюмени"
@@ -100,9 +100,9 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 1️⃣ <b>Тариф «Раннее бронирование»</b>: скидка 10% при заказе за 20 дней до даты заезда.
 2️⃣ <b>Тариф «Длительное проживание»</b>: скидка 10% на все бронирования от 10 ночей со включенной регулярной уборкой и сменой белья.
 
-Все актуальные цены и свободные даты без посредников и комиссий представлены на <a href="https://добрыйдом-72.рф/">сайте добрыйдом-72.рф</a>. 
+Все актуальные цены и свободные даты без посредников и комиссий представлены на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. 
 
-Посмотреть витрину можно также в сервисе <a href="https://max.ru/id660300569233_biz">Макс</a> и в <a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">профиле Авито</a>."""
+Следить за акциями можно также в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b> и в <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">профиле Авито</a></b>."""
 
     else:
         title = topic or "Гид по Тюмени: термальные воды, экскурсионные туры и гастрономия"
