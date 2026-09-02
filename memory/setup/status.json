@@ -1,15 +1,15 @@
 {
   "version": "1",
-  "complete": false,
-  "updated_at": null,
+  "complete": true,
+  "updated_at": "2026-09-02T18:05:00Z",
   "phases": {
-    "cloud": "pending",
-    "site": "pending",
-    "author": "pending",
-    "voice": "pending",
-    "visual": "pending",
-    "cta": "pending",
-    "scout": "pending"
+    "cloud": "done",
+    "site": "done",
+    "author": "done",
+    "voice": "done",
+    "visual": "done",
+    "cta": "done",
+    "scout": "done"
   },
-  "notes": "excalibur-blog-setup stamps phases to done and sets complete=true when all required phases pass."
+  "notes": "Setup completed for 'Добрый дом Тюмень' (Telegram content generation & distribution system)."
 }
