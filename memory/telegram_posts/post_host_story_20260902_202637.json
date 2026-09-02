@@ -1,0 +1,27 @@
+{
+  "title": "Уют в деталях: почему мы встречаем гостей как старых друзей",
+  "category_id": "host_story",
+  "category_name": "Заметки радушного хозяина: живой диалог и забота",
+  "created_at": "2026-09-02 20:26:37",
+  "text_html": "<b>Уют в деталях: почему мы встречаем гостей как старых друзей</b>\n\nКаждый раз, когда мы готовим квартиру к новому заезду, мы задаем себе один простой вопрос: «А нам самим было бы здесь уютно и тепло?»\n\nДля нас сервис — это не просто выдать ключи. Это когда вы заходите после долгой дороги или сибирского морозца, а в квартире уже приятно пахнет чистотой, на кровати ждет <b>белоснежное отельное белье</b>, в ванной — пушистые полотенца и свежие наборы гигиены, а на кухне можно сразу налить чашку чая с конфеткой.\n\nНикаких лишних звонков и подстраиваний под график администратора: с нашим <b>бесконтактным заездом 24/7</b> вы заходите в квартиру за считанные минуты в любое время суток.\n\nВыбирайте любую из наших 60+ уютных квартир на <b><a href=\"https://добрыйдом-72.рф/\">официальном сайте</a></b> — там всегда <b>прямые цены без наценок</b> и комиссий. <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Отзывы гостей</a></b> читайте на <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b>, а новости — в нашем канале <b><a href=\"https://max.ru/id660300569233_biz\">Макс</a></b>.",
+  "image_prompt": {
+    "prompt": "Realistic photography scene inspired by real life aesthetic: A floral plate with crepes and coffee in a sunlit room, evoking a serene morning vibe.. Design layout for Telegram post, square 1:1 ratio. Brand colors: emerald green (#2E8B57) and coral red (#E05244) accents on a clean light cream background. Include a stylish brand banner or card with the exact Russian text in elegant, crisp, modern Cyrillic typography: 'С заботой о каждом госте'. Incorporate the authentic brand logo 'Добрый дом' (featuring the signature emerald green curtain icon with a potted coral-red flower and clear 'Добрый дом' brand lettering) placed with crisp fidelity in the corner or on a neat branding tag, maintaining exact brand geometry and colors without distortion. High resolution 4k, professional commercial photography, photorealistic, balanced natural lighting, cinematic composition.",
+    "text_on_image": "С заботой о каждом госте",
+    "aspect_ratio": "1:1",
+    "resolution": "1K"
+  },
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "Забронировать",
+          "url": "https://добрыйдом-72.рф/"
+        },
+        {
+          "text": "Менеджер",
+          "url": "https://t.me/Dobriy_dom_Tyumen"
+        }
+      ]
+    ]
+  }
+}

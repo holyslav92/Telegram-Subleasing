@@ -18,6 +18,7 @@ from datetime import datetime
 from pathlib import Path
 
 from image_prompt_builder import build_image_prompt
+from pexels_client import fetch_pexels_idea
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"

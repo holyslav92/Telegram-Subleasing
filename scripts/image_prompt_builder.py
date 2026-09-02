@@ -7,7 +7,10 @@
 4. Формат 1:1, реалистичный фото-стиль интерьеров Тюмени или городских пейзажей.
 """
 
-def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "") -> dict:
+import os
+from pexels_client import fetch_pexels_idea
+
+def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "", visual_idea: str = "") -> dict:
     # Заголовок на картинке кириллицей
     if not text_on_image:
         titles_map = {
@@ -20,6 +23,20 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         }
         text_on_image = titles_map.get(category_id, "Добрый дом Тюмень")
 
+    # Если идея не передана явно, попробуем обогатить её через Pexels API
+    if not visual_idea:
+        search_terms = {
+            "afisha": "cozy city evening cafe festival lights",
+            "district_guide": "modern luxury scandinavian apartment interior living room",
+            "service_lifehack": "hotel keys smart lock coffee cup warm morning",
+            "special_offers": "bright modern apartment workspace laptop sunny",
+            "city_guide": "outdoor hot thermal pool steam forest",
+            "host_story": "cozy kitchen breakfast fresh coffee flowers table"
+        }
+        pexels_data = fetch_pexels_idea(search_terms.get(category_id, "cozy apartment interior"))
+        if pexels_data and pexels_data.get("alt"):
+            visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
+
     scene_prompts = {
         "afisha": "Cozy warm morning in a luxury apartment living room in Tyumen, soft sunlight through sheer curtains, steaming cup of herbal tea on a stylish wooden coffee table, background view of Tyumen city embankment. Elegant interior photography.",
         "district_guide": "Modern premium Scandinavian style studio apartment in Tyumen residential complex Novin or Evropeyskiy, floor-to-ceiling windows, king-size bed with crisp white luxury hotel bedding, designer emerald green curtains, warm ambient evening lights.",
@@ -29,7 +46,7 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         "host_story": "Warm, welcoming, sunlit dining area and kitchen of a premium Tyumen apartment, a cup of fresh morning coffee and a vase with small flowers on a wooden table, genuine home warmth and impeccable hotel cleanliness. Professional atmospheric photography."
     }
 
-    base_scene = scene_prompts.get(category_id, scene_prompts["afisha"])
+    base_scene = visual_idea or scene_prompts.get(category_id, scene_prompts["afisha"])
 
     full_prompt = (
         f"{base_scene} "
