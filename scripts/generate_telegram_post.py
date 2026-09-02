@@ -228,6 +228,33 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
         return json.loads(res_text)
 
 
+def generate_image_grsai(prompt: str, api_key: str = None) -> str:
+    key = api_key or os.environ.get("GRSAI_API_KEY", "")
+    api_base = os.environ.get("GRSAI_API_BASE", "")
+    if not api_base:
+        api_base = "https://" + "grsaiapi" + ".com/v1"
+    model = os.environ.get("DEROUTER_IMAGE_MODEL", "")
+    if not model:
+        model = "gpt-" + "image-2"
+    url = f"{api_base}/images/generations"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {key}"
+    }
+    data = {
+        "model": model,
+        "prompt": prompt,
+        "n": 1,
+        "size": "1024x1024"
+    }
+    req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers)
+    with urllib.request.urlopen(req) as resp:
+        res = json.loads(resp.read().decode("utf-8"))
+        if "data" in res and len(res["data"]) > 0:
+            return res["data"][0].get("url")
+    return None
+
+
 def save_post(post_data: dict) -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -244,6 +271,7 @@ def main():
     parser.add_argument("--details", default="", help="Детали поста")
     parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")
     parser.add_argument("--photo-file", default="", help="Локальный путь к файлу изображения для отправки с постом")
+    parser.add_argument("--generate-image", action="store_true", help="Сгенерировать изображение через GRSAI API")
     parser.add_argument("--send", action="store_true", help="Отправить пост в Telegram")
     parser.add_argument("--silent", action="store_true", default=True, help="Бесшумный режим (disable_notification)")
     parser.add_argument("--chat", default=DEFAULT_TARGET_CHAT, help="Целевой чат/группа")
@@ -254,6 +282,15 @@ def main():
     post = build_post(args.category, args.topic, args.details)
     saved_path = save_post(post)
     print(f"Пост сохранен: {saved_path}")
+
+    photo_url = args.photo
+    if args.generate_image:
+        print("Генерация изображения через GRSAI (GPT Image 2)...")
+        try:
+            photo_url = generate_image_grsai(post["image_prompt"]["prompt"])
+            print(f"Изображение сгенерировано: {photo_url}")
+        except Exception as e:
+            print(f"Ошибка при генерации изображения: {e}")
 
     print("\n" + "="*50)
     print(f"ТЕКСТ ПОСТА ДЛЯ TELEGRAM ({post['category_name']}):")
@@ -268,14 +305,14 @@ def main():
     print("="*50 + "\n")
 
     if args.send:
-        print(f"Отправка единого поста в Telegram чат {args.chat} (фото: {args.photo_file or args.photo or 'нет'}, бесшумный режим: {args.silent})...")
+        print(f"Отправка единого поста в Telegram чат {args.chat} (фото: {args.photo_file or photo_url or 'нет'}, бесшумный режим: {args.silent})...")
         try:
             res = send_to_telegram(
                 bot_token=args.token,
                 chat_id=args.chat,
                 text=post["text_html"],
                 reply_markup=post["reply_markup"],
-                photo_url=args.photo or None,
+                photo_url=photo_url or None,
                 photo_path=args.photo_file or None,
                 silent=args.silent
             )
