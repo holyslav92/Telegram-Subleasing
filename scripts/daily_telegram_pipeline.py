@@ -23,6 +23,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post
+from ftp_uploader import upload_file_to_ftp
 
 CATEGORIES_SCHEDULE = [
     "afisha",            # Понедельник: афиша и события
@@ -48,14 +49,36 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     
     photo_url = None
     prompt = post["image_prompt"]["prompt"]
-    print("Генерация изображения через GRSAI API (до 3 попыток)...")
+    
+    # Подготовка референсов для Image-to-Image режима:
+    # 1. Проверяем URL логотипа на сайте или загружаем через FTP / GitHub Raw
+    input_urls = []
+    logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
+    logo_online_url = os.environ.get("BRAND_LOGO_URL", "")
+    
+    # Если задан FTP, пытаемся загрузить логотип на сайт
+    if not logo_online_url and os.environ.get("FTP_HOST") and logo_file.exists():
+        print("Загрузка логотипа на сайт через FTP для создания публичного референса...")
+        logo_online_url = upload_file_to_ftp(str(logo_file), "logo_brand_reference.jpg")
+    
+    # Резервный публичный URL из репозитория GitHub
+    if not logo_online_url:
+        repo = os.environ.get("GITHUB_REPOSITORY", "")
+        if repo:
+            logo_online_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/logo_full.jpg"
+    
+    if logo_online_url:
+        input_urls.append(logo_online_url)
+        print(f"Используем эталонный логотип (Image-to-Image reference): {logo_online_url}")
+
+    print(f"Генерация изображения через GRSAI API (до 3 попыток, input_urls: {len(input_urls)})...")
     
     max_retries = 3
     retry_delay_seconds = 5
     for attempt in range(1, max_retries + 1):
         try:
             print(f"Попытка генерации {attempt} из {max_retries}...")
-            photo_url = generate_image_grsai(prompt)
+            photo_url = generate_image_grsai(prompt, input_urls=input_urls if input_urls else None)
             if photo_url:
                 print(f"Изображение успешно получено: {photo_url}")
                 break

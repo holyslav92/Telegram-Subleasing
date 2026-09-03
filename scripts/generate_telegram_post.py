@@ -216,7 +216,7 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
         return json.loads(res_text)
 
 
-def generate_image_grsai(prompt: str, api_key: str = None) -> str:
+def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = None) -> str:
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
     if not key:
         raise ValueError("Ключ GRSAI_API_KEY не задан в переменных окружения (Secrets).")
@@ -237,6 +237,8 @@ def generate_image_grsai(prompt: str, api_key: str = None) -> str:
         "n": 1,
         "size": "1024x1024"
     }
+    if input_urls:
+        data["input_urls"] = input_urls
     req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers)
     with urllib.request.urlopen(req) as resp:
         res = json.loads(resp.read().decode("utf-8"))
