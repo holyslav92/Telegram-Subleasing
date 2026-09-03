@@ -284,7 +284,7 @@ TOPIC_BANK = {
 
 Бронируйте на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> по <b>прямым ценам</b>. Каталог и <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">отзывы гостей</a></b> доступны на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, читайте нас в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а выбрать увлекательную экскурсию можно на <b><a href="https://добрыйдом-72.рф/excursions/">странице туров</a></b>.""",
             "image_title": "Термальные источники Тюмени",
-            "search_query": "outdoor steaming hot spring pool forest winter spa resort"
+            "search_query": "outdoor hot mineral pool pine forest siberia winter steam spa resort"
         },
         {
             "id": "city_dzerzhinskogo_excursions",

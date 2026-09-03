@@ -76,8 +76,8 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
     if category_id in ["weekend_thermal", "city_guide"]:
         full_prompt = (
             f"Social media promotional poster, square 1:1 aspect ratio. "
-            f"Subject: {base_scene}. "
-            f"Atmosphere: Authentic Siberian outdoor thermal hot spring mineral pool in Tyumen surrounded by peaceful coniferous pine trees, soothing rising mist and steam over warm mineral water, wooden lounge terrace, ambient warm lanterns, crisp clean air, absolutely no high-rise buildings or skyscrapers. "
+            f"Subject: A modern comfortable open-air thermal mineral resort in Tyumen, Russia (like LetoLeto or Verkhniy Bor). "
+            f"Atmosphere: Large outdoor swimming pool with clean steaming mineral water, surrounded by Siberian pine forest and wooden decks with loungers, gentle evening lights and cozy steam rising in crisp air. Realistic modern resort facility, authentic Tyumen spa aesthetics, strictly no alien volcanic craters, no surreal geysers, absolutely no high-rise buildings or skyscrapers. "
             f"{headline_prompt} "
             f"{logo_prompt} "
             f"Photorealistic 4k photography, 35mm lens, natural soft warm lighting."
