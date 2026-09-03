@@ -28,11 +28,11 @@ from ftp_uploader import upload_file_to_ftp
 CATEGORIES_SCHEDULE = [
     "afisha",            # Понедельник: афиша и события Тюмени
     "district_guide",    # Вторник: гид по районам и лучшим ЖК (Новин, Европейский, Видный)
-    "host_story",        # Среда: заметки радушного хозяина (живой диалог и забота)
+    "host_story",        # Среда: забота и уют в деталях (стандарты комфорта сети)
     "service_lifehack",  # Четверг: стандарты сервиса, чистоты и бесконтактный заезд 24/7
     "city_guide",        # Пятница: гид по Тюмени, термальные источники и маршруты выходного дня
     "special_offers",    # Суббота: скидки, спецпредложения и раннее бронирование
-    "host_story"         # Воскресенье: уютные истории и сибирское гостеприимство
+    "host_story"         # Воскресенье: уютные детали и комфортное сибирское гостеприимство
 ]
 
 def get_today_category():
@@ -68,7 +68,7 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
         
     logo_online_url = os.environ.get("BRAND_LOGO_URL", cfg_logo_url)
     
-    # Если задан FTP, пытаемся загрузить логотип на сайт
+    # Если задан FTP, загружаем актуальный логотип на сайт
     if os.environ.get("FTP_HOST") and logo_file.exists():
         print("Загрузка логотипа на сайт через FTP для создания публичного референса...")
         uploaded = upload_file_to_ftp(str(logo_file), "brand_logo_reference.png")
@@ -79,7 +79,7 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     if not logo_online_url:
         repo = os.environ.get("GITHUB_REPOSITORY", "")
         if repo:
-            logo_online_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/logo_full.jpg"
+            logo_online_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
     
     if logo_online_url:
         input_urls.append(logo_online_url)

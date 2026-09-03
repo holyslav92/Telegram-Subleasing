@@ -89,9 +89,20 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
     title = topic or topic_data.get("title", "")
     body = topic_data.get("body", "")
     image_title = image_title or topic_data.get("image_title", "")
-    visual_idea = topic_data.get("search_query", "")
+    
+    # Получаем визуальный референс через Pexels API
+    pexels_term = topic_data.get("search_query", "cozy modern scandinavian apartment interior")
+    pexels_data = fetch_pexels_idea(pexels_term)
+    
+    visual_idea = ""
+    pexels_url = ""
+    if pexels_data and pexels_data.get("alt"):
+        visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
+        pexels_url = pexels_data.get("url", "")
 
     image_meta = build_image_prompt(category_id, topic, image_title, visual_idea=visual_idea)
+    if pexels_url:
+        image_meta["pexels_reference_url"] = pexels_url
 
     post_data = {
         "id": topic_id,
@@ -105,7 +116,6 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
             "inline_keyboard": inline_keyboard
         }
     }
-    return post_data
     return post_data
 
 
@@ -213,20 +223,6 @@ def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = No
                 return res["data"][0].get("url")
     except urllib.error.HTTPError as e:
         err_msg = e.read().decode("utf-8", errors="ignore")
-        # Если Image-to-Image с переданными input_urls вернул ошибку внешнего URL (например, недоступность хостинга для китайских серверов)
-        if input_urls and (e.code == 400 or "generate image failed" in err_msg):
-            print(f"Предупреждение: референс input_urls не принят удаленным сервером ({err_msg}). Повторяем запрос с текстовым описанием бренда...")
-            fallback_data = {
-                "model": model,
-                "prompt": prompt,
-                "n": 1,
-                "size": "1024x1024"
-            }
-            fallback_req = urllib.request.Request(url, data=json.dumps(fallback_data).encode("utf-8"), headers=headers)
-            with urllib.request.urlopen(fallback_req) as resp:
-                res = json.loads(resp.read().decode("utf-8"))
-                if "data" in res and len(res["data"]) > 0:
-                    return res["data"][0].get("url")
         raise RuntimeError(f"GRSAI API error {e.code}: {err_msg}")
     return None
 
@@ -272,10 +268,21 @@ def main():
                         input_urls.append(logo_u)
             except Exception:
                 pass
+        
+        # Если логотип не найден в конфиге, пробуем резерв из GitHub репозитория
+        if not input_urls:
+            repo = os.environ.get("GITHUB_REPOSITORY", "")
+            if repo:
+                input_urls.append(f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png")
+
         pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
         if pexels_u:
             input_urls.append(pexels_u)
             
+        print(f"Передано референсов input_urls: {len(input_urls)}")
+        for u in input_urls:
+            print(f"  -> {u}")
+
         try:
             photo_url = generate_image_grsai(post["image_prompt"]["prompt"], input_urls=input_urls if input_urls else None)
             print(f"Изображение сгенерировано: {photo_url}")
