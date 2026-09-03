@@ -1,0 +1,27 @@
+{
+  "title": "Куда сходить в Тюмени: термальные комплексы, экскурсии и отдых",
+  "category_id": "afisha",
+  "category_name": "Афиша и события Тюмени",
+  "created_at": "2026-09-02 18:00:11",
+  "text_html": "<b>Куда сходить в Тюмени: термальные комплексы, экскурсии и отдых</b>\n\nПланируете визит в Тюмень или хотите насыщенно провести выходные? Собрали ключевые идеи для отдыха.\n\n5 сентября у озера Тихое пройдет атмосферный фестиваль <b>«Пошумим на Тихом»</b> с концертом дуэта <b>NANSI & SIDOROV</b> и салютом над водой. Вход свободный.\n\nЕсли планируете приехать на фестиваль, комфортнее всего остановиться рядом. В апартаментах «Добрый дом» в <b>ЖК «Европейский»</b> и <b>«Европейский Берег»</b> вас ждет отельный уют: белоснежное белье, Wi-Fi, наборы для душа и <b>бесконтактный заезд 24/7</b> без ожидания.\n\nБронировать на <b><a href=\"https://добрыйдом-72.рф/\">нашем сайте</a></b> выгоднее — действуют <b>прямые цены</b> без комиссий. <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Отзывы</a></b> и квартиры также есть на <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b>, следить за новостями можно в <b><a href=\"https://max.ru/id660300569233_biz\">Макс</a></b>, а записаться на экскурсии — на <b><a href=\"https://добрыйдом-72.рф/excursions/\">странице туров</a></b>.",
+  "image_prompt": {
+    "prompt": "Cozy warm morning in a luxury apartment living room in Tyumen, soft sunlight through sheer curtains, steaming cup of herbal tea on a stylish wooden coffee table, background view of Tyumen city embankment. Elegant interior photography. Design layout for Telegram post, square 1:1 ratio. Brand colors: emerald green (#2E8B57) and coral red (#E05244) accents on a clean light cream background. Include a stylish brand card or banner with the exact Russian text written in clear, elegant, readable Cyrillic typography: 'Афиша и отдых в Тюмени'. Incorporate the brand logo elements from reference images (green curtain symbol with red flower in pot and 'Добрый дом' inscription) cleanly and organically into the composition. High resolution 4k, professional commercial interior photography, photorealistic, balanced lighting, cinematic composition.",
+    "text_on_image": "Афиша и отдых в Тюмени",
+    "aspect_ratio": "1:1",
+    "resolution": "1K"
+  },
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "Забронировать",
+          "url": "https://добрыйдом-72.рф/"
+        },
+        {
+          "text": "Менеджер",
+          "url": "https://t.me/Dobriy_dom_Tyumen"
+        }
+      ]
+    ]
+  }
+}

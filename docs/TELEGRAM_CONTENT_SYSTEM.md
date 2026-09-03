@@ -1,0 +1,68 @@
+# Инструкция: Публикация и генерация контента для Telegram-канала «Добрый дом Тюмень»
+
+Данная система осуществляет поиск инфоповодов, генерирует структурированные и вовлекающие посты для Telegram с нативным вшиванием ресурсов бренда (Max, Авито, сайт, экскурсии, соцсети), добавляет инлайн-кнопки бронирования и отправляет посты через Telegram-бота в группу `@SMM_ddom`.
+
+---
+
+## 1. Ресурсы бренда и ссылки
+- **Сайт для бронирования (лучшие цены):** `https://добрыйдом-72.рф/`
+- **Экскурсии партнеров:** `https://добрыйдом-72.рф/excursions/`
+- **Менеджер:** `@Dobriy_dom_Tyumen` (`https://t.me/Dobriy_dom_Tyumen`)
+- **Telegram-канал:** `@Dobriy_dom_72` (`https://t.me/Dobriy_dom_72`)
+- **Макс (новостной канал бренда):** `https://max.ru/id660300569233_biz`
+- **Авито (все квартиры и отзывы):** `https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4`
+- **ВКонтакте:** `https://vk.com/dobryi_dom_tyumen`
+- **Яндекс Дзен:** `https://dzen.ru/dobryidom72`
+
+---
+
+## 2. Кнопки под каждым постом
+Каждый пост автоматически снабжается 2 кнопками:
+1. `Забронировать` → `https://добрыйдом-72.рф/`
+2. `Менеджер` → `https://t.me/Dobriy_dom_Tyumen`
+
+---
+
+## 3. Генерация изображений в GPT Image 2 (GRSAI)
+- Формат изображения: строго **1:1** (квадрат для Telegram).
+- Модель: **GPT Image 2** (стандартная).
+- Логотипы бренда сохранены в `memory/branding/` (`logo_full.jpg` и `logo_icon.jpg`).
+- Модуль `scripts/image_prompt_builder.py` генерирует промпты с указанием точной кириллической надписи, интеграции логотипа и фирменных цветов (#2E8B57, #E05244).
+
+---
+
+## 4. Как запустить генерацию и отправку
+
+### Генерация текстового поста с предпросмотром:
+```bash
+python3 scripts/generate_telegram_post.py --category afisha --topic "Афиша и события Тюмени"
+```
+
+### Генерация и отправка поста в группу в бесшумном режиме:
+```bash
+python3 scripts/generate_telegram_post.py --category district_guide --send --silent
+```
+
+### Отправка поста с фото как единое целое (sendPhoto + caption):
+```bash
+# С локальным файлом изображения
+python3 scripts/generate_telegram_post.py --category service_lifehack --topic "Бесконтактный заезд 24/7" --photo-file memory/branding/logo_full.jpg --send --silent
+
+# С URL сгенерированного изображения
+python3 scripts/generate_telegram_post.py --category afisha --topic "Афиша Тюмени" --photo "https://url-к-картинке.jpg" --send --silent
+```
+
+---
+
+## 6. Ежедневный запуск через Cursor Cloud Automations
+
+Для ежедневной автоматической публикации в 08:00 по Екатеринбургу (UTC+5, 03:00 UTC) создайте Automation в панели Cursor:
+- **Расписание (Cron):** `0 3 * * *` (03:00 UTC = 08:00 Екатеринбург).
+- **Команда запуска:**
+```bash
+python3 scripts/daily_telegram_pipeline.py
+```
+- **Секреты:** `TELEGRAM_BOT_TOKEN`, `GRSAI_API_KEY`.
+
+
+
