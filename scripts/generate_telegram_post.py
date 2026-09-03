@@ -243,7 +243,7 @@ def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = No
 
     # Ожидаем результат через опрос /v1/draw/result
     result_url = f"{base_api}/v1/draw/result"
-    max_wait_seconds = 180
+    max_wait_seconds = 360
     start_wait = time.time()
     
     while time.time() - start_wait < max_wait_seconds:
@@ -258,6 +258,7 @@ def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = No
                 poll_data = json.loads(poll_resp.read().decode("utf-8"))
                 d = poll_data.get("data", {})
                 status = d.get("status")
+                progress = d.get("progress", 0)
                 if status == "succeeded":
                     results = d.get("results", [])
                     if results and len(results) > 0:

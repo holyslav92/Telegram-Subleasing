@@ -59,14 +59,27 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
 
     base_scene = visual_idea or scene_prompts.get(category_id, scene_prompts["afisha"])
 
+    # Промпты для типографики и логотипа:
+    # 1. Заголовок: стильный журнальный заголовок белым цветом, современная типографика
+    headline_prompt = (
+        f"Headline: In the upper area, place a stylish designer heading in crisp white Russian Cyrillic typography: {text_on_image.upper()}. "
+        f"Modern clean aesthetic editorial font with elegant spacing and subtle gentle shadow for perfect legibility."
+    )
+
+    # 2. Интеграция логотипа: аккуратный логотип в верхнем углу (на прозрачном фоне или изящной стеклянной подложке)
+    logo_prompt = (
+        f"Brand Logo Placement: Place the official brand logo from reference image url 1 in the upper right corner with a clean transparent or subtle light backdrop. "
+        f"The logo must keep its exact green curtains window icon, small red potted flower, and Добрый дом lettering crisp, unwarped, and clearly readable."
+    )
+
     # Если тема про термальные источники, формируем уличную сцену термального курорта
     if category_id in ["weekend_thermal", "city_guide"]:
         full_prompt = (
             f"Social media promotional poster, square 1:1 aspect ratio. "
             f"Subject: {base_scene}. "
             f"Atmosphere: Authentic Siberian outdoor thermal hot spring mineral pool in Tyumen surrounded by peaceful coniferous pine trees, soothing rising mist and steam over warm mineral water, wooden lounge terrace, ambient warm lanterns, crisp clean air, absolutely no high-rise buildings or skyscrapers. "
-            f"Headline: In the upper area, place a prominent, stylish Russian Cyrillic heading in crisp, uniform white modern bold sans-serif font: {text_on_image.upper()}. "
-            f"Brand Logo Placement: Place the official brand logo from reference image url 1 directly onto a clean white rectangular badge with rounded corners in the top right corner. The logo must keep its exact green curtains window icon, small red potted flower, and Добрый дом brand lettering intact with crisp professional clarity. "
+            f"{headline_prompt} "
+            f"{logo_prompt} "
             f"Photorealistic 4k photography, 35mm lens, natural soft warm lighting."
         )
     else:
@@ -74,8 +87,8 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
             f"Social media promotional poster, square 1:1 aspect ratio. "
             f"Subject: {base_scene}. "
             f"Interior details: authentic cozy Scandinavian apartment in Tyumen, soft morning sunlight, comfortable authentic living space, wooden furniture, vase with delicate white flowers, crisp hotel bed linens. Solid wall and cozy warm room ambiance, strictly low-rise green neighborhood outside, absolutely no skyscrapers, no high-rise glass towers in any window. "
-            f"Headline: In the upper area, place a prominent, stylish Russian Cyrillic heading in crisp, uniform white modern bold sans-serif font: {text_on_image.upper()}. "
-            f"Brand Logo Placement: Place the official brand logo from reference image url 1 directly onto a clean white rectangular badge with rounded corners in the top right corner. The logo must keep its exact green curtains window icon, small red potted flower, and Добрый дом brand lettering intact with crisp professional clarity. "
+            f"{headline_prompt} "
+            f"{logo_prompt} "
             f"Photorealistic 4k interior photography, 35mm lens, natural soft warm lighting."
         )
 
