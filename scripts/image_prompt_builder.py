@@ -51,13 +51,12 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
     base_scene = visual_idea or scene_prompts.get(category_id, scene_prompts["afisha"])
 
     full_prompt = (
-        f"{base_scene} "
-        f"Square 1:1 commercial social media layout. "
-        f"In the top area, include a prominent, bold, modern, highly legible graphic design title in elegant Russian Cyrillic typography: '{text_on_image.upper()}'. "
-        f"The text must be large, crisp, and beautifully styled with high contrast against the background so it immediately catches attention in a social feed. "
-        f"In the top corner or on a neat clean white badge, seamlessly integrate the exact brand logo from the input reference image (green curtains emblem with red flower in a pot and 'Добрый дом' inscription) without warping, distortion, or color changes. "
-        f"Brand color palette: emerald green (#2E8B57), coral red (#E05244), and crisp white/cream tones. "
-        f"Authentic professional interior and travel photography, 35mm lens, natural daylight, sharp focus, 4k resolution, no AI blur."
+        f"Commercial social media post banner, square 1:1 format. "
+        f"Photo scene: {base_scene}. "
+        f"Atmosphere & Setting: authentic cozy Scandinavian apartment interior in Tyumen, soft warm natural sunlight, genuine comfortable living space, wooden furniture, fresh flowers in a ceramic vase, crisp white bedding. Strictly low-rise green neighborhood outside or cozy room focus, absolutely no skyscrapers, no high-rise towers, no American or Moscow metropolis skyline in the window. "
+        f"Typography: In the upper area, place a prominent, stylish Russian Cyrillic heading in crisp, uniform white modern bold sans-serif font: {text_on_image.upper()}. "
+        f"Branding: Place the brand logo badge on a neat white tag in the top right corner: emerald green curtain icon with red flower and Добрый дом lettering. "
+        f"Photorealistic 4k interior photography, 35mm lens, natural soft warm lighting, zero AI blur."
     )
 
     return {

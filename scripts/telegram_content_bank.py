@@ -125,7 +125,7 @@ TOPIC_BANK = {
 
 Выбирайте любую из 60+ квартир по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а наши новости — в канале <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
             "image_title": "Уют в каждой детали",
-            "search_query": "crisp white luxury hotel bed sheets morning sun cozy bedroom"
+            "search_query": "cozy luxury bedroom white bed hotel interior without window"
         },
         {
             "id": "care_tea",

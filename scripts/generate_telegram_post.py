@@ -258,30 +258,40 @@ def main():
     photo_url = args.photo
     if args.generate_image:
         print("Генерация изображения через GRSAI (GPT Image 2 в режиме Image-to-Image)...")
+        # Всегда строго сбрасываем и берем ровно 2 референса:
+        # Референс 1: эталонный логотип бренда
+        # Референс 2: свежая визуальная идея из Pexels
         input_urls = []
         tenant_cfg = WORKSPACE_ROOT / "shared" / "tenant-config.json"
+        logo_url = ""
         if tenant_cfg.exists():
             try:
                 with open(tenant_cfg, "r", encoding="utf-8") as f:
-                    logo_u = json.load(f).get("brand_logo_url", "")
-                    if logo_u:
-                        input_urls.append(logo_u)
+                    logo_url = json.load(f).get("brand_logo_url", "")
             except Exception:
                 pass
         
-        # Если логотип не найден в конфиге, пробуем резерв из GitHub репозитория
-        if not input_urls:
+        if not logo_url:
             repo = os.environ.get("GITHUB_REPOSITORY", "")
             if repo:
-                input_urls.append(f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png")
+                logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
+
+        # Формируем публичный CDN URL для модели
+        repo = os.environ.get("GITHUB_REPOSITORY", "")
+        if repo:
+            cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
+        else:
+            cdn_logo_url = logo_url or "#"
+        
+        input_urls.append(cdn_logo_url)
 
         pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
         if pexels_u:
             input_urls.append(pexels_u)
             
-        print(f"Передано референсов input_urls: {len(input_urls)}")
-        for u in input_urls:
-            print(f"  -> {u}")
+        print(f"Подготовлено референсов (ровно логотип + 1 идея из Pexels): {len(input_urls)}")
+        for idx, u in enumerate(input_urls, 1):
+            print(f"  [Референс {idx}] -> {u}")
 
         try:
             photo_url = generate_image_grsai(post["image_prompt"]["prompt"], input_urls=input_urls if input_urls else None)

@@ -51,7 +51,9 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     prompt = post["image_prompt"]["prompt"]
     
     # Подготовка референсов для Image-to-Image режима:
+    # Всегда строго сбрасываем список и используем ровно 2 актуальных референса:
     # 1. Эталонный логотип бренда
+    # 2. Новая уникальная идея из Pexels под тему сегодняшнего поста
     input_urls = []
     tenant_cfg = SCRIPT_DIR.parent / "shared" / "tenant-config.json"
     cfg_logo_url = ""
@@ -76,20 +78,23 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             logo_online_url = uploaded
     
     # Резервный публичный URL из репозитория GitHub
-    if not logo_online_url:
-        repo = os.environ.get("GITHUB_REPOSITORY", "")
-        if repo:
-            logo_online_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if repo:
+        cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
+    elif logo_online_url:
+        cdn_logo_url = logo_online_url
+    else:
+        # Fallback на сохраненный логотип в репозитории проекта
+        cdn_logo_url = cfg_logo_url
     
-    if logo_online_url:
-        input_urls.append(logo_online_url)
-        print(f"Используем эталонный логотип (Image-to-Image reference): {logo_online_url}")
+    input_urls.append(cdn_logo_url)
+    print(f"Используем эталонный логотип (Image-to-Image reference): {cdn_logo_url}")
 
-    # 2. Визуальный референс стиля и композиции из Pexels
+    # 2. Свежий визуальный референс стиля и композиции из Pexels
     pexels_ref = post.get("image_prompt", {}).get("pexels_reference_url", "")
     if pexels_ref:
         input_urls.append(pexels_ref)
-        print(f"Используем визуальный стиль из Pexels (Image-to-Image reference): {pexels_ref}")
+        print(f"Используем свежий стиль из Pexels (Image-to-Image reference): {pexels_ref}")
 
     print(f"Генерация изображения через GRSAI API (до 3 попыток, input_urls: {len(input_urls)})...")
     
