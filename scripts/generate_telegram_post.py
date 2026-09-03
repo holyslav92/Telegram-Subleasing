@@ -87,9 +87,21 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
 Оформляете бронь на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> по <b>прямым ценам</b> или через <b><a href="https://t.me/Dobriy_dom_Tyumen">менеджера</a></b>, получаете понятную инструкцию с кодом доступа и заезжаете в любое время суток за 5 минут.
 
-В каждом номере подготовлены <b>отельное постельное белье</b>, свежие полотенца, одноразовые наборы гигиены, Wi-Fi, фен, утюг, стиральная машина и <b>кассовый чек с QR-кодом</b> для бухгалтерии.
+В каждом номере подготовлены <b>отельное постельное белье</b>, свежие полотенца, одноразовые наборы гигиены, скоростной Wi-Fi, фен, утюг, стиральная машина и <b>кассовый чек с QR-кодом</b> для бухгалтерии.
 
-<b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, читайте нас в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а анонсы событий ждут вас в нашем канале <b><a href="https://t.me/Dobriy_dom_72">@Dobriy_dom_72</a></b>."""
+<b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, читайте новости в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а анонсы событий ждут вас в нашем канале <b><a href="https://t.me/Dobriy_dom_72">@Dobriy_dom_72</a></b>."""
+
+    elif category_id == "host_story":
+        title = topic or "Заметки радушного хозяина: почему забота скрывается в деталях"
+        body = f"""<b>{title}</b>
+
+Когда мы открывали первые квартиры в Тюмени, договорились о главном правиле: каждый гость должен чувствовать себя так спокойно и тепло, будто вернулся в дом к близким друзьям.
+
+1️⃣ <b>Идеальная тишина и сон</b>: тяжелые портьеры, которые не пропускают утреннее солнце, и матрасы, на которых мгновенно восстанавливаешь силы после перелета или долгой дороги.
+2️⃣ <b>Никаких бытовых забот</b>: от свежих полотенец и хлопкового белья до хорошего фена, гладильной доски и чая на кухне.
+3️⃣ <b>Свобода графика</b>: наш <b>бесконтактный заезд 24/7</b> позволяет приехать глубокой ночью и зайти в номер за пару минут по коду без созвонов и ожидания.
+
+Все наши 60+ квартир и актуальные <b>прямые цены</b> ждут вас на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> открыты на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а задать любой вопрос или забронировать можно напрямую через <b><a href="https://t.me/Dobriy_dom_Tyumen">менеджера</a></b>. Новости города и бренда читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
 
     elif category_id == "special_offers":
         title = topic or "Специальные тарифы и скидки на проживание в Тюмени"
@@ -100,9 +112,9 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 1️⃣ <b>Тариф «Раннее бронирование»</b>: скидка 10% при заказе за 20 дней до даты заезда.
 2️⃣ <b>Тариф «Длительное проживание»</b>: скидка 10% на все бронирования от 10 ночей со включенной регулярной уборкой и сменой белья.
 
-Все актуальные цены и свободные даты без посредников и комиссий представлены на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. 
+Все актуальные <b>прямые цены</b> и свободные даты без посредников и комиссий представлены на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b>. 
 
-Следить за акциями можно также в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b> и в <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">профиле Авито</a></b>."""
+Следить за акциями можно также в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, отзывы гостей читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а написать нам можно напрямую <b><a href="https://t.me/Dobriy_dom_Tyumen">менеджеру</a></b>."""
 
     else:
         title = topic or "Гид по Тюмени: термальные воды, экскурсионные туры и гастрономия"
@@ -111,10 +123,10 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 Тюмень — первый русский город Сибири и термальная столица страны. Что обязательно включить в маршрут:
 
 1️⃣ <b>Термальные источники</b> — горячие минеральные бассейны на свежем воздухе в «ЛетоЛето» и «Верхнем бору».
-2️⃣ <b>Экскурсии по городу и окрестностям</b> — тематические пешеходные и автобусные маршруты от наших партнеров собраны на странице <a href="https://добрыйдом-72.рф/excursions/">экскурсий</a>.
+2️⃣ <b>Экскурсии по городу и окрестностям</b> — авторские пешеходные и автобусные маршруты от наших партнеров собраны на <b><a href="https://добрыйдом-72.рф/excursions/">странице туров</a></b>.
 3️⃣ <b>Сибирская кухня</b> — строганина, блюда из дичи и сибирские десерты в заведениях исторического центра.
 
-Для комфортного проживания выбирайте любую из 60+ квартир «Доброго дома». Прямые цены без наценок всегда ждут вас на <a href="https://добрыйдом-72.рф/">официальном сайте</a>."""
+Для комфортного проживания выбирайте любую из 60+ квартир «Доброго дома» с <b>бесконтактным заездом 24/7</b>. <b>Прямые цены</b> без наценок всегда ждут вас на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b>, отзывы смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а свежие события — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
 
     image_meta = build_image_prompt(category_id, topic, image_title)
 
@@ -205,12 +217,15 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
 
 def generate_image_grsai(prompt: str, api_key: str = None) -> str:
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
-    api_base = os.environ.get("GRSAI_API_BASE", "")
+    api_base = os.environ.get("GRSAI_API_BASE", "").strip().rstrip("/")
     if not api_base:
-        api_base = "https://" + "grsaiapi" + ".com/v1"
-    model = os.environ.get("DEROUTER_IMAGE_MODEL", "")
+        api_base = "https://" + "api.example.com"
+    if not api_base.endswith("/v1"):
+        api_base = f"{api_base}/v1"
+    
+    model = os.environ.get("DEROUTER_IMAGE_MODEL", "").strip()
     if not model:
-        model = "gpt-" + "image-2"
+        model = "default-" + "image-model"
     url = f"{api_base}/images/generations"
     headers = {
         "Content-Type": "application/json",
@@ -223,7 +238,7 @@ def generate_image_grsai(prompt: str, api_key: str = None) -> str:
         "size": "1024x1024"
     }
     req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers)
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=120) as resp:
         res = json.loads(resp.read().decode("utf-8"))
         if "data" in res and len(res["data"]) > 0:
             return res["data"][0].get("url")
@@ -241,7 +256,7 @@ def save_post(post_data: dict) -> Path:
 
 def main():
     parser = argparse.ArgumentParser(description="Генератор и публикатор постов в Telegram (Добрый дом Тюмень)")
-    parser.add_argument("--category", default="afisha", choices=["afisha", "district_guide", "service_lifehack", "special_offers", "city_guide"])
+    parser.add_argument("--category", default="afisha", choices=["afisha", "district_guide", "host_story", "service_lifehack", "special_offers", "city_guide"])
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--details", default="", help="Детали поста")
     parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")

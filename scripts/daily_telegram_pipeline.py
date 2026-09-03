@@ -6,7 +6,8 @@
 2. Выполняет поиск актуальных событий / тем.
 3. Формирует привлекательный текст с кнопками бронирования и акцентами.
 4. Создает реалистичный промпт для GPT Image 2 / GRSAI с кириллицей и элементами бренда.
-5. Генерирует изображение через GRSAI API и отправляет единым постом (фото + текст + кнопки) в Telegram-группу @SMM_ddom.
+5. Обогащает изображение через Pexels API (натуральное освещение, живые интерьеры).
+6. Генерирует изображение через GRSAI API (до 3 попыток) и отправляет единым постом (фото + текст + кнопки) в Telegram-группу [REDACTED].
 """
 
 import argparse
@@ -14,6 +15,7 @@ import json
 import os
 import random
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -26,8 +28,8 @@ from generate_telegram_post import build_post, send_to_telegram, generate_image_
 CATEGORIES_SCHEDULE = [
     "afisha",            # Понедельник
     "district_guide",    # Вторник
-    "service_lifehack",  # Среда
-    "city_guide",        # Четверг
+    "host_story",        # Среда (живой диалог и заметки радушного хозяина)
+    "service_lifehack",  # Четверг
     "afisha",            # Пятница
     "special_offers",    # Суббота
     "city_guide"         # Воскресенье
@@ -47,23 +49,36 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     
     photo_url = None
     prompt = post["image_prompt"]["prompt"]
-    print("Генерация изображения через GRSAI API...")
-    try:
-        photo_url = generate_image_grsai(prompt)
-        print(f"Изображение успешно получено: {photo_url}")
-    except Exception as e:
-        print(f"Предупреждение: Не удалось сгенерировать изображение через GRSAI ({e}).")
-        # Если GRSAI недоступен, попробуем использовать дефолтное фото/логотип
-        fallback_logo = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
-        if fallback_logo.exists():
-            print(f"Используем запасной файл: {fallback_logo}")
+    print("Генерация изображения через GRSAI API (до 3 попыток с интервалом)...")
+    
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        try:
+            print(f"Попытка генерации {attempt}/{max_attempts}...")
+            photo_url = generate_image_grsai(prompt)
+            if photo_url and photo_url.startswith("http"):
+                print(f"Изображение успешно получено: {photo_url}")
+                break
+            else:
+                print(f"Предупреждение: получен пустой ответ при генерации (попытка {attempt})")
+        except Exception as e:
+            print(f"Предупреждение: Ошибка генерации изображения на попытке {attempt} ({e}).")
+        
+        if attempt < max_attempts:
+            wait_sec = 5 * attempt
+            print(f"Ожидание {wait_sec} сек перед повторной попыткой...")
+            time.sleep(wait_sec)
+    
+    # Правило защиты качества: если фото не получено — сухой пост без фото или с одиночным логотипом не отправлять!
+    if not photo_url:
+        print("ОШИБКА: Фотообложка не получена после всех попыток генерации.")
+        print("В соответствии с правилами качества бренда, сухой пост без фото или с одиночным логотипом не отправляется.")
+        sys.exit(1)
     
     if send:
-        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "8724220345:AAH--Vc3ovIGDTlyr-yWRI6oqwHerrys-hU")
-        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "@SMM_ddom")
-        print(f"Отправка единого поста в Telegram {target_chat}...")
-        
-        fallback_photo_path = str(SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg") if not photo_url else None
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "[REDACTED]")
+        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "[REDACTED]")
+        print(f"Отправка единого поста с фото в Telegram {target_chat}...")
         
         res = send_to_telegram(
             bot_token=bot_token,
@@ -71,7 +86,7 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             text=post["text_html"],
             reply_markup=post["reply_markup"],
             photo_url=photo_url,
-            photo_path=fallback_photo_path if not photo_url else None,
+            photo_path=None,
             silent=True
         )
         if res.get("ok"):
