@@ -23,6 +23,7 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         }
         text_on_image = titles_map.get(category_id, "Добрый дом Тюмень")
 
+    pexels_image_url = ""
     # Если идея не передана явно, попробуем обогатить её через Pexels API
     if not visual_idea:
         search_terms = {
@@ -36,6 +37,7 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         pexels_data = fetch_pexels_idea(search_terms.get(category_id, "cozy apartment interior"))
         if pexels_data and pexels_data.get("alt"):
             visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
+            pexels_image_url = pexels_data.get("url", "")
 
     scene_prompts = {
         "afisha": "Cozy warm morning in a luxury apartment living room in Tyumen, soft sunlight through sheer curtains, steaming cup of herbal tea on a stylish wooden coffee table, background view of Tyumen city embankment. Elegant interior photography.",
@@ -61,5 +63,6 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         "prompt": full_prompt,
         "text_on_image": text_on_image,
         "aspect_ratio": "1:1",
-        "resolution": "1K"
+        "resolution": "1K",
+        "pexels_reference_url": pexels_image_url
     }

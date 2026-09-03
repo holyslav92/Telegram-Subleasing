@@ -51,7 +51,7 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     prompt = post["image_prompt"]["prompt"]
     
     # Подготовка референсов для Image-to-Image режима:
-    # 1. Проверяем URL логотипа на сайте или загружаем через FTP / GitHub Raw
+    # 1. Эталонный логотип бренда
     input_urls = []
     logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
     logo_online_url = os.environ.get("BRAND_LOGO_URL", "")
@@ -70,6 +70,12 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     if logo_online_url:
         input_urls.append(logo_online_url)
         print(f"Используем эталонный логотип (Image-to-Image reference): {logo_online_url}")
+
+    # 2. Визуальный референс стиля и композиции из Pexels
+    pexels_ref = post.get("image_prompt", {}).get("pexels_reference_url", "")
+    if pexels_ref:
+        input_urls.append(pexels_ref)
+        print(f"Используем визуальный стиль из Pexels (Image-to-Image reference): {pexels_ref}")
 
     print(f"Генерация изображения через GRSAI API (до 3 попыток, input_urls: {len(input_urls)})...")
     

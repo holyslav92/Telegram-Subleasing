@@ -17,6 +17,11 @@ import urllib.parse
 from datetime import datetime
 from pathlib import Path
 
+# Добавляем scripts в sys.path
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 from image_prompt_builder import build_image_prompt
 from pexels_client import fetch_pexels_idea
 
