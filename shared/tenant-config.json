@@ -35,6 +35,7 @@
     "bot_token_env": "TELEGRAM_BOT_TOKEN",
     "target_chat_env": "TELEGRAM_CHAT_ID"
   },
+  "brand_logo_url": "https://xn---72-9cdob8azaodt6k.xn--p1ai/wp-content/uploads/2026/04/dizajn-bez-nazvaniya-36.png",
   "phone": "+7 (993) 574-83-22",
   "cover_mode": "illustrative",
   "dzen_rf_pack": true,

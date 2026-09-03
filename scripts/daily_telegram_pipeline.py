@@ -22,17 +22,17 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post
+from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post, record_published_id
 from ftp_uploader import upload_file_to_ftp
 
 CATEGORIES_SCHEDULE = [
-    "afisha",            # Понедельник: афиша и события
-    "district_guide",    # Вторник: гид по районам и ЖК
-    "host_story",        # Среда: живой диалог и заметки радушного хозяина
-    "service_lifehack",  # Четверг: сервис и бесконтактный заезд 24/7
-    "afisha",            # Пятница: планы на выходные и отдых
-    "special_offers",    # Суббота: скидки и тарифы
-    "city_guide"         # Воскресенье: гид по термам и сибирским прогулкам
+    "afisha",            # Понедельник: афиша и события Тюмени
+    "district_guide",    # Вторник: гид по районам и лучшим ЖК (Новин, Европейский, Видный)
+    "host_story",        # Среда: заметки радушного хозяина (живой диалог и забота)
+    "service_lifehack",  # Четверг: стандарты сервиса, чистоты и бесконтактный заезд 24/7
+    "city_guide",        # Пятница: гид по Тюмени, термальные источники и маршруты выходного дня
+    "special_offers",    # Суббота: скидки, спецпредложения и раннее бронирование
+    "host_story"         # Воскресенье: уютные истории и сибирское гостеприимство
 ]
 
 def get_today_category():
@@ -53,13 +53,27 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
     # Подготовка референсов для Image-to-Image режима:
     # 1. Эталонный логотип бренда
     input_urls = []
-    logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
-    logo_online_url = os.environ.get("BRAND_LOGO_URL", "")
+    tenant_cfg = SCRIPT_DIR.parent / "shared" / "tenant-config.json"
+    cfg_logo_url = ""
+    if tenant_cfg.exists():
+        try:
+            with open(tenant_cfg, "r", encoding="utf-8") as f:
+                cfg_logo_url = json.load(f).get("brand_logo_url", "")
+        except Exception:
+            pass
+            
+    logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "site_logo.png"
+    if not logo_file.exists():
+        logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
+        
+    logo_online_url = os.environ.get("BRAND_LOGO_URL", cfg_logo_url)
     
     # Если задан FTP, пытаемся загрузить логотип на сайт
-    if not logo_online_url and os.environ.get("FTP_HOST") and logo_file.exists():
+    if os.environ.get("FTP_HOST") and logo_file.exists():
         print("Загрузка логотипа на сайт через FTP для создания публичного референса...")
-        logo_online_url = upload_file_to_ftp(str(logo_file), "logo_brand_reference.jpg")
+        uploaded = upload_file_to_ftp(str(logo_file), "brand_logo_reference.png")
+        if uploaded:
+            logo_online_url = uploaded
     
     # Резервный публичный URL из репозитория GitHub
     if not logo_online_url:
@@ -122,6 +136,8 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
         if res.get("ok"):
             msg_id = res.get("result", {}).get("message_id")
             print(f"Пост успешно опубликован! Telegram Message ID: {msg_id}")
+            if post.get("id"):
+                record_published_id(post["id"])
         else:
             print(f"Ошибка публикации: {res}")
             sys.exit(1)

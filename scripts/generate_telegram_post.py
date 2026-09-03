@@ -24,6 +24,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from image_prompt_builder import build_image_prompt
 from pexels_client import fetch_pexels_idea
+from telegram_content_bank import get_next_topic
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
@@ -48,6 +49,25 @@ def load_tenant_config():
         return json.load(f)
 
 
+def load_published_ids():
+    history_file = OUTPUT_DIR / "history.json"
+    if history_file.exists():
+        try:
+            with open(history_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
+
+def record_published_id(topic_id: str):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    history_file = OUTPUT_DIR / "history.json"
+    history = load_published_ids()
+    if topic_id and topic_id not in history:
+        history.append(topic_id)
+        with open(history_file, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+
 def build_post(category_id: str, topic: str = "", details: str = "", image_title: str = "") -> dict:
     templates_data = load_templates()
     categories = {cat["id"]: cat for cat in templates_data.get("categories", [])}
@@ -61,82 +81,20 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         ]
     ]
 
-    if category_id == "afisha":
-        title = topic or "Куда сходить в Тюмени: термальные комплексы, экскурсии и отдых"
-        body = f"""<b>{title}</b>
+    # Если тема не задана вручную, подбираем свежую тему из банка контента с защитой от дублей
+    published_history = load_published_ids()
+    topic_data = get_next_topic(category_id, published_history)
+    topic_id = topic_data.get("id", "")
+    
+    title = topic or topic_data.get("title", "")
+    body = topic_data.get("body", "")
+    image_title = image_title or topic_data.get("image_title", "")
+    visual_idea = topic_data.get("search_query", "")
 
-Планируете визит в Тюмень или хотите насыщенно провести выходные? Собрали ключевые идеи для отдыха.
-
-5 сентября у озера Тихое пройдет атмосферный фестиваль <b>«Пошумим на Тихом»</b> с концертом дуэта <b>NANSI & SIDOROV</b> и салютом над водой. Вход свободный.
-
-Если планируете приехать на фестиваль, комфортнее всего остановиться рядом. В апартаментах «Добрый дом» в <b>ЖК «Европейский»</b> и <b>«Европейский Берег»</b> вас ждет отельный уют: белоснежное белье, Wi-Fi, наборы для душа и <b>бесконтактный заезд 24/7</b> без ожидания.
-
-Бронировать на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> выгоднее — действуют <b>прямые цены</b> без комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> и квартиры также есть на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, следить за новостями можно в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а записаться на экскурсии — на <b><a href="https://добрыйдом-72.рф/excursions/">странице туров</a></b>."""
-
-    elif category_id == "district_guide":
-        title = topic or "Где остановиться в Тюмени: обзор районов и жилых комплексов"
-        body = f"""<b>{title}</b>
-
-Подготовили навигатор по основным локациям Тюмени для гостей города и деловых путешественников:
-
-В <b>ЖК «Новин»</b> в деловом центре удобно остановиться в командировке: закрытая территория и выезд на главные магистрали. В <b>ЖК «Европейский»</b> и <b>«Европейский Берег»</b> у реки Туры — тишина, прогулочные зоны и 5 минут до аквапарка «ЛетоЛето». А в <b>ЖК «Видный»</b> и <b>«Звёздный»</b> — развитая инфраструктура рядом с ТРЦ «Кристалл» и «СитиМолл».
-
-В каждом объекте «Доброго дома» действует <b>бесконтактный заезд 24/7</b> без ожидания администратора.
-
-Прямое бронирование по самым выгодным ценам доступно на <b><a href="https://добрыйдом-72.рф/">нашем официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> и каталог квартир также представлены на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а наши новости читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
-
-    elif category_id == "service_lifehack":
-        title = topic or "Бесконтактный заезд 24/7: как заселиться в квартиру за 5 минут"
-        body = f"""<b>{title}</b>
-
-При позднем рейсе или плотном графике поездки не нужно подстраиваться под встречи с администратором.
-
-Оформляете бронь на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> по <b>прямым ценам</b> или через <b><a href="https://t.me/Dobriy_dom_Tyumen">менеджера</a></b>, получаете понятную инструкцию с кодом доступа и заезжаете в любое время суток за 5 минут.
-
-В каждом номере подготовлены <b>отельное постельное белье</b>, свежие полотенца, одноразовые наборы гигиены, Wi-Fi, фен, утюг, стиральная машина и <b>кассовый чек с QR-кодом</b> для бухгалтерии.
-
-<b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, читайте нас в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, а анонсы событий ждут вас в нашем канале <b><a href="https://t.me/Dobriy_dom_72">@Dobriy_dom_72</a></b>."""
-
-    elif category_id == "special_offers":
-        title = topic or "Специальные тарифы и скидки на проживание в Тюмени"
-        body = f"""<b>{title}</b>
-
-Бронировать квартиры напрямую на официальном сайте «Доброго дома» всегда выгоднее:
-
-1️⃣ <b>Тариф «Раннее бронирование»</b>: скидка 10% при заказе за 20 дней до даты заезда.
-2️⃣ <b>Тариф «Длительное проживание»</b>: скидка 10% на все бронирования от 10 ночей со включенной регулярной уборкой и сменой белья.
-
-Все актуальные цены и свободные даты без посредников и комиссий представлены на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. 
-
-Следить за акциями можно также в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b> и в <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">профиле Авито</a></b>."""
-
-    elif category_id == "host_story":
-        title = topic or "Уют в деталях: почему мы встречаем гостей как старых друзей"
-        body = f"""<b>{title}</b>
-
-Каждый раз, когда мы готовим квартиру к новому заезду, мы задаем себе один простой вопрос: «А нам самим было бы здесь уютно и тепло?»
-
-Для нас сервис — это не просто выдать ключи. Это когда вы заходите после долгой дороги или сибирского морозца, а в квартире уже приятно пахнет чистотой, на кровати ждет <b>белоснежное отельное белье</b>, в ванной — пушистые полотенца и свежие наборы гигиены, а на кухне можно сразу налить чашку чая с конфеткой.
-
-Никаких лишних звонков и подстраиваний под график администратора: с нашим <b>бесконтактным заездом 24/7</b> вы заходите в квартиру за считанные минуты в любое время суток.
-
-Выбирайте любую из наших 60+ уютных квартир на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b> — там всегда <b>прямые цены без наценок</b> и комиссий. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости — в нашем канале <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
-
-    else:
-        title = topic or "Гид по Тюмени: термальные воды, экскурсионные туры и гастрономия"
-        body = f"""<b>{title}</b>
-
-Тюмень — первый русский город Сибири и термальная столица страны. Что обязательно включить в маршрут:
-
-1️⃣ <b>Термальные источники</b> — горячие минеральные бассейны на свежем воздухе в «ЛетоЛето» и «Верхнем бору».
-2️⃣ <b>Экскурсии по городу и окрестностям</b> — тематические пешеходные и автобусные маршруты от наших партнеров собраны на странице <b><a href="https://добрыйдом-72.рф/excursions/">экскурсий</a></b>.
-3️⃣ <b>Сибирская кухня</b> — строганина, блюда из дичи и сибирские десерты в заведениях исторического центра.
-
-Для комфортного проживания выбирайте любую из 60+ квартир «Доброго дома». <b>Прямые цены</b> без наценок всегда ждут вас на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>, а наши новости читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
-
-    image_meta = build_image_prompt(category_id, topic, image_title)
+    image_meta = build_image_prompt(category_id, topic, image_title, visual_idea=visual_idea)
 
     post_data = {
+        "id": topic_id,
         "title": title,
         "category_id": category_id,
         "category_name": cat.get("name", "Афиша и события"),
@@ -147,6 +105,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
             "inline_keyboard": inline_keyboard
         }
     }
+    return post_data
     return post_data
 
 
@@ -225,9 +184,11 @@ def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = No
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
     if not key:
         raise ValueError("Ключ GRSAI_API_KEY не задан в переменных окружения (Secrets).")
-    api_base = os.environ.get("GRSAI_API_BASE", "")
+    api_base = os.environ.get("GRSAI_API_BASE", "").rstrip("/")
     if not api_base:
         api_base = "https://" + "grsaiapi" + ".com/v1"
+    elif not api_base.endswith("/v1"):
+        api_base = f"{api_base}/v1"
     model = os.environ.get("DEROUTER_IMAGE_MODEL", "")
     if not model:
         model = "gpt-" + "image-2"
@@ -245,10 +206,28 @@ def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = No
     if input_urls:
         data["input_urls"] = input_urls
     req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers)
-    with urllib.request.urlopen(req) as resp:
-        res = json.loads(resp.read().decode("utf-8"))
-        if "data" in res and len(res["data"]) > 0:
-            return res["data"][0].get("url")
+    try:
+        with urllib.request.urlopen(req) as resp:
+            res = json.loads(resp.read().decode("utf-8"))
+            if "data" in res and len(res["data"]) > 0:
+                return res["data"][0].get("url")
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode("utf-8", errors="ignore")
+        # Если Image-to-Image с переданными input_urls вернул ошибку внешнего URL (например, недоступность хостинга для китайских серверов)
+        if input_urls and (e.code == 400 or "generate image failed" in err_msg):
+            print(f"Предупреждение: референс input_urls не принят удаленным сервером ({err_msg}). Повторяем запрос с текстовым описанием бренда...")
+            fallback_data = {
+                "model": model,
+                "prompt": prompt,
+                "n": 1,
+                "size": "1024x1024"
+            }
+            fallback_req = urllib.request.Request(url, data=json.dumps(fallback_data).encode("utf-8"), headers=headers)
+            with urllib.request.urlopen(fallback_req) as resp:
+                res = json.loads(resp.read().decode("utf-8"))
+                if "data" in res and len(res["data"]) > 0:
+                    return res["data"][0].get("url")
+        raise RuntimeError(f"GRSAI API error {e.code}: {err_msg}")
     return None
 
 
@@ -282,9 +261,23 @@ def main():
 
     photo_url = args.photo
     if args.generate_image:
-        print("Генерация изображения через GRSAI (GPT Image 2)...")
+        print("Генерация изображения через GRSAI (GPT Image 2 в режиме Image-to-Image)...")
+        input_urls = []
+        tenant_cfg = WORKSPACE_ROOT / "shared" / "tenant-config.json"
+        if tenant_cfg.exists():
+            try:
+                with open(tenant_cfg, "r", encoding="utf-8") as f:
+                    logo_u = json.load(f).get("brand_logo_url", "")
+                    if logo_u:
+                        input_urls.append(logo_u)
+            except Exception:
+                pass
+        pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
+        if pexels_u:
+            input_urls.append(pexels_u)
+            
         try:
-            photo_url = generate_image_grsai(post["image_prompt"]["prompt"])
+            photo_url = generate_image_grsai(post["image_prompt"]["prompt"], input_urls=input_urls if input_urls else None)
             print(f"Изображение сгенерировано: {photo_url}")
         except Exception as e:
             print(f"Ошибка при генерации изображения: {e}")
