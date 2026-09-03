@@ -276,14 +276,17 @@ def main():
             if repo:
                 logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
 
-        # Формируем публичный CDN URL для модели
-        repo = os.environ.get("GITHUB_REPOSITORY", "")
-        if repo:
-            cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
-        else:
-            cdn_logo_url = logo_url or "#"
+        # Референс 1: Эталонный логотип бренда
+        cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "")
+        if not cdn_logo_url:
+            cdn_logo_url = logo_url
+        if not cdn_logo_url:
+            repo = os.environ.get("GITHUB_REPOSITORY", "")
+            if repo:
+                cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
         
-        input_urls.append(cdn_logo_url)
+        if cdn_logo_url:
+            input_urls.append(cdn_logo_url)
 
         pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
         if pexels_u:

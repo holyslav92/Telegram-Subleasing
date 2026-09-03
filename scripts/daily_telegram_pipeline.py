@@ -78,17 +78,17 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             logo_online_url = uploaded
     
     # Резервный публичный URL из репозитория GitHub
-    repo = os.environ.get("GITHUB_REPOSITORY", "")
-    if repo:
-        cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
-    elif logo_online_url:
-        cdn_logo_url = logo_online_url
-    else:
-        # Fallback на сохраненный логотип в репозитории проекта
-        cdn_logo_url = cfg_logo_url
+    cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "")
+    if not cdn_logo_url:
+        cdn_logo_url = cfg_logo_url or logo_online_url
+    if not cdn_logo_url:
+        repo = os.environ.get("GITHUB_REPOSITORY", "")
+        if repo:
+            cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
     
-    input_urls.append(cdn_logo_url)
-    print(f"Используем эталонный логотип (Image-to-Image reference): {cdn_logo_url}")
+    if cdn_logo_url:
+        input_urls.append(cdn_logo_url)
+        print(f"Используем эталонный логотип (Image-to-Image reference): {cdn_logo_url}")
 
     # 2. Свежий визуальный референс стиля и композиции из Pexels
     pexels_ref = post.get("image_prompt", {}).get("pexels_reference_url", "")

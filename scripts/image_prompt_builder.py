@@ -55,7 +55,7 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
         f"Photo scene: {base_scene}. "
         f"Atmosphere & Setting: authentic cozy Scandinavian apartment interior in Tyumen, soft warm natural sunlight, genuine comfortable living space, wooden furniture, fresh flowers in a ceramic vase, crisp white bedding. Strictly low-rise green neighborhood outside or cozy room focus, absolutely no skyscrapers, no high-rise towers, no American or Moscow metropolis skyline in the window. "
         f"Typography: In the upper area, place a prominent, stylish Russian Cyrillic heading in crisp, uniform white modern bold sans-serif font: {text_on_image.upper()}. "
-        f"Branding: Place the brand logo badge on a neat white tag in the top right corner: emerald green curtain icon with red flower and Добрый дом lettering. "
+        f"Branding: Seamlessly place the exact brand logo badge from the first input reference image on a neat white card in the top right corner. The logo shows an emerald green curtain window icon with a red flower in pot, and exact lettering Добрый дом in muted terracotta red serif font. "
         f"Photorealistic 4k interior photography, 35mm lens, natural soft warm lighting, zero AI blur."
     )
 
