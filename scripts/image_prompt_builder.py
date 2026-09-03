@@ -1,38 +1,44 @@
 """
-Модуль формирования промптов для генерации изображений через GPT Image 2 (Kie.ai / GRSAI).
+Модуль формирования промптов для генерации изображений через GPT Image 2 (GRSAI).
 Формирует:
 1. Точный визуальный промпт под тему поста и категорию.
 2. Текст на русском языке (кириллицей) для аккуратного размещения на арте.
 3. Указания по интеграции логотипа бренда (Добрый дом) в фирменных зеленых (#2E8B57) и коралловых (#E05244) тонах.
-4. Формат 1:1, реалистичный фото-стиль интерьеров Тюмени или городских пейзажей.
+4. Формат 1:1, реалистичный фото-стиль интерьеров Тюмени или аутентичных городских пейзажей (без небоскребов).
 """
 
 import os
 from pexels_client import fetch_pexels_idea
 
 def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "", visual_idea: str = "") -> dict:
-    # Заголовок на картинке кириллицей
+    # Заголовок на картинке кириллицей под каждую из рубрик недели
     if not text_on_image:
         titles_map = {
-            "afisha": "Афиша и отдых в Тюмени",
+            "afisha": "Афиша и события Тюмени",
             "district_guide": "Квартиры в лучших ЖК Тюмени",
-            "service_lifehack": "Бесконтактный заезд 24/7",
+            "host_story": "Уют в каждой детали",
+            "service_standards": "Отельный стандарт чистоты",
+            "service_lifehack": "Отельный стандарт чистоты",
+            "weekend_thermal": "Термальная столица России",
+            "city_guide": "Термальная столица России",
             "special_offers": "Скидки до 10% на проживание",
-            "city_guide": "Гид по Тюмени: термы и прогулки",
-            "host_story": "С заботой о каждом госте"
+            "siberian_hospitality": "Сибирское гостеприимство"
         }
         text_on_image = titles_map.get(category_id, "Добрый дом Тюмень")
 
     pexels_image_url = ""
-    # Если идея не передана явно, попробуем обогатить её через Pexels API
+    # Если идея не передана явно, подбираем поисковый запрос для Pexels API
     if not visual_idea:
         search_terms = {
-            "afisha": "cozy city evening cafe festival lights",
+            "afisha": "city evening concert theater celebration warm lights",
             "district_guide": "modern luxury scandinavian apartment interior living room",
-            "service_lifehack": "hotel keys smart lock coffee cup warm morning",
-            "special_offers": "bright modern apartment workspace laptop sunny",
-            "city_guide": "outdoor hot thermal pool steam forest",
-            "host_story": "cozy kitchen breakfast fresh coffee flowers table"
+            "host_story": "steaming herbal tea cup wooden table morning sunlight bedroom",
+            "service_standards": "clean luxury hotel bathroom fluffy white towels amenities",
+            "service_lifehack": "clean luxury hotel bathroom fluffy white towels amenities",
+            "weekend_thermal": "outdoor steaming hot mineral spring forest spa resort",
+            "city_guide": "outdoor steaming hot mineral spring forest spa resort",
+            "special_offers": "bright modern apartment sunny cozy comfortable sofa",
+            "siberian_hospitality": "cozy warm scandinavian living room armchair lamp book blanket"
         }
         pexels_data = fetch_pexels_idea(search_terms.get(category_id, "cozy apartment interior"))
         if pexels_data and pexels_data.get("alt"):
@@ -40,23 +46,26 @@ def build_image_prompt(category_id: str, topic: str = "", text_on_image: str = "
             pexels_image_url = pexels_data.get("url", "")
 
     scene_prompts = {
-        "afisha": "Cozy warm morning in a luxury apartment living room in Tyumen, soft sunlight through sheer curtains, steaming cup of herbal tea on a stylish wooden coffee table, background view of Tyumen city embankment. Elegant interior photography.",
+        "afisha": "Atmospheric evening culture in Tyumen, soft warm lighting, grand theater foyer or concert hall ambiance with gentle golden glow, elegant city atmosphere. Authentic editorial photography.",
         "district_guide": "Modern premium Scandinavian style studio apartment in Tyumen residential complex Novin or Evropeyskiy, floor-to-ceiling windows, king-size bed with crisp white luxury hotel bedding, designer emerald green curtains, warm ambient evening lights.",
-        "service_lifehack": "Smart door lock with electronic keypad on modern apartment entrance door in Tyumen, hotel welcome tray with neat keys, fluffy towels, disposable hygiene amenities, cup of coffee, clean minimalistic aesthetic.",
+        "host_story": "Warm, welcoming, sunlit dining area and kitchen of a premium Tyumen apartment, a steaming cup of fresh morning tea and a vase with small delicate flowers on a wooden table, genuine home warmth and immaculate hotel cleanliness.",
+        "service_standards": "Immaculately clean hotel-standard bathroom in modern apartment, neatly rolled fluffy white cotton towels, branded toiletries and amenities tray, sparkling mirror and polished fixtures, soothing spa atmosphere.",
+        "service_lifehack": "Immaculately clean hotel-standard bathroom in modern apartment, neatly rolled fluffy white cotton towels, branded toiletries, sparkling cleanliness.",
+        "weekend_thermal": "Outdoor natural thermal mineral spring pool with soothing steam in snowy or autumn pine forest in Tyumen, cozy wooden deck with warm ambient lanterns.",
+        "city_guide": "Outdoor natural thermal mineral spring pool with soothing steam in pine forest in Tyumen, cozy wooden relaxation terrace.",
         "special_offers": "Bright stylish studio apartment interior with comfortable sofa and laptop open on clean work desk, warm welcoming atmosphere, bouquet of flowers in a pot, warm sunlight.",
-        "city_guide": "Outdoor thermal mineral spring pool with soothing steam in winter or autumn forest in Tyumen, cozy relaxation area with wooden loungers and warm blankets.",
-        "host_story": "Warm, welcoming, sunlit dining area and kitchen of a premium Tyumen apartment, a cup of fresh morning coffee and a vase with small flowers on a wooden table, genuine home warmth and impeccable hotel cleanliness. Professional atmospheric photography."
+        "siberian_hospitality": "Tranquil cozy Sunday morning in a warm Scandinavian apartment bedroom in Tyumen, soft morning sunlight casting gentle shadows on crisp white cotton sheets, cup of coffee on bedside nightstand, calm and peaceful mood."
     }
 
     base_scene = visual_idea or scene_prompts.get(category_id, scene_prompts["afisha"])
 
     full_prompt = (
-        f"Commercial social media post banner, square 1:1 format. "
-        f"Photo scene: {base_scene}. "
-        f"Atmosphere & Setting: authentic cozy Scandinavian apartment interior in Tyumen, soft warm natural sunlight, genuine comfortable living space, wooden furniture, fresh flowers in a ceramic vase, crisp white bedding. Strictly low-rise green neighborhood outside or cozy room focus, absolutely no skyscrapers, no high-rise towers, no American or Moscow metropolis skyline in the window. "
-        f"Typography: In the upper area, place a prominent, stylish Russian Cyrillic heading in crisp, uniform white modern bold sans-serif font: {text_on_image.upper()}. "
-        f"Branding: Seamlessly place the exact brand logo badge from the first input reference image on a neat white card in the top right corner. The logo shows an emerald green curtain window icon with a red flower in pot, and exact lettering Добрый дом in muted terracotta red serif font. "
-        f"Photorealistic 4k interior photography, 35mm lens, natural soft warm lighting, zero AI blur."
+        f"Social media promotional poster, square 1:1 aspect ratio. "
+        f"Subject: {base_scene}. "
+        f"Interior details: authentic cozy Scandinavian apartment in Tyumen, soft morning sunlight, comfortable authentic living space, wooden furniture, vase with delicate white flowers, crisp hotel bed linens. Solid wall and cozy warm room ambiance, strictly low-rise green neighborhood outside, absolutely no skyscrapers, no high-rise glass towers in any window. "
+        f"Headline: In the upper area, place a prominent, stylish Russian Cyrillic heading in crisp, uniform white modern bold sans-serif font: {text_on_image.upper()}. "
+        f"Brand Logo Placement: Place the official brand logo from reference image url 1 directly onto a clean white rectangular badge with rounded corners in the top right corner. The logo must keep its exact green curtains window icon, small red potted flower, and Добрый дом brand lettering intact with crisp professional clarity. "
+        f"Photorealistic 4k interior photography, 35mm lens, natural soft warm lighting."
     )
 
     return {

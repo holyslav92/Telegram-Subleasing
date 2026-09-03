@@ -26,13 +26,13 @@ from generate_telegram_post import build_post, send_to_telegram, generate_image_
 from ftp_uploader import upload_file_to_ftp
 
 CATEGORIES_SCHEDULE = [
-    "afisha",            # Понедельник: афиша и события Тюмени
-    "district_guide",    # Вторник: гид по районам и лучшим ЖК (Новин, Европейский, Видный)
-    "host_story",        # Среда: забота и уют в деталях (стандарты комфорта сети)
-    "service_lifehack",  # Четверг: стандарты сервиса, чистоты и бесконтактный заезд 24/7
-    "city_guide",        # Пятница: гид по Тюмени, термальные источники и маршруты выходного дня
-    "special_offers",    # Суббота: скидки, спецпредложения и раннее бронирование
-    "host_story"         # Воскресенье: уютные детали и комфортное сибирское гостеприимство
+    "afisha",                # 0 (Понедельник): Афиша и события Тюмени
+    "district_guide",        # 1 (Вторник): Гид по районам и лучшим ЖК города
+    "host_story",            # 2 (Среда): Заметки радушного "хозяина" (живой диалог от первого лица)
+    "service_standards",     # 3 (Четверг): Сервис, забота и стандарты чистоты
+    "weekend_thermal",       # 4 (Пятница): Планы на выходные и термальная столица (термы, экскурсии)
+    "special_offers",        # 5 (Суббота): Акции, тарифы и спецпредложения (скидки 10%, выгода сайта)
+    "siberian_hospitality"   # 6 (Воскресенье): Уютные истории и сибирское гостеприимство
 ]
 
 def get_today_category():
@@ -64,31 +64,23 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
         except Exception:
             pass
             
-    logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "site_logo.png"
-    if not logo_file.exists():
-        logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
-        
-    logo_online_url = os.environ.get("BRAND_LOGO_URL", cfg_logo_url)
-    
-    # Если задан FTP, загружаем актуальный логотип на сайт
-    if os.environ.get("FTP_HOST") and logo_file.exists():
-        print("Загрузка логотипа на сайт через FTP для создания публичного референса...")
-        uploaded = upload_file_to_ftp(str(logo_file), "brand_logo_reference.png")
-        if uploaded:
-            logo_online_url = uploaded
-    
-    # Резервный публичный URL из репозитория GitHub
-    cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "")
-    if not cdn_logo_url:
-        cdn_logo_url = cfg_logo_url or logo_online_url
-    if not cdn_logo_url:
-        repo = os.environ.get("GITHUB_REPOSITORY", "")
-        if repo:
-            cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
-    
+    # Референс 1: Эталонный логотип бренда
+    # Приоритет 1: Прямой CDN/сайт URL логотипа для максимального качества Image-to-Image модели
+    cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "") or cfg_logo_url
     if cdn_logo_url:
         input_urls.append(cdn_logo_url)
-        print(f"Используем эталонный логотип (Image-to-Image reference): {cdn_logo_url}")
+        print(f"Используем эталонный логотип (Image-to-Image URL): {cdn_logo_url}")
+    else:
+        logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
+        if not logo_file.exists():
+            logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "site_logo.png"
+
+        if logo_file.exists():
+            import base64
+            with open(logo_file, "rb") as f:
+                b64_logo = base64.b64encode(f.read()).decode("utf-8")
+            input_urls.append(f"data:image/jpeg;base64,{b64_logo}")
+            print(f"Используем локальный эталонный логотип (base64): {logo_file.name}")
 
     # 2. Свежий визуальный референс стиля и композиции из Pexels
     pexels_ref = post.get("image_prompt", {}).get("pexels_reference_url", "")

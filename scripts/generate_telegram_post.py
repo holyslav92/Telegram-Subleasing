@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.parse
 from datetime import datetime
@@ -111,6 +112,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         "category_name": cat.get("name", "Афиша и события"),
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "text_html": body,
+        "body": body,
         "image_prompt": image_meta,
         "reply_markup": {
             "inline_keyboard": inline_keyboard
@@ -191,40 +193,83 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
 
 
 def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = None) -> str:
+    """Генерация изображения через нативный эндпоинт GRSAI /v1/draw/completions по документации провайдера."""
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
     if not key:
         raise ValueError("Ключ GRSAI_API_KEY не задан в переменных окружения (Secrets).")
-    api_base = os.environ.get("GRSAI_API_BASE", "").rstrip("/")
-    if not api_base:
-        api_base = "https://" + "grsaiapi" + ".com/v1"
-    elif not api_base.endswith("/v1"):
-        api_base = f"{api_base}/v1"
-    model = os.environ.get("DEROUTER_IMAGE_MODEL", "")
-    if not model:
-        model = "gpt-" + "image-2"
-    url = f"{api_base}/images/generations"
+    
+    base_api = os.environ.get("GRSAI_API_BASE", "https://" + "grsaiapi.com").rstrip("/")
+    url = f"{base_api}/v1/draw/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {key}"
     }
-    data = {
-        "model": model,
-        "prompt": prompt,
-        "n": 1,
-        "size": "1024x1024"
-    }
+
+    # Формируем список urls для референсов (поддерживаются прямые ссылки и base64)
+    urls = []
     if input_urls:
-        data["input_urls"] = input_urls
-    req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers)
+        for item in input_urls:
+            if item.startswith("data:") or item.startswith("http"):
+                urls.append(item)
+            elif os.path.exists(item):
+                import base64
+                with open(item, "rb") as f:
+                    b64_str = base64.b64encode(f.read()).decode("utf-8")
+                urls.append(f"data:image/png;base64,{b64_str}")
+
+    model_name = os.environ.get("GRSAI_IMAGE_MODEL", "gpt" + "-image-2")
+    payload = {
+        "model": model_name,
+        "prompt": prompt,
+        "aspectRatio": "1024x1024",
+        "quality": "high",
+        "webHook": "-1",
+        "shutProgress": True
+    }
+    if urls:
+        payload["urls"] = urls
+
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers)
     try:
-        with urllib.request.urlopen(req) as resp:
-            res = json.loads(resp.read().decode("utf-8"))
-            if "data" in res and len(res["data"]) > 0:
-                return res["data"][0].get("url")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            resp_data = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         err_msg = e.read().decode("utf-8", errors="ignore")
         raise RuntimeError(f"GRSAI API error {e.code}: {err_msg}")
-    return None
+
+    task_id = resp_data.get("data", {}).get("id")
+    if not task_id:
+        raise RuntimeError(f"GRSAI API не вернул id задачи: {resp_data}")
+
+    # Ожидаем результат через опрос /v1/draw/result
+    result_url = f"{base_api}/v1/draw/result"
+    max_wait_seconds = 180
+    start_wait = time.time()
+    
+    while time.time() - start_wait < max_wait_seconds:
+        time.sleep(3)
+        poll_req = urllib.request.Request(
+            result_url,
+            data=json.dumps({"id": task_id}).encode("utf-8"),
+            headers=headers
+        )
+        try:
+            with urllib.request.urlopen(poll_req, timeout=15) as poll_resp:
+                poll_data = json.loads(poll_resp.read().decode("utf-8"))
+                d = poll_data.get("data", {})
+                status = d.get("status")
+                if status == "succeeded":
+                    results = d.get("results", [])
+                    if results and len(results) > 0:
+                        return results[0].get("url")
+                    return d.get("url")
+                elif status == "failed":
+                    reason = d.get("error") or d.get("failure_reason") or "unknown"
+                    raise RuntimeError(f"Генерация завершилась ошибкой статуса ({status}): {reason}")
+        except urllib.error.HTTPError as poll_e:
+            pass
+
+    raise TimeoutError(f"Превышено время ожидания генерации изображения в GRSAI ({max_wait_seconds}с)")
 
 
 def save_post(post_data: dict) -> Path:
@@ -238,7 +283,9 @@ def save_post(post_data: dict) -> Path:
 
 def main():
     parser = argparse.ArgumentParser(description="Генератор и публикатор постов в Telegram (Добрый дом Тюмень)")
-    parser.add_argument("--category", default="afisha", choices=["afisha", "district_guide", "service_lifehack", "special_offers", "city_guide", "host_story"])
+    parser.add_argument("--category", default="afisha", choices=[
+        "afisha", "district_guide", "host_story", "service_standards", "service_lifehack", "weekend_thermal", "city_guide", "special_offers", "siberian_hospitality"
+    ])
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--details", default="", help="Детали поста")
     parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")
@@ -277,16 +324,21 @@ def main():
                 logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
 
         # Референс 1: Эталонный логотип бренда
-        cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "")
-        if not cdn_logo_url:
-            cdn_logo_url = logo_url
-        if not cdn_logo_url:
-            repo = os.environ.get("GITHUB_REPOSITORY", "")
-            if repo:
-                cdn_logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
-        
+        # Приоритет 1: Прямой CDN/сайт URL логотипа для максимального качества Image-to-Image модели
+        cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "") or logo_url
         if cdn_logo_url:
             input_urls.append(cdn_logo_url)
+            print(f"Используем эталонный логотип (Image-to-Image URL): {cdn_logo_url}")
+        else:
+            logo_local = WORKSPACE_ROOT / "memory" / "branding" / "logo_full.jpg"
+            if not logo_local.exists():
+                logo_local = WORKSPACE_ROOT / "memory" / "branding" / "site_logo.png"
+            if logo_local.exists():
+                import base64
+                with open(logo_local, "rb") as f:
+                    b64_logo = base64.b64encode(f.read()).decode("utf-8")
+                input_urls.append(f"data:image/jpeg;base64,{b64_logo}")
+                print(f"Используем локальный логотип (base64): {logo_local.name}")
 
         pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
         if pexels_u:
