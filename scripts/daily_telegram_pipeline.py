@@ -134,7 +134,7 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
             msg_id = res.get("result", {}).get("message_id")
             print(f"Пост успешно опубликован! Telegram Message ID: {msg_id}")
             if post.get("id"):
-                record_published_id(post["id"])
+                record_published_id(post["id"], category_id=post.get("category_id", cat))
         else:
             print(f"Ошибка публикации: {res}")
             sys.exit(1)

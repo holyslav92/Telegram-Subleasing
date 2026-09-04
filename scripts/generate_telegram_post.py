@@ -26,6 +26,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from image_prompt_builder import build_image_prompt
 from pexels_client import fetch_pexels_idea
 from telegram_content_bank import get_next_topic
+from telegram_post_history import load_history, record_publication
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
@@ -51,23 +52,13 @@ def load_tenant_config():
 
 
 def load_published_ids():
-    history_file = OUTPUT_DIR / "history.json"
-    if history_file.exists():
-        try:
-            with open(history_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return []
-    return []
+    """Обратная совместимость: список id из истории публикаций."""
+    from telegram_post_history import get_all_published_ids
+    return get_all_published_ids()
 
-def record_published_id(topic_id: str):
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    history_file = OUTPUT_DIR / "history.json"
-    history = load_published_ids()
-    if topic_id and topic_id not in history:
-        history.append(topic_id)
-        with open(history_file, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
+
+def record_published_id(topic_id: str, category_id: str = ""):
+    record_publication(topic_id, category_id=category_id)
 
 def build_post(category_id: str, topic: str = "", details: str = "", image_title: str = "") -> dict:
     templates_data = load_templates()
@@ -82,16 +73,16 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         ]
     ]
 
-    # Если тема не задана вручную, подбираем свежую тему из банка контента с защитой от дублей
-    published_history = load_published_ids()
-    topic_data = get_next_topic(category_id, published_history)
+    # Если тема не задана вручную, подбираем свежую тему из банка с cooldown ~60 дней
+    history = load_history()
+    topic_data = get_next_topic(category_id, history)
     topic_id = topic_data.get("id", "")
     
     title = topic or topic_data.get("title", "")
     body = topic_data.get("body", "")
     image_title = image_title or topic_data.get("image_title", "")
     
-    # Получаем визуальный референс через Pexels API
+    # Визуальный референс через Pexels API под конкретную тему
     pexels_term = topic_data.get("search_query", "cozy modern scandinavian apartment interior")
     pexels_data = fetch_pexels_idea(pexels_term)
     
@@ -101,7 +92,13 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
         pexels_url = pexels_data.get("url", "")
 
-    image_meta = build_image_prompt(category_id, topic, image_title, visual_idea=visual_idea)
+    image_meta = build_image_prompt(
+        category_id,
+        topic,
+        image_title,
+        visual_idea=visual_idea,
+        topic_id=topic_id,
+    )
     if pexels_url:
         image_meta["pexels_reference_url"] = pexels_url
 

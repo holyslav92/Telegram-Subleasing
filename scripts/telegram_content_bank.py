@@ -302,6 +302,34 @@ TOPIC_BANK = {
             "search_query": "historic wooden architecture pedestrian street cozy evening lights"
         },
         {
+            "id": "weekend_embankment_walk",
+            "title": "Вечерняя прогулка по четырёхуровневой набережной Туры",
+            "body": """<b>Вечерняя прогулка по четырёхуровневой набережной Туры</b>
+
+Пятница в Тюмени — идеальный момент для неспешной прогулки по единственной в России четырёхуровневой набережной реки Туры.
+
+Вечером здесь особенно красиво: подсветка вантового моста Влюблённых, отражения огней на воде, уличные музыканты и свежий речной бриз. Это отличный старт выходных без долгих переездов — особенно если вы остановились в апартаментах «Добрый дом» в <b>ЖК «Европейский Берег»</b> буквально в шаговой доступности от набережной.
+
+После прогулки — тишина, мягкая постель и <b>бесконтактный заезд 24/7</b>.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>, экскурсии — на <b><a href="https://добрыйдом-72.рф/excursions/">странице туров</a></b>.""",
+            "image_title": "Набережная Туры вечером",
+            "search_query": "illuminated river embankment bridge night lights reflection walkway"
+        },
+        {
+            "id": "weekend_letoleto_spa",
+            "title": "Спа-день после терм: как провести пятницу с пользой для себя",
+            "body": """<b>Спа-день после терм: как провести пятницу с пользой для себя</b>
+
+Лучший пятничный сценарий в Тюмени — чередовать активный отдых и полное расслабление. Утром или днём — термальные бассейны «ЛетоЛето» или «Верхний бор», а вечером — тихая квартира, горячий чай и восстановление сил.
+
+Мы в «Добром доме» знаем: после водных процедур важны тёплый текстиль, чистота и тишина. Поэтому в каждой квартире — отельный сатин, мягкие полотенца и <b>бесконтактный заезд 24/7</b>, чтобы вы не теряли ни минуты отдыха.
+
+Бронируйте напрямую на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b> по <b>прямым ценам</b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Спа-отдых после терм",
+            "search_query": "luxury spa relaxation towels candles warm ambient wellness"
+        },
+        {
             "id": "weekend_siberian_gastronomy",
             "title": "Гастрономический уикенд: вкусы Сибири и отдых в Тюмени",
             "body": """<b>Гастрономический уикенд: вкусы Сибири и отдых в Тюмени</b>
@@ -429,17 +457,39 @@ TOPIC_BANK["service_lifehack"] = TOPIC_BANK["service_standards"]
 TOPIC_BANK["city_guide"] = TOPIC_BANK["weekend_thermal"]
 
 
-def get_next_topic(category_id: str, published_ids: list = None) -> dict:
-    """Выбирает следующую тему из банка рубрики, исключая ранее опубликованные."""
-    published_ids = published_ids or []
+def get_next_topic(category_id: str, history: list = None) -> dict:
+    """Выбирает следующую тему из банка рубрики с учётом cooldown (~60 дней)."""
+    from telegram_post_history import get_ids_in_cooldown, get_all_published_ids, load_history
+
+    history = history if history is not None else load_history()
     topics = TOPIC_BANK.get(category_id, TOPIC_BANK.get("afisha", []))
     if not topics:
         topics = TOPIC_BANK["afisha"]
-    
-    # Ищем темы, которых еще не было в истории
-    fresh = [t for t in topics if t["id"] not in published_ids]
+
+    blocked_ids = get_ids_in_cooldown(history, category_id=category_id)
+    fresh = [t for t in topics if t["id"] not in blocked_ids]
     if fresh:
         return fresh[0]
-    
-    # Если все темы рубрики уже публиковались, возвращаем по кругу самую давнюю
+
+    # Все темы рубрики недавно публиковались — берём ту, что давнее всех
+    published_ids = get_all_published_ids(history)
+    oldest = None
+    oldest_dt = None
+    for topic in topics:
+        for entry in history:
+            if entry.get("id") != topic["id"]:
+                continue
+            from telegram_post_history import _parse_date
+            dt = _parse_date(entry.get("published_at", ""))
+            if oldest is None or (dt and (oldest_dt is None or dt < oldest_dt)):
+                oldest = topic
+                oldest_dt = dt
+    if oldest:
+        return oldest
+
+    # Fallback: первая тема, которой ещё не было в истории вообще
+    never_published = [t for t in topics if t["id"] not in published_ids]
+    if never_published:
+        return never_published[0]
+
     return topics[0]
