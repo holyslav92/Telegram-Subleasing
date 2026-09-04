@@ -3,5 +3,10 @@
     "id": "city_thermal_pools",
     "category_id": "weekend_thermal",
     "published_at": "2026-09-04 08:00:00"
+  },
+  {
+    "id": "city_dzerzhinskogo_excursions",
+    "category_id": "weekend_thermal",
+    "published_at": "2026-09-04 04:58:21"
   }
 ]
