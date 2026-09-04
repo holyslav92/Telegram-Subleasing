@@ -12,6 +12,9 @@ canvases/
 node_modules/
 .cursor/canvases/
 tmp/
+*.png
+!memory/branding/*.png
+memory/telegram_posts/post_*.json
 
 # test runtime fixtures
 memory/blog/articles/_cta_gate_fixture/

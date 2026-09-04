@@ -1,0 +1,396 @@
+#!/usr/bin/env python3
+"""
+Скрипт генерации и отправки постов в Telegram канал/группу через Telegram Bot API.
+Поддерживает:
+1. Генерацию текста по рубрикам с гармоничным вшиванием ссылок (Сайт, Экскурсии, Max, Авито, соцсети).
+2. Две обязательные inline-кнопки: "Забронировать" (https://добрыйдом-72.рф/) и "Менеджер" (https://t.me/Dobriy_dom_Tyumen).
+3. Промпт-генератор для GPT Image 2 (Kie.ai/GRSAI) с форматом 1:1, кириллицей и референсом логотипа.
+4. Отправку сообщения с фото (sendPhoto) или текстового сообщения (sendMessage) через бота в бесшумном режиме (disable_notification=True).
+"""
+
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.request
+import urllib.parse
+from datetime import datetime
+from pathlib import Path
+
+# Добавляем scripts в sys.path
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from image_prompt_builder import build_image_prompt
+from pexels_client import fetch_pexels_idea
+from telegram_content_bank import get_next_topic
+from telegram_post_history import load_history, record_publication
+from telegram_credentials import load_telegram_credentials
+
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
+TENANT_CONFIG_PATH = WORKSPACE_ROOT / "shared" / "tenant-config.json"
+OUTPUT_DIR = WORKSPACE_ROOT / "memory" / "telegram_posts"
+
+DEFAULT_BOT_TOKEN = load_telegram_credentials()["bot_token"]
+DEFAULT_TARGET_CHAT = load_telegram_credentials()["chat_id"]
+
+
+def load_templates():
+    if not TEMPLATES_PATH.exists():
+        raise FileNotFoundError(f"Файл шаблонов не найден: {TEMPLATES_PATH}")
+    with open(TEMPLATES_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_tenant_config():
+    if not TENANT_CONFIG_PATH.exists():
+        return {}
+    with open(TENANT_CONFIG_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_published_ids():
+    """Обратная совместимость: список id из истории публикаций."""
+    from telegram_post_history import get_all_published_ids
+    return get_all_published_ids()
+
+
+def record_published_id(topic_id: str, category_id: str = ""):
+    record_publication(topic_id, category_id=category_id)
+
+def build_post(category_id: str, topic: str = "", details: str = "", image_title: str = "") -> dict:
+    templates_data = load_templates()
+    categories = {cat["id"]: cat for cat in templates_data.get("categories", [])}
+    cat = categories.get(category_id, categories.get("afisha", {}))
+
+    # Две обязательные кнопки внизу
+    inline_keyboard = [
+        [
+            {"text": "Забронировать", "url": "https://добрыйдом-72.рф/"},
+            {"text": "Менеджер", "url": "https://t.me/Dobriy_dom_Tyumen"}
+        ]
+    ]
+
+    # Если тема не задана вручную, подбираем свежую тему из банка с cooldown ~60 дней
+    history = load_history()
+    topic_data = get_next_topic(category_id, history)
+    topic_id = topic_data.get("id", "")
+    
+    title = topic or topic_data.get("title", "")
+    body = topic_data.get("body", "")
+    image_title = image_title or topic_data.get("image_title", "")
+    
+    # Визуальный референс через Pexels API под конкретную тему
+    pexels_term = topic_data.get("search_query", "cozy modern scandinavian apartment interior")
+    pexels_data = fetch_pexels_idea(pexels_term)
+    
+    visual_idea = ""
+    pexels_url = ""
+    if pexels_data and pexels_data.get("alt"):
+        visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
+        pexels_url = pexels_data.get("url", "")
+
+    image_meta = build_image_prompt(
+        category_id,
+        topic,
+        image_title,
+        visual_idea=visual_idea,
+        topic_id=topic_id,
+    )
+    if pexels_url:
+        image_meta["pexels_reference_url"] = pexels_url
+
+    post_data = {
+        "id": topic_id,
+        "title": title,
+        "category_id": category_id,
+        "category_name": cat.get("name", "Афиша и события"),
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "text_html": body,
+        "body": body,
+        "image_prompt": image_meta,
+        "reply_markup": {
+            "inline_keyboard": inline_keyboard
+        }
+    }
+    return post_data
+
+
+def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict = None, photo_url: str = None, photo_path: str = None, silent: bool = True) -> dict:
+    if photo_path and os.path.exists(photo_path):
+        url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body_bytes = bytearray()
+        
+        # chat_id
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"chat_id\"\r\n\r\n{chat_id}\r\n".encode("utf-8"))
+        # caption
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"caption\"\r\n\r\n{text}\r\n".encode("utf-8"))
+        # parse_mode
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"parse_mode\"\r\n\r\nHTML\r\n".encode("utf-8"))
+        # disable_notification
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"disable_notification\"\r\n\r\n{str(silent).lower()}\r\n".encode("utf-8"))
+        # reply_markup
+        if reply_markup:
+            body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"reply_markup\"\r\n\r\n{json.dumps(reply_markup)}\r\n".encode("utf-8"))
+        
+        # photo file
+        filename = os.path.basename(photo_path)
+        with open(photo_path, "rb") as pf:
+            file_data = pf.read()
+        body_bytes.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"{filename}\"\r\nContent-Type: image/jpeg\r\n\r\n".encode("utf-8"))
+        body_bytes.extend(file_data)
+        body_bytes.extend(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+        
+        req = urllib.request.Request(
+            url,
+            data=bytes(body_bytes),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+        )
+    elif photo_url:
+        url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+        payload = {
+            "chat_id": chat_id,
+            "photo": photo_url,
+            "caption": text,
+            "parse_mode": "HTML",
+            "disable_notification": silent
+        }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=req_data,
+            headers={"Content-Type": "application/json"}
+        )
+    else:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_notification": silent,
+            "disable_web_page_preview": False
+        }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=req_data,
+            headers={"Content-Type": "application/json"}
+        )
+    
+    with urllib.request.urlopen(req) as resp:
+        res_text = resp.read().decode("utf-8")
+        return json.loads(res_text)
+
+
+def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = None) -> str:
+    """Генерация изображения через нативный эндпоинт GRSAI /v1/draw/completions по документации провайдера."""
+    key = api_key or os.environ.get("GRSAI_API_KEY", "")
+    if not key:
+        raise ValueError("Ключ GRSAI_API_KEY не задан в переменных окружения (Secrets).")
+    
+    base_api = os.environ.get("GRSAI_API_BASE", "https://" + "grsaiapi.com").rstrip("/")
+    url = f"{base_api}/v1/draw/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {key}"
+    }
+
+    # Формируем список urls для референсов (поддерживаются прямые ссылки и base64)
+    urls = []
+    if input_urls:
+        for item in input_urls:
+            if item.startswith("data:") or item.startswith("http"):
+                urls.append(item)
+            elif os.path.exists(item):
+                import base64
+                with open(item, "rb") as f:
+                    b64_str = base64.b64encode(f.read()).decode("utf-8")
+                urls.append(f"data:image/png;base64,{b64_str}")
+
+    model_name = os.environ.get("GRSAI_IMAGE_MODEL", "gpt" + "-image-2")
+    payload = {
+        "model": model_name,
+        "prompt": prompt,
+        "aspectRatio": "1024x1024",
+        "quality": "high",
+        "webHook": "-1",
+        "shutProgress": True
+    }
+    if urls:
+        payload["urls"] = urls
+
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            resp_data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode("utf-8", errors="ignore")
+        raise RuntimeError(f"GRSAI API error {e.code}: {err_msg}")
+
+    task_id = resp_data.get("data", {}).get("id")
+    if not task_id:
+        raise RuntimeError(f"GRSAI API не вернул id задачи: {resp_data}")
+
+    # Ожидаем результат через опрос /v1/draw/result
+    result_url = f"{base_api}/v1/draw/result"
+    max_wait_seconds = 360
+    start_wait = time.time()
+    
+    while time.time() - start_wait < max_wait_seconds:
+        time.sleep(3)
+        poll_req = urllib.request.Request(
+            result_url,
+            data=json.dumps({"id": task_id}).encode("utf-8"),
+            headers=headers
+        )
+        try:
+            with urllib.request.urlopen(poll_req, timeout=15) as poll_resp:
+                poll_data = json.loads(poll_resp.read().decode("utf-8"))
+                d = poll_data.get("data", {})
+                status = d.get("status")
+                progress = d.get("progress", 0)
+                if status == "succeeded":
+                    results = d.get("results", [])
+                    if results and len(results) > 0:
+                        return results[0].get("url")
+                    return d.get("url")
+                elif status == "failed":
+                    reason = d.get("error") or d.get("failure_reason") or "unknown"
+                    raise RuntimeError(f"Генерация завершилась ошибкой статуса ({status}): {reason}")
+        except urllib.error.HTTPError as poll_e:
+            pass
+
+    raise TimeoutError(f"Превышено время ожидания генерации изображения в GRSAI ({max_wait_seconds}с)")
+
+
+def save_post(post_data: dict) -> Path:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_path = OUTPUT_DIR / f"post_{post_data['category_id']}_{timestamp}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(post_data, f, ensure_ascii=False, indent=2)
+    return file_path
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Генератор и публикатор постов в Telegram (Добрый дом Тюмень)")
+    parser.add_argument("--category", default="afisha", choices=[
+        "afisha", "district_guide", "host_story", "service_standards", "service_lifehack", "weekend_thermal", "city_guide", "special_offers", "siberian_hospitality"
+    ])
+    parser.add_argument("--topic", default="", help="Тема поста")
+    parser.add_argument("--details", default="", help="Детали поста")
+    parser.add_argument("--photo", default="", help="URL изображения для отправки с постом")
+    parser.add_argument("--photo-file", default="", help="Локальный путь к файлу изображения для отправки с постом")
+    parser.add_argument("--generate-image", action="store_true", help="Сгенерировать изображение через GRSAI API")
+    parser.add_argument("--send", action="store_true", help="Отправить пост в Telegram")
+    parser.add_argument("--silent", action="store_true", default=True, help="Бесшумный режим (disable_notification)")
+    parser.add_argument("--chat", default=DEFAULT_TARGET_CHAT, help="Целевой чат/группа")
+    parser.add_argument("--token", default=DEFAULT_BOT_TOKEN, help="Токен бота")
+
+    args = parser.parse_args()
+
+    post = build_post(args.category, args.topic, args.details)
+    saved_path = save_post(post)
+    print(f"Пост сохранен: {saved_path}")
+
+    photo_url = args.photo
+    if args.generate_image:
+        print("Генерация изображения через GRSAI (GPT Image 2 в режиме Image-to-Image)...")
+        # Всегда строго сбрасываем и берем ровно 2 референса:
+        # Референс 1: эталонный логотип бренда
+        # Референс 2: свежая визуальная идея из Pexels
+        input_urls = []
+        tenant_cfg = WORKSPACE_ROOT / "shared" / "tenant-config.json"
+        logo_url = ""
+        if tenant_cfg.exists():
+            try:
+                with open(tenant_cfg, "r", encoding="utf-8") as f:
+                    logo_url = json.load(f).get("brand_logo_url", "")
+            except Exception:
+                pass
+        
+        if not logo_url:
+            repo = os.environ.get("GITHUB_REPOSITORY", "")
+            if repo:
+                logo_url = f"https://raw.githubusercontent.com/{repo}/main/memory/branding/site_logo.png"
+
+        # Референс 1: Эталонный логотип бренда
+        # Приоритет 1: Прямой CDN/сайт URL логотипа для максимального качества Image-to-Image модели
+        cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "") or logo_url
+        if cdn_logo_url:
+            input_urls.append(cdn_logo_url)
+            print(f"Используем эталонный логотип (Image-to-Image URL): {cdn_logo_url}")
+        else:
+            logo_local = WORKSPACE_ROOT / "memory" / "branding" / "logo_full.jpg"
+            if not logo_local.exists():
+                logo_local = WORKSPACE_ROOT / "memory" / "branding" / "site_logo.png"
+            if logo_local.exists():
+                import base64
+                with open(logo_local, "rb") as f:
+                    b64_logo = base64.b64encode(f.read()).decode("utf-8")
+                input_urls.append(f"data:image/jpeg;base64,{b64_logo}")
+                print(f"Используем локальный логотип (base64): {logo_local.name}")
+
+        pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
+        if pexels_u:
+            input_urls.append(pexels_u)
+            
+        print(f"Подготовлено референсов (ровно логотип + 1 идея из Pexels): {len(input_urls)}")
+        for idx, u in enumerate(input_urls, 1):
+            print(f"  [Референс {idx}] -> {u}")
+
+        try:
+            photo_url = generate_image_grsai(post["image_prompt"]["prompt"], input_urls=input_urls if input_urls else None)
+            print(f"Изображение сгенерировано: {photo_url}")
+        except Exception as e:
+            print(f"Ошибка при генерации изображения: {e}")
+
+    print("\n" + "="*50)
+    print(f"ТЕКСТ ПОСТА ДЛЯ TELEGRAM ({post['category_name']}):")
+    print("="*50)
+    print(post["text_html"])
+    print("\nПромпт для генерации изображения (GPT Image 2):")
+    print(f"  [1:1 | 1K] {post['image_prompt']['prompt']}")
+    print("\nИнлайн-кнопки:")
+    for row in post["reply_markup"]["inline_keyboard"]:
+        for btn in row:
+            print(f"  [{btn['text']}] -> {btn['url']}")
+    print("="*50 + "\n")
+
+    if args.send:
+        bot_token = args.token or load_telegram_credentials()["bot_token"]
+        chat_id = args.chat or load_telegram_credentials()["chat_id"]
+        if not bot_token or not chat_id:
+            print("Ошибка: Токен бота и ID чата должны быть переданы через параметры или заданы в переменных окружения (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).")
+            sys.exit(1)
+        print(f"Отправка единого поста в Telegram чат {chat_id} (фото: {args.photo_file or photo_url or 'нет'}, бесшумный режим: {args.silent})...")
+        try:
+            res = send_to_telegram(
+                bot_token=bot_token,
+                chat_id=chat_id,
+                text=post["text_html"],
+                reply_markup=post["reply_markup"],
+                photo_url=photo_url or None,
+                photo_path=args.photo_file or None,
+                silent=args.silent
+            )
+            if res.get("ok"):
+                msg_id = res.get("result", {}).get("message_id")
+                print(f"Успешно отправлено! Message ID: {msg_id}")
+            else:
+                print(f"Ошибка отправки: {res}")
+        except Exception as e:
+            print(f"Ошибка при обращении к Telegram API: {e}")
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
