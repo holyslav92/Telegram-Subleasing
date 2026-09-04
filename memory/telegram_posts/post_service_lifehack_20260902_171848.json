@@ -1,0 +1,27 @@
+{
+  "title": "Бесконтактный заезд 24/7: заселение в Тюмени за 5 минут",
+  "category_id": "service_lifehack",
+  "category_name": "Сервис, забота и лайфхаки для гостей",
+  "created_at": "2026-09-02 17:18:48",
+  "text_html": "<b>Бесконтактный заезд 24/7: заселение в Тюмени за 5 минут</b>\n\nПри позднем рейсе или плотном графике поездки не нужно подстраиваться под встречи с администратором.\n\n1️⃣ <b>Быстрый выбор</b>: оформляете бронь на нашем <a href=\"https://добрыйдом-72.рф/\">официальном сайте</a> (по лучшим прямым ценам) или через <a href=\"https://t.me/Dobriy_dom_Tyumen\">менеджера</a>.\n2️⃣ <b>Понятная инструкция</b>: получаете подробное руководство с кодом доступа.\n3️⃣ <b>Круглосуточный заезд</b>: заходите в квартиру в любое удобное время суток за 5 минут.\n\n<b>Стандарты подготовки каждого номера:</b>\n- Отельное постельное белье и свежие полотенца\n- Индивидуальные гигиенические наборы (зубная щетка, паста, шампунь, гель)\n- Скоростной Wi-Fi, фен, утюг, стиральная машина и посуда\n- Кассовый чек с QR-кодом для бухгалтерии\n\nОзнакомиться с отзывами можно на <a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a>, а актуальные предложения всегда доступны в нашем канале <a href=\"https://t.me/Dobriy_dom_72\">@Dobriy_dom_72</a>.",
+  "image_prompt": {
+    "prompt": "Smart door lock with electronic keypad on modern apartment entrance door in Tyumen, hotel welcome tray with neat keys, fluffy towels, disposable hygiene amenities, cup of coffee, clean minimalistic aesthetic. Design layout for Telegram post, square 1:1 ratio. Brand colors: emerald green (#2E8B57) and coral red (#E05244) accents on a clean light cream background. Include a stylish brand card or banner with the exact Russian text written in clear, elegant, readable Cyrillic typography: 'Бесконтактный заезд 24/7'. Incorporate the brand logo elements from reference images (green curtain symbol with red flower in pot and 'Добрый дом' inscription) cleanly and organically into the composition. High resolution 4k, professional commercial interior photography, photorealistic, balanced lighting, cinematic composition.",
+    "text_on_image": "Бесконтактный заезд 24/7",
+    "aspect_ratio": "1:1",
+    "resolution": "1K"
+  },
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "Забронировать",
+          "url": "https://добрыйдом-72.рф/"
+        },
+        {
+          "text": "Менеджер",
+          "url": "https://t.me/Dobriy_dom_Tyumen"
+        }
+      ]
+    ]
+  }
+}
