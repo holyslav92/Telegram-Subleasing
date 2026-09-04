@@ -8,5 +8,10 @@
     "id": "city_dzerzhinskogo_excursions",
     "category_id": "weekend_thermal",
     "published_at": "2026-09-04 04:58:21"
+  },
+  {
+    "id": "special_early_booking",
+    "category_id": "special_offers",
+    "published_at": "2026-09-04 16:56:49"
   }
 ]
