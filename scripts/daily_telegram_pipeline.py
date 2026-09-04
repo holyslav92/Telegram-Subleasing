@@ -23,6 +23,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post, record_published_id
+from telegram_credentials import load_telegram_credentials
 from ftp_uploader import upload_file_to_ftp
 
 CATEGORIES_SCHEDULE = [
@@ -114,8 +115,9 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True)
         sys.exit(1)
     
     if send:
-        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        target_chat = os.environ.get("TELEGRAM_CHAT_ID", "")
+        creds = load_telegram_credentials()
+        bot_token = creds["bot_token"]
+        target_chat = creds["chat_id"]
         if not bot_token or not target_chat:
             print("Ошибка: Переменные TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID должны быть заданы в окружении (Secrets)!")
             sys.exit(1)

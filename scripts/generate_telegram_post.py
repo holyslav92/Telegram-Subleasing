@@ -27,14 +27,15 @@ from image_prompt_builder import build_image_prompt
 from pexels_client import fetch_pexels_idea
 from telegram_content_bank import get_next_topic
 from telegram_post_history import load_history, record_publication
+from telegram_credentials import load_telegram_credentials
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
 TENANT_CONFIG_PATH = WORKSPACE_ROOT / "shared" / "tenant-config.json"
 OUTPUT_DIR = WORKSPACE_ROOT / "memory" / "telegram_posts"
 
-DEFAULT_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-DEFAULT_TARGET_CHAT = os.environ.get("TELEGRAM_CHAT_ID", "")
+DEFAULT_BOT_TOKEN = load_telegram_credentials()["bot_token"]
+DEFAULT_TARGET_CHAT = load_telegram_credentials()["chat_id"]
 
 
 def load_templates():
@@ -365,8 +366,8 @@ def main():
     print("="*50 + "\n")
 
     if args.send:
-        bot_token = args.token or os.environ.get("TELEGRAM_BOT_TOKEN", "")
-        chat_id = args.chat or os.environ.get("TELEGRAM_CHAT_ID", "")
+        bot_token = args.token or load_telegram_credentials()["bot_token"]
+        chat_id = args.chat or load_telegram_credentials()["chat_id"]
         if not bot_token or not chat_id:
             print("Ошибка: Токен бота и ID чата должны быть переданы через параметры или заданы в переменных окружения (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).")
             sys.exit(1)

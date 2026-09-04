@@ -11,6 +11,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from generate_telegram_post import send_to_telegram, record_published_id
+from telegram_credentials import load_telegram_credentials
 
 WORKSPACE_ROOT = SCRIPT_DIR.parent
 
@@ -19,8 +20,9 @@ def main():
     parser = argparse.ArgumentParser(description="Опубликовать сохранённый Telegram-пост")
     parser.add_argument("--post", required=True, help="Путь к post_*.json")
     parser.add_argument("--photo", required=True, help="Путь к PNG/JPG обложке")
-    parser.add_argument("--token", default=os.environ.get("TELEGRAM_BOT_TOKEN", ""))
-    parser.add_argument("--chat", default=os.environ.get("TELEGRAM_CHAT_ID", ""))
+    creds = load_telegram_credentials()
+    parser.add_argument("--token", default=creds["bot_token"])
+    parser.add_argument("--chat", default=creds["chat_id"])
     args = parser.parse_args()
 
     post_path = Path(args.post)
@@ -29,8 +31,12 @@ def main():
         raise SystemExit(f"Файл поста не найден: {post_path}")
     if not photo_path.exists():
         raise SystemExit(f"Изображение не найдено: {photo_path}")
+    creds = load_telegram_credentials()
     if not args.token or not args.chat:
-        raise SystemExit("Задайте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в Secrets или через --token / --chat")
+        raise SystemExit(
+            "Задайте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в Secrets окружения, "
+            "memory/site.env.local или через --token / --chat"
+        )
 
     with open(post_path, "r", encoding="utf-8") as f:
         post = json.load(f)

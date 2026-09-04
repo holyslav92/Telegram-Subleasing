@@ -64,7 +64,10 @@ python3 scripts/generate_telegram_post.py --category afisha --topic "Афиша 
 ```bash
 python3 scripts/daily_telegram_pipeline.py
 ```
-- **Секреты:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `GRSAI_API_KEY`, `PEXELS_API_KEY`, а также FTP-доступы (по желанию): `FTP_HOST`, `FTP_USER`, `FTP_PASSWORD`, `FTP_DIR`, `FTP_BASE_URL`.
+- **Секреты:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `GRSAI_API_KEY`, `PEXELS_API_KEY`.
+  - Для **ручных прогонов Cloud Agent** секреты должны быть в **Environment Secrets** репозитория (не только в Automation).
+  - Дополнительно можно положить в `memory/site.env.local` (см. `memory/site.env.local.example`).
+  - Диагностика: `python3 scripts/telegram_doctor.py`
 
 ---
 
