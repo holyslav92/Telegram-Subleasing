@@ -1,0 +1,27 @@
+{
+  "title": "Квартиры в лучших ЖК Тюмени: Новин, Европейский и Видный",
+  "category_id": "district_guide",
+  "category_name": "Гид по районам и ЖК Тюмени",
+  "created_at": "2026-09-02 17:12:26",
+  "text_html": "<b>Квартиры в лучших ЖК Тюмени: Новин, Европейский и Видный</b>\n\nПодготовили навигатор по основным локациям Тюмени для гостей города и деловых путешественников:\n\n1️⃣ <b>ЖК «Новин» (Центральный район / 50 лет Октября)</b>\nДеловой квартал с закрытой территорией, ресторанами и быстрым доступом к ключевым транспортным магистралям. Отличный выбор для командировок.\n\n2️⃣ <b>ЖК «Европейский» и «Европейский Берег» (Заречная часть)</b>\nСовременный европейский квартал у реки Туры, в 5 минутах от аквапарка «ЛетоЛето». Прогулочные зоны, тишина и семейный уют.\n\n3️⃣ <b>ЖК «Видный» и «Звёздный»</b>\nРазвитые современные микрорайоны рядом с крупными торгово-развлекательными центрами («Кристалл», «СитиМолл»).\n\nВ каждом объекте «Доброго дома» действует круглосуточный заезд без ожидания администратора.\n\nПрямое бронирование по самым низким ценам доступно на <a href=\"https://добрыйдом-72.рф/\">официальном сайте</a>. Каталог квартир и отзывы гостей также представлены на <a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a> и в сервисе <a href=\"https://max.ru/id660300569233_biz\">Макс</a>.",
+  "image_prompt": {
+    "prompt": "Modern premium Scandinavian style studio apartment in Tyumen residential complex Novin or Evropeyskiy, floor-to-ceiling windows, king-size bed with crisp white luxury hotel bedding, designer emerald green curtains, warm ambient evening lights. Design layout for Telegram post, square 1:1 ratio. Brand colors: emerald green (#2E8B57) and coral red (#E05244) accents on a clean light cream background. Include a stylish brand card or banner with the exact Russian text written in clear, elegant, readable Cyrillic typography: 'Квартиры в лучших ЖК Тюмени'. Incorporate the brand logo elements from reference images (green curtain symbol with red flower in pot and 'Добрый дом' inscription) cleanly and organically into the composition. High resolution 4k, professional commercial interior photography, photorealistic, balanced lighting, cinematic composition.",
+    "text_on_image": "Квартиры в лучших ЖК Тюмени",
+    "aspect_ratio": "1:1",
+    "resolution": "1K"
+  },
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "Забронировать",
+          "url": "https://добрыйдом-72.рф/"
+        },
+        {
+          "text": "Менеджер",
+          "url": "https://t.me/Dobriy_dom_Tyumen"
+        }
+      ]
+    ]
+  }
+}

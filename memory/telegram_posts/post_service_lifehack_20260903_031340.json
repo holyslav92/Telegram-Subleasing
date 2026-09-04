@@ -1,0 +1,27 @@
+{
+  "title": "Бесконтактный заезд 24/7: как заселиться в квартиру за 5 минут",
+  "category_id": "service_lifehack",
+  "category_name": "Сервис, забота и лайфхаки для гостей",
+  "created_at": "2026-09-03 03:13:40",
+  "text_html": "<b>Бесконтактный заезд 24/7: как заселиться в квартиру за 5 минут</b>\n\nПри позднем рейсе или плотном графике поездки не нужно подстраиваться под встречи с администратором.\n\nОформляете бронь на <b><a href=\"https://добрыйдом-72.рф/\">нашем сайте</a></b> по <b>прямым ценам</b> или через <b><a href=\"https://t.me/Dobriy_dom_Tyumen\">менеджера</a></b>, получаете понятную инструкцию с кодом доступа и заезжаете в любое время суток за 5 минут.\n\nВ каждом номере подготовлены <b>отельное постельное белье</b>, свежие полотенца, одноразовые наборы гигиены, скоростной Wi-Fi, фен, утюг, стиральная машина и <b>кассовый чек с QR-кодом</b> для бухгалтерии.\n\n<b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Отзывы гостей</a></b> смотрите на <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b>, читайте новости в <b><a href=\"https://max.ru/id660300569233_biz\">Макс</a></b>, а анонсы событий ждут вас в нашем канале <b><a href=\"https://t.me/Dobriy_dom_72\">@Dobriy_dom_72</a></b>.",
+  "image_prompt": {
+    "prompt": "Smart door lock with electronic keypad on modern apartment entrance door in Tyumen, hotel welcome tray with neat keys, fluffy towels, disposable hygiene amenities, cup of coffee, clean minimalistic aesthetic. Real-life photography reference details: A dark wooden door set against a vibrant yellow wall, showcasing minimalism.. Design layout for Telegram post, square 1:1 ratio. Brand colors: emerald green (#2E8B57) and coral red (#E05244) accents on a clean light cream background. Include a stylish brand banner or card with the exact Russian text in elegant, crisp, modern Cyrillic typography: 'Бесконтактный заезд 24/7'. Incorporate the authentic brand logo 'Добрый дом' (featuring the signature emerald green curtain icon with a potted coral-red flower and clear 'Добрый дом' brand lettering) placed with crisp fidelity in the corner or on a neat branding tag, maintaining exact brand geometry and colors without distortion. High resolution 4k, professional commercial photography, photorealistic, balanced natural lighting, cinematic composition.",
+    "text_on_image": "Бесконтактный заезд 24/7",
+    "aspect_ratio": "1:1",
+    "resolution": "1K"
+  },
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "Забронировать",
+          "url": "https://добрыйдом-72.рф/"
+        },
+        {
+          "text": "Менеджер",
+          "url": "https://t.me/Dobriy_dom_Tyumen"
+        }
+      ]
+    ]
+  }
+}
