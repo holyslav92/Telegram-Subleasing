@@ -13,5 +13,10 @@
     "id": "special_early_booking",
     "category_id": "special_offers",
     "published_at": "2026-09-04 16:56:49"
+  },
+  {
+    "id": "special_long_stay",
+    "category_id": "special_offers",
+    "published_at": "2026-09-05 03:16:39"
   }
 ]
