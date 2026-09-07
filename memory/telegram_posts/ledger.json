@@ -1,0 +1,86 @@
+[
+  {
+    "id": "manual_afisha_306e4942",
+    "category_id": "afisha",
+    "title": "Фестиваль и афиша выходных в Тюмени",
+    "published_at": "2026-09-02 16:09:12",
+    "entities": [
+      "верхний бор",
+      "дзержинского",
+      "летолето"
+    ],
+    "event_date": "",
+    "text_fingerprint": "306e49423eb7285f"
+  },
+  {
+    "id": "manual_afisha_85b744b4",
+    "category_id": "afisha",
+    "title": "Куда сходить в Тюмени: термальные источники, Набережная и уютный отдых",
+    "published_at": "2026-09-02 16:22:05",
+    "entities": [
+      "верхний бор",
+      "дзержинского",
+      "летолето"
+    ],
+    "event_date": "",
+    "text_fingerprint": "85b744b406f9eaf2"
+  },
+  {
+    "id": "manual_afisha_a870ecdb",
+    "category_id": "afisha",
+    "title": "Куда сходить в Тюмени: термальные комплексы, экскурсии и отдых",
+    "published_at": "2026-09-02 16:44:01",
+    "entities": [
+      "верхний бор",
+      "дзержинского",
+      "летолето",
+      "набережная туры"
+    ],
+    "event_date": "",
+    "text_fingerprint": "a870ecdb0c5b355d"
+  },
+  {
+    "id": "manual_district_guide_38e63ff5",
+    "category_id": "district_guide",
+    "title": "Квартиры в лучших ЖК Тюмени: Новин, Европейский и Видный",
+    "published_at": "2026-09-02 17:12:26",
+    "entities": [
+      "летолето"
+    ],
+    "event_date": "",
+    "text_fingerprint": "38e63ff5868e1c12"
+  },
+  {
+    "id": "manual_service_lifehack_6458bb6c",
+    "category_id": "service_lifehack",
+    "title": "Бесконтактный заезд 24/7: заселение в Тюмени за 5 минут",
+    "published_at": "2026-09-02 17:18:48",
+    "entities": [],
+    "event_date": "",
+    "text_fingerprint": "6458bb6c37ad685f"
+  },
+  {
+    "id": "manual_afisha_bde5f988",
+    "category_id": "afisha",
+    "title": "Куда сходить в Тюмени: термальные комплексы, экскурсии и отдых",
+    "published_at": "2026-09-02 18:00:11",
+    "entities": [
+      "nansi",
+      "sidorov",
+      "пошумим на тихом",
+      "салют",
+      "тихое"
+    ],
+    "event_date": "2026-09-05",
+    "text_fingerprint": "bde5f98840004beb"
+  },
+  {
+    "id": "manual_host_story_b28a35d1",
+    "category_id": "host_story",
+    "title": "Уют в деталях: почему мы встречаем гостей как старых друзей",
+    "published_at": "2026-09-02 20:26:37",
+    "entities": [],
+    "event_date": "",
+    "text_fingerprint": "b28a35d17b77fad0"
+  }
+]

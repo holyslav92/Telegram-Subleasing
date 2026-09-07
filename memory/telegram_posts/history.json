@@ -1,12 +1,37 @@
 [
   {
-    "id": "city_thermal_pools",
-    "category_id": "weekend_thermal",
-    "published_at": "2026-09-04 08:00:00"
+    "id": "manual_afisha_306e4942",
+    "category_id": "afisha",
+    "published_at": "2026-09-02 16:09:12"
   },
   {
-    "id": "city_dzerzhinskogo_excursions",
-    "category_id": "weekend_thermal",
-    "published_at": "2026-09-04 04:58:21"
+    "id": "manual_afisha_85b744b4",
+    "category_id": "afisha",
+    "published_at": "2026-09-02 16:22:05"
+  },
+  {
+    "id": "manual_afisha_a870ecdb",
+    "category_id": "afisha",
+    "published_at": "2026-09-02 16:44:01"
+  },
+  {
+    "id": "manual_district_guide_38e63ff5",
+    "category_id": "district_guide",
+    "published_at": "2026-09-02 17:12:26"
+  },
+  {
+    "id": "manual_service_lifehack_6458bb6c",
+    "category_id": "service_lifehack",
+    "published_at": "2026-09-02 17:18:48"
+  },
+  {
+    "id": "manual_afisha_bde5f988",
+    "category_id": "afisha",
+    "published_at": "2026-09-02 18:00:11"
+  },
+  {
+    "id": "manual_host_story_b28a35d1",
+    "category_id": "host_story",
+    "published_at": "2026-09-02 20:26:37"
   }
 ]

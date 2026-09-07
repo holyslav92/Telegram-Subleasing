@@ -73,7 +73,18 @@ Cover-text (Gemini) || Schema (inherit) → Cover (inherit); Indexer; Publish; m
 - Логотип бренда (знак зеленых шторок с красным цветком и четкая надпись «Добрый дом») интегрируется на аккуратной плашке в верхнем углу без искажения пропорций и фирменных цветов.
 - Защита качества: до 3 попыток генерации фото с интервалом. Если фото не получено — сухой пост без фото или с одиночным логотипом не отправлять!
 
-### 3. Выполнение пайплайна и Фиксик:
+### 3. Выполнение пайплайна и Фиксик
+
+**Запрещено** писать пост вручную или обходить gate. Только:
+
+```bash
+python3 scripts/daily_telegram_pipeline.py
+```
+
+При FAIL gate (`scripts/telegram_content_gate.py`) — pipeline автоматически берёт другую тему (до 3 попыток). **Не обходить gate** и не публиковать через произвольный текст.
+
+Память: `memory/telegram_posts/ledger.json` (entities, event_date, fingerprint). Backfill: `python3 scripts/telegram_history_backfill.py`.
+
 Выполни скрипт:
 python3 scripts/daily_telegram_pipeline.py
 
