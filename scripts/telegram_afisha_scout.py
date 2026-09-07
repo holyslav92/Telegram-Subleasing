@@ -103,15 +103,33 @@ def parse_events_from_html(html: str, source: str) -> list[dict]:
     return events
 
 
+WEEKDAY_ABBR = ("пн", "вт", "ср", "чт", "пт", "сб", "вс")
+
+
 def is_valid_event_title(title: str) -> bool:
     if len(title) < 12 or len(title) > 100:
         return False
     junk = (
         "удалить", "избранн", "cookie", "войти", "регистрац",
         "javascript", "click", "banner", "modal", "уверен",
+        "все события", "место из", "купить", "18+", "16+", "билет",
     )
     lower = title.lower()
-    return not any(j in lower for j in junk)
+    if any(j in lower for j in junk):
+        return False
+    if title.count("•") >= 2:
+        return False
+    # Календарная сетка: «пн 8 вт 9 ср 10…»
+    weekday_hits = sum(1 for w in WEEKDAY_ABBR if re.search(rf"\b{w}\b", lower))
+    if weekday_hits >= 2:
+        return False
+    digit_count = sum(c.isdigit() for c in title)
+    if digit_count > len(title) * 0.25:
+        return False
+    # Должно быть хотя бы одно осмысленное слово (5+ букв, не день недели)
+    words = re.findall(r"[а-яёa-z]{5,}", lower)
+    meaningful = [w for w in words if w not in WEEKDAY_ABBR]
+    return len(meaningful) >= 1
 
 
 def filter_fresh_events(events: list[dict]) -> list[dict]:

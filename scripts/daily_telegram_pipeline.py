@@ -39,12 +39,12 @@ def get_today_category():
     return CATEGORIES_SCHEDULE[weekday]
 
 
-def select_topic_with_gate(category: str, topic: str = ""):
+def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = True):
     """Подбирает тему с прохождением gate; до MAX_GATE_RETRIES попыток."""
     ledger = load_ledger()
     exclude_ids: set[str] = set()
 
-    if category == "afisha" and datetime.now().weekday() == 0 and not topic:
+    if category == "afisha" and datetime.now().weekday() == 0 and not topic and use_scout:
         try:
             from telegram_afisha_scout import scout_afisha_topic
             scout_topic = scout_afisha_topic(fallback_category=category)
@@ -60,9 +60,13 @@ def select_topic_with_gate(category: str, topic: str = ""):
                 }
                 status, reasons = check_post(post_probe, ledger)
                 if status == "PASS":
-                    print(f"Scout: тема прошла gate — {scout_topic.get('id')}")
-                    return scout_topic, None
-                print(f"Scout FAIL: {reasons} — fallback на банк")
+                    from telegram_afisha_scout import is_valid_event_title
+                    if is_valid_event_title(scout_topic.get("title", "")):
+                        print(f"Scout: тема прошла gate — {scout_topic.get('id')}")
+                        return scout_topic, None
+                    print("Scout FAIL: некачественный заголовок — fallback на банк")
+                else:
+                    print(f"Scout FAIL: {reasons} — fallback на банк")
         except Exception as e:
             print(f"Scout недоступен: {e} — fallback на банк")
 
@@ -106,11 +110,11 @@ def select_topic_with_gate(category: str, topic: str = ""):
     return None, f"Gate FAIL после {MAX_GATE_RETRIES} попыток"
 
 
-def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True):
+def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True, use_scout: bool = True):
     cat = category or get_today_category()
     print(f"=== Запуск ежедневного пайплайна [Категория: {cat}] ===")
 
-    topic_data, gate_error = select_topic_with_gate(cat, topic=topic)
+    topic_data, gate_error = select_topic_with_gate(cat, topic=topic, use_scout=use_scout)
     if gate_error:
         print(f"КРИТИЧЕСКАЯ ОШИБКА: {gate_error}")
         sys.exit(1)
@@ -221,6 +225,7 @@ if __name__ == "__main__":
     parser.add_argument("--category", default=None, help="Принудительно выбрать рубрику")
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--no-send", action="store_true", help="Не отправлять в Telegram, только сформировать")
+    parser.add_argument("--no-scout", action="store_true", help="Не использовать Afisha Scout, только банк тем")
     args = parser.parse_args()
 
-    run_daily_pipeline(category=args.category, topic=args.topic, send=not args.no_send)
+    run_daily_pipeline(category=args.category, topic=args.topic, send=not args.no_send, use_scout=not args.no_scout)
