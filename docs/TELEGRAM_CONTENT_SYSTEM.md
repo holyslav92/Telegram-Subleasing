@@ -92,7 +92,7 @@ python3 scripts/daily_telegram_pipeline.py
    - **Память и anti-dup:** все публикации фиксируются в `memory/telegram_posts/ledger.json` (поля `id`, `category_id`, `title`, `published_at`, `entities`, `event_date`, `text_fingerprint`). Файл `history.json` синхронизируется для обратной совместимости.
    - **Cooldown:** повтор `id` — **60 дней**; повтор **сущности** (озеро Тихое, салют, Пошумим…) — **45 дней**; прошедшие дated-события блокируются gate.
    - **Gate обязателен:** `scripts/telegram_content_gate.py` — PASS/FAIL перед send. Automation **не пишет посты вручную** — только `python3 scripts/daily_telegram_pipeline.py`. При FAIL gate — другая тема (до 3 попыток), gate не обходить.
-   - **Понедельник Afisha Scout:** `scripts/telegram_afisha_scout.py` — visittyumen.ru + afisha.72.ru, события +7–14 дней; fallback на evergreen из банка.
+   - **Понедельник Afisha Scout:** `scripts/telegram_afisha_scout.py` — **выключен по умолчанию** (HTML afisha.72.ru даёт UI-мусор). В pipeline только с `--use-scout`. Обычный понедельник — тема из банка (17 evergreen-тем afisha).
    - Backfill ledger из старых `post_*.json`: `python3 scripts/telegram_history_backfill.py`.
 3. **Роль Fixer (Фиксик):** В случае программных сбоев или ошибок субагент Фиксик локализует причину, устраняет баг в коде/конфигурации и доводит публикацию до безупречного выхода без паллиативных «пустышек».
 

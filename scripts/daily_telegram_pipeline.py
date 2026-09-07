@@ -39,7 +39,7 @@ def get_today_category():
     return CATEGORIES_SCHEDULE[weekday]
 
 
-def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = True):
+def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = False):
     """Подбирает тему с прохождением gate; до MAX_GATE_RETRIES попыток."""
     ledger = load_ledger()
     exclude_ids: set[str] = set()
@@ -47,7 +47,7 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Tru
     if category == "afisha" and datetime.now().weekday() == 0 and not topic and use_scout:
         try:
             from telegram_afisha_scout import scout_afisha_topic
-            scout_topic = scout_afisha_topic(fallback_category=category)
+            scout_topic = scout_afisha_topic()
             if scout_topic:
                 post_probe = {
                     "id": scout_topic.get("id", ""),
@@ -110,7 +110,7 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Tru
     return None, f"Gate FAIL после {MAX_GATE_RETRIES} попыток"
 
 
-def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True, use_scout: bool = True):
+def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True, use_scout: bool = False):
     cat = category or get_today_category()
     print(f"=== Запуск ежедневного пайплайна [Категория: {cat}] ===")
 
@@ -225,7 +225,16 @@ if __name__ == "__main__":
     parser.add_argument("--category", default=None, help="Принудительно выбрать рубрику")
     parser.add_argument("--topic", default="", help="Тема поста")
     parser.add_argument("--no-send", action="store_true", help="Не отправлять в Telegram, только сформировать")
-    parser.add_argument("--no-scout", action="store_true", help="Не использовать Afisha Scout, только банк тем")
+    parser.add_argument(
+        "--use-scout",
+        action="store_true",
+        help="Включить Afisha Scout (эксперимент; по умолчанию только банк тем)",
+    )
     args = parser.parse_args()
 
-    run_daily_pipeline(category=args.category, topic=args.topic, send=not args.no_send, use_scout=not args.no_scout)
+    run_daily_pipeline(
+        category=args.category,
+        topic=args.topic,
+        send=not args.no_send,
+        use_scout=args.use_scout,
+    )

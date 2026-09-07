@@ -82,5 +82,18 @@
     "entities": [],
     "event_date": "",
     "text_fingerprint": "b28a35d17b77fad0"
+  },
+  {
+    "id": "afisha_comedy_club",
+    "category_id": "afisha",
+    "title": "Stand-up и юмор: лёгкий вечер в Тюмени",
+    "published_at": "2026-09-07 04:57:23",
+    "entities": [
+      "stand-up",
+      "юмор",
+      "комедия"
+    ],
+    "event_date": "",
+    "text_fingerprint": "a3c3347c73533a7c"
   }
 ]
