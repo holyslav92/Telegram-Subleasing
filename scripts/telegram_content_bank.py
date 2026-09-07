@@ -4,12 +4,18 @@
 уникальные, разносторонние и творческие посты без повторов.
 """
 
+import random
+from datetime import datetime
+
 TOPIC_BANK = {
     # Понедельник — «Афиша и события Тюмени»: Культурная жизнь города, фестивали, концерты, спектакли ТБДТ, события у озера Тихое, набережная Туры и др.
     "afisha": [
         {
             "id": "afisha_quiet_lake",
             "title": "Куда сходить в Тюмени: салют и фестиваль на озере Тихое",
+            "entities": ["озеро тихое", "пошумим на тихом", "салют", "фейерверк"],
+            "evergreen": False,
+            "event_date": "",
             "body": """<b>Куда сходить в Тюмени: салют и фестиваль на озере Тихое</b>
 
 Планируете визит в Тюмень или хотите ярко провести вечер? В европейском микрорайоне у озера Тихое регулярно проходят атмосферные события — фестиваль <b>«Пошумим на Тихом»</b> с живой музыкой, уютными фуд-кортами и фейерверком над зеркальной гладью воды.
@@ -25,6 +31,8 @@ TOPIC_BANK = {
         {
             "id": "afisha_drama_theater",
             "title": "Театральный вечер в Тюмени: премьеры Большого Драматического",
+            "entities": ["тбдт", "большой драматический", "театр"],
+            "evergreen": True,
             "body": """<b>Театральный вечер в Тюмени: премьеры Большого Драматического</b>
 
 Тюменский Большой Драматический театр — крупнейший драматический театр России по площади, настоящий дворец искусства с великолепными залами, мраморными лестницами и сильным актерским составом.
@@ -40,6 +48,8 @@ TOPIC_BANK = {
         {
             "id": "afisha_jazz_embankment",
             "title": "Джаз и вечерние огни на четырехуровневой Набережной Туры",
+            "entities": ["набережная туры", "мост влюблённых", "джаз"],
+            "evergreen": True,
             "body": """<b>Джаз и вечерние огни на четырехуровневой Набережной Туры</b>
 
 Единственная в России четырехуровневая набережная реки Туры прекрасна в любое время года, но по вечерам здесь царит особенное вдохновение.
@@ -55,6 +65,8 @@ TOPIC_BANK = {
         {
             "id": "afisha_philharmonic_concerts",
             "title": "Музыкальные сезоны Тюменской Филармонии: живой орган и классика",
+            "entities": ["филармония", "орган", "классика"],
+            "evergreen": True,
             "body": """<b>Музыкальные сезоны Тюменской Филармонии: живой орган и классика</b>
 
 Тюменская филармония — центр музыкального притяжения Сибири. Здесь звучит уникальный орган, выступает филармонический оркестр и проходят гастроли ведущих мировых исполнителей.
@@ -66,6 +78,227 @@ TOPIC_BANK = {
 Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
             "image_title": "Концертный вечер Тюмень",
             "search_query": "cozy warm classical concert hall cello piano elegant evening"
+        },
+        {
+            "id": "afisha_art_gallery",
+            "title": "Выставки и современное искусство в галереях Тюмени",
+            "entities": ["галерея", "выставка", "искусство"],
+            "evergreen": True,
+            "body": """<b>Выставки и современное искусство в галереях Тюмени</b>
+
+Тюмень удивляет не только термами, но и насыщенной культурной программой: современные галереи, персональные выставки и инсталляции местных художников.
+
+Если вы любите вдохновляться искусством, заложите в маршрут хотя бы один музейный или галерейный визит — это отличный способ увидеть город с другой стороны.
+
+После прогулки по выставкам приятно вернуться в тихие апартаменты «Добрый дом» с <b>бесконтактным заездом 24/7</b> и отельным уютом.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Искусство и выставки",
+            "search_query": "modern art gallery exhibition warm lighting elegant interior"
+        },
+        {
+            "id": "afisha_children_events",
+            "title": "Куда с семьёй: детские спектакли и городские праздники",
+            "entities": ["детский", "семейный", "спектакль"],
+            "evergreen": True,
+            "body": """<b>Куда с семьёй: детские спектакли и городские праздники</b>
+
+Планируете поездку с детьми? В Тюмени регулярно проходят семейные спектакли, интерактивные программы и городские праздники на набережной и в парках.
+
+Удобнее всего выбирать жильё рядом с транспортной развязкой и зелёными зонами — так проще совмещать отдых и развлечения.
+
+В апартаментах «Добрый дом» есть всё для семьи: простор, чистота, Wi-Fi и <b>бесконтактный заезд 24/7</b>.
+
+Бронируйте на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b> по <b>прямым ценам</b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Семейный отдых в Тюмени",
+            "search_query": "happy family cozy apartment living room warm sunlight children"
+        },
+        {
+            "id": "afisha_cinema_premiere",
+            "title": "Кино и премьеры: вечерний досуг в Тюмени",
+            "entities": ["кино", "премьера", "кинотеатр"],
+            "evergreen": True,
+            "body": """<b>Кино и премьеры: вечерний досуг в Тюмени</b>
+
+После рабочей недели хочется простого и приятного — фильм в современном кинотеатре, попкорн и неспешная прогулка по вечернему городу.
+
+Тюмень предлагает несколько кинотеатров в торговых центрах и центре — удобно совместить шопинг, ужин и просмотр премьеры.
+
+Вернитесь после сеанса в уютные апартаменты «Добрый дом» с <b>бесконтактным заездом 24/7</b>.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Кино и вечерний город",
+            "search_query": "cozy cinema evening city lights warm atmosphere"
+        },
+        {
+            "id": "afisha_street_festival",
+            "title": "Уличные фестивали и ярмарки: атмосфера центра Тюмени",
+            "entities": ["фестиваль", "ярмарка", "центр города"],
+            "evergreen": True,
+            "body": """<b>Уличные фестивали и ярмарки: атмосфера центра Тюмени</b>
+
+Летом и в межсезонье центр Тюмени оживает: уличные музыканты, ремесленные лавки, гастрономические палатки и семейные программы на площадях.
+
+Это отличный повод прогуляться по историческому центру, попробовать местные деликатесы и почувствовать ритм города.
+
+Остановиться удобнее всего в апартаментах «Добрый дом» в центре или у набережной — <b>бесконтактный заезд 24/7</b> и отельный комфорт.
+
+Бронируйте на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Городской фестиваль",
+            "search_query": "street festival evening lights cozy city celebration"
+        },
+        {
+            "id": "afisha_museum_evening",
+            "title": "Музеи Тюмени: вечера истории и культуры",
+            "entities": ["музей", "история", "культура"],
+            "evergreen": True,
+            "body": """<b>Музеи Тюмени: вечера истории и культуры</b>
+
+Тюмень — один из старейших городов Сибири, и музеи здесь рассказывают историю купечества, освоения края и современной жизни региона.
+
+Выделите вечер на музейную программу: это спокойный и познавательный формат для пары или семьи.
+
+После экскурсии — тишина и уют апартаментов «Добрый дом» с <b>бесконтактным заездом 24/7</b>.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Музеи и история",
+            "search_query": "museum hall warm lighting elegant cultural interior"
+        },
+        {
+            "id": "afisha_comedy_club",
+            "title": "Stand-up и юмор: лёгкий вечер в Тюмени",
+            "entities": ["stand-up", "юмор", "комедия"],
+            "evergreen": True,
+            "body": """<b>Stand-up и юмор: лёгкий вечер в Тюмени</b>
+
+Иногда лучший отдых — это смех. В Тюмени проходят stand-up вечера, камерные концерты комиков и импровизационные шоу.
+
+Отличный формат для компании друзей или романтического вечера без лишней суеты.
+
+Вернитесь после шоу в апартаменты «Добрый дом» — <b>бесконтактный заезд 24/7</b>, чистота и мягкая постель.
+
+Бронируйте на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b> по <b>прямым ценам</b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Вечер юмора",
+            "search_query": "cozy comedy club warm stage lights audience atmosphere"
+        },
+        {
+            "id": "afisha_sports_event",
+            "title": "Спортивные события: хоккей, бег и активный отдых",
+            "entities": ["хоккей", "спорт", "стадион"],
+            "evergreen": True,
+            "body": """<b>Спортивные события: хоккей, бег и активный отдых</b>
+
+Тюмень — спортивный город: матчи местных клубов, массовые забеги, турниры и семейные спортивные фестивали собирают тысячи зрителей.
+
+Если вы приезжаете на матч или соревнование, заранее забронируйте апартаменты рядом с ареной или центром.
+
+«Добрый дом» — <b>бесконтактный заезд 24/7</b>, отчётные документы и отельный сервис.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Спорт и активность",
+            "search_query": "sports arena evening lights energetic atmosphere crowd"
+        },
+        {
+            "id": "afisha_food_festival",
+            "title": "Гастрономические фестивали и дегустации",
+            "entities": ["гастрономия", "дегустация", "фестиваль еды"],
+            "evergreen": True,
+            "body": """<b>Гастрономические фестивали и дегустации</b>
+
+Тюмень славится сибирской кухней — от строганины до авторских блюд шеф-поваров. Гастрономические фестивали и food-ярмарки — повод попробовать город на вкус.
+
+После дегустаций приятно вернуться в тихую квартиру с полноценной кухней и отдыхом.
+
+Апартаменты «Добрый дом» — <b>бесконтактный заезд 24/7</b> и забота в каждой детали.
+
+Бронируйте на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Гастрономия Тюмени",
+            "search_query": "food festival table dishes warm cozy restaurant atmosphere"
+        },
+        {
+            "id": "afisha_park_concert",
+            "title": "Концерты в парках: музыка под открытым небом",
+            "entities": ["парк", "концерт", "open air"],
+            "evergreen": True,
+            "body": """<b>Концерты в парках: музыка под открытым небом</b>
+
+Летом и в тёплую осень парки Тюмени становятся сценами для живой музыки — от акустики до больших open-air концертов.
+
+Возьмите плед, выберите удобное жильё рядом с зелёными зонами и насладитесь вечером без спешки.
+
+«Добрый дом» — апартаменты с <b>бесконтактным заездом 24/7</b> и отельным уютом.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Парк и музыка",
+            "search_query": "park concert evening lights trees cozy atmosphere"
+        },
+        {
+            "id": "afisha_craft_fair",
+            "title": "Ремесленные ярмарки и сувениры ручной работы",
+            "entities": ["ярмарка", "ремесла", "сувениры"],
+            "evergreen": True,
+            "body": """<b>Ремесленные ярмарки и сувениры ручной работы</b>
+
+На ярмарках Тюмени можно найти изделия местных мастеров — керамику, текстиль, украшения и сибирские сувениры с характером.
+
+Это живой формат знакомства с городом, который хочется привезти домой в память о поездке.
+
+Остановитесь в апартаментах «Добрый дом» с <b>бесконтактным заездом 24/7</b>.
+
+Бронируйте на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Ярмарка ремёсел",
+            "search_query": "craft fair handmade market cozy warm lights"
+        },
+        {
+            "id": "afisha_literary_evening",
+            "title": "Литературные вечера и встречи с авторами",
+            "entities": ["литература", "книги", "автор"],
+            "evergreen": True,
+            "body": """<b>Литературные вечера и встречи с авторами</b>
+
+Камерные литературные встречи, презентации книг и поэтические вечера — тихая, но ёмкая часть культурной афиши Тюмени.
+
+Если любите читать и слушать живое слово, загляните в городские библиотеки и книжные пространства.
+
+После встречи — чай, тишина и уют апартаментов «Добрый дом» с <b>бесконтактным заездом 24/7</b>.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Литературный вечер",
+            "search_query": "cozy bookstore reading warm lamp evening atmosphere"
+        },
+        {
+            "id": "afisha_photo_exhibition",
+            "title": "Фотовыставки и визуальные истории Сибири",
+            "entities": ["фотовыставка", "фото", "выставка"],
+            "evergreen": True,
+            "body": """<b>Фотовыставки и визуальные истории Сибири</b>
+
+Фотовыставки в Тюмени показывают край глазами путешественников, журналистов и художников — от тайги до современного города.
+
+Это вдохновляющий формат для тех, кто любит эстетику и истории за кадром.
+
+Вернитесь после выставки в апартаменты «Добрый дом» — <b>бесконтактный заезд 24/7</b> и отельный комфорт.
+
+Бронируйте на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Фотовыставка",
+            "search_query": "photography exhibition gallery warm lighting elegant frames"
+        },
+        {
+            "id": "afisha_chamber_music",
+            "title": "Камерная музыка: камерные залы и камерные ансамбли",
+            "entities": ["камерная музыка", "ансамбль", "скрипка"],
+            "evergreen": True,
+            "body": """<b>Камерная музыка: камерные залы и камерные ансамбли</b>
+
+Камерные концерты — особый формат: близость к музыкантам, акустика зала и камерная атмосфера без суеты больших арен.
+
+Тюменская филармония и культурные площадки регулярно собирают такие программы.
+
+После концерта — спокойный вечер в апартаментах «Добрый дом» с <b>бесконтактным заездом 24/7</b>.
+
+Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы</a></b> — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+            "image_title": "Камерная музыка",
+            "search_query": "chamber music hall violin cello warm elegant lighting"
         }
     ],
 
@@ -457,9 +690,20 @@ TOPIC_BANK["service_lifehack"] = TOPIC_BANK["service_standards"]
 TOPIC_BANK["city_guide"] = TOPIC_BANK["weekend_thermal"]
 
 
-def get_next_topic(category_id: str, history: list = None) -> dict:
-    """Выбирает следующую тему из банка рубрики с учётом cooldown (~60 дней)."""
-    from telegram_post_history import get_ids_in_cooldown, get_all_published_ids, load_history
+def get_next_topic(
+    category_id: str,
+    history: list = None,
+    prefer_evergreen: bool = False,
+    exclude_ids: set | None = None,
+) -> dict:
+    """Выбирает тему с учётом cooldown по id и entities; приоритет — давно не публиковавшиеся."""
+    from telegram_post_history import (
+        _parse_date,
+        get_all_published_ids,
+        get_entities_in_cooldown,
+        get_ids_in_cooldown,
+        load_history,
+    )
 
     history = history if history is not None else load_history()
     topics = TOPIC_BANK.get(category_id, TOPIC_BANK.get("afisha", []))
@@ -467,29 +711,57 @@ def get_next_topic(category_id: str, history: list = None) -> dict:
         topics = TOPIC_BANK["afisha"]
 
     blocked_ids = get_ids_in_cooldown(history, category_id=category_id)
-    fresh = [t for t in topics if t["id"] not in blocked_ids]
-    if fresh:
-        return fresh[0]
+    blocked_entities = get_entities_in_cooldown(history)
+    exclude_ids = exclude_ids or set()
 
-    # Все темы рубрики недавно публиковались — берём ту, что давнее всех
+    def entity_overlap(topic: dict) -> bool:
+        ents = [e.lower() for e in topic.get("entities") or []]
+        return any(e in blocked_entities for e in ents)
+
+    def is_eligible(topic: dict) -> bool:
+        tid = topic.get("id", "")
+        if tid in blocked_ids or tid in exclude_ids:
+            return False
+        if entity_overlap(topic):
+            return False
+        if prefer_evergreen and not topic.get("evergreen", True):
+            return False
+        return True
+
+    eligible = [t for t in topics if is_eligible(t)]
+    if prefer_evergreen and not eligible:
+        eligible = [t for t in topics if is_eligible({**t, "evergreen": True}) or is_eligible(t)]
+
+    if not eligible:
+        # Fallback: evergreen без пересечения entities
+        eligible = [t for t in topics if t.get("evergreen", True) and not entity_overlap(t)]
+    if not eligible:
+        eligible = topics[:]
+
     published_ids = get_all_published_ids(history)
-    oldest = None
-    oldest_dt = None
-    for topic in topics:
+
+    def last_published_dt(topic_id: str):
+        oldest = None
         for entry in history:
-            if entry.get("id") != topic["id"]:
+            if entry.get("id") != topic_id:
                 continue
-            from telegram_post_history import _parse_date
             dt = _parse_date(entry.get("published_at", ""))
-            if oldest is None or (dt and (oldest_dt is None or dt < oldest_dt)):
-                oldest = topic
-                oldest_dt = dt
-    if oldest:
+            if dt and (oldest is None or dt < oldest):
+                oldest = dt
         return oldest
 
-    # Fallback: первая тема, которой ещё не было в истории вообще
-    never_published = [t for t in topics if t["id"] not in published_ids]
-    if never_published:
-        return never_published[0]
+    never = [t for t in eligible if t["id"] not in published_ids]
+    if never:
+        random.shuffle(never)
+        return never[0]
 
-    return topics[0]
+    # Самая давняя публикация среди eligible
+    scored = []
+    for t in eligible:
+        dt = last_published_dt(t["id"])
+        scored.append((dt or datetime.min, t))
+    scored.sort(key=lambda x: x[0])
+    oldest_dt = scored[0][0]
+    oldest_topics = [t for dt, t in scored if dt == oldest_dt]
+    random.shuffle(oldest_topics)
+    return oldest_topics[0]
