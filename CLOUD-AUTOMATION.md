@@ -81,7 +81,15 @@ Cover-text (Gemini) || Schema (inherit) → Cover (inherit); Indexer; Publish; m
 python3 scripts/daily_telegram_pipeline.py
 ```
 
-Scout **не включать** без доработки парсера (`--use-scout` только вручную). Понедельник = тема из `TOPIC_BANK`, не HTML-скрейп afisha.72.ru.
+Результат: `post_bundle_*.json` — **одно фото**, **3 текста**. Менеджер выбирает вариант:
+
+```bash
+python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_bundle_....json --variant 2
+```
+
+Scout **не включать** без доработки парсера (`--use-scout` только вручную).
+
+При FAIL gate (`scripts/telegram_content_gate.py`) — pipeline автоматически берёт другую тему (до 3 попыток). **Не обходить gate** и не публиковать через произвольный текст.
 
 Память: `memory/telegram_posts/ledger.json` (entities, event_date, fingerprint). Backfill: `python3 scripts/telegram_history_backfill.py`.
 

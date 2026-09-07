@@ -391,17 +391,19 @@ TOPIC_BANK = {
             "search_query": "cozy luxury bedroom white bed hotel interior without window"
         },
         {
-            "id": "care_tea",
-            "title": "Заметки радушного «хозяина»: зачем мы всегда ставим конфету к чаю",
-            "body": """<b>Заметки радушного «хозяина»: зачем мы всегда ставим конфету к чаю</b>
+            "id": "care_welcome_tea",
+            "title": "Заметки радушного «хозяина»: чай после дороги — маленькая забота",
+            "entities": ["чай", "заезд", "уют"],
+            "evergreen": True,
+            "body": """<b>Заметки радушного «хозяина»: чай после дороги — маленькая забота</b>
 
-Представьте: вечер, на часах одиннадцать, за плечами задержка рейса, тяжелый чемодан и холодный ветер на парковке. Вы открываете дверь квартиры, ставите сумку и понимаете, что все магазины вокруг уже закрыты.
+Представьте: поздний вечер, задержка рейса, холодный ветер у подъезда — а вокруг уже нет открытых магазинов.
 
-В этот момент человеку меньше всего хочется думать, где раздобыть бутылку воды или чайный пакетик.
+В такие моменты хочется не искать чайный пакетик, а просто поставить чайник и выдохнуть. Поэтому в квартирах «Доброго дома» на кухне всегда есть чай, сахар и всё необходимое, чтобы быстро согреться после дороги.
 
-Именно поэтому в каждой квартире «Доброго дома» на столе всегда стоят чашки, ароматный сибирский чай, сахар и сладкий комплимент. Чтобы первое, что вы сделали после заезда — это налили горячий чай, съели конфету, присели в мягкое кресло и почувствовали искреннюю заботу. Ведь настоящий дом начинается с тепла.
+Это не про «вау-сервис», а про честную мелочь, которая делает заезд человечным. Как и **бесконтактный заезд 24/7** — без ожидания и лишних встреч.
 
-Приезжайте в Тюмень! Бронируйте напрямую на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> — здесь действуют <b>прямые цены</b> без переплат. Каталог и <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости — в канале <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+Бронируйте напрямую на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b> — здесь действуют <b>прямые цены</b> без переплат. Каталог и <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости — в канале <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
             "image_title": "Забота и чай с дороги",
             "search_query": "steaming herbal tea cup wooden table flowers morning sunlight"
         },
@@ -704,8 +706,10 @@ def get_next_topic(
         get_ids_in_cooldown,
         load_history,
     )
+    from telegram_content_rules import get_blocked_topic_ids
 
     history = history if history is not None else load_history()
+    blocked_topics = get_blocked_topic_ids()
     topics = TOPIC_BANK.get(category_id, TOPIC_BANK.get("afisha", []))
     if not topics:
         topics = TOPIC_BANK["afisha"]
@@ -720,6 +724,8 @@ def get_next_topic(
 
     def is_eligible(topic: dict) -> bool:
         tid = topic.get("id", "")
+        if tid in blocked_topics:
+            return False
         if tid in blocked_ids or tid in exclude_ids:
             return False
         if entity_overlap(topic):

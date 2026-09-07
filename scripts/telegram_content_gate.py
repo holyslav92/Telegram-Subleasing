@@ -13,6 +13,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from telegram_content_bank import TOPIC_BANK, get_next_topic
+from telegram_content_rules import check_forbidden_content
 from telegram_post_history import (
     extract_entities_from_text,
     extract_event_dates_from_text,
@@ -67,6 +68,8 @@ def check_post(
 
     if event_date and not evergreen and is_event_date_past(event_date):
         reasons.append(f"дата события в прошлом: {event_date}")
+
+    reasons.extend(check_forbidden_content(text=text, topic_id=topic_id, title=title))
 
     # Проверка fingerprint против недавних постов
     fp = post.get("text_fingerprint") or text_fingerprint(text)

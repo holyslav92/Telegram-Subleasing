@@ -22,6 +22,11 @@ CHAT_ALIASES = (
     "CHANNEL_ID",
 )
 
+MANAGER_CHAT_ALIASES = (
+    "TELEGRAM_MANAGER_CHAT_ID",
+    "TG_MANAGER_CHAT_ID",
+)
+
 
 def _read_env_file(path: Path) -> dict[str, str]:
     env: dict[str, str] = {}
@@ -47,7 +52,7 @@ def _first_value(keys: tuple[str, ...], *sources: dict[str, str]) -> str:
 def load_telegram_credentials() -> dict[str, str]:
     """Возвращает bot_token и chat_id из всех доступных источников."""
     file_env = _read_env_file(SITE_ENV_PATH)
-    os_env = {k: os.environ.get(k, "") for k in TOKEN_ALIASES + CHAT_ALIASES}
+    os_env = {k: os.environ.get(k, "") for k in TOKEN_ALIASES + CHAT_ALIASES + MANAGER_CHAT_ALIASES}
 
     tenant_token_key = "TELEGRAM_BOT_TOKEN"
     tenant_chat_key = "TELEGRAM_CHAT_ID"
@@ -67,10 +72,12 @@ def load_telegram_credentials() -> dict[str, str]:
 
     bot_token = _first_value(TOKEN_ALIASES, os_env, tenant_env, file_env)
     chat_id = _first_value(CHAT_ALIASES, os_env, tenant_env, file_env)
+    manager_chat_id = _first_value(MANAGER_CHAT_ALIASES, os_env, file_env)
 
     return {
         "bot_token": bot_token,
         "chat_id": chat_id,
+        "manager_chat_id": manager_chat_id,
         "token_source": _detect_source(bot_token, TOKEN_ALIASES, (tenant_token_key,), file_env),
         "chat_source": _detect_source(chat_id, CHAT_ALIASES, (tenant_chat_key,), file_env),
     }

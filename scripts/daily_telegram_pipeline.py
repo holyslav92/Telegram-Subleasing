@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Скрипт ежедневного пайплайна публикаций для сети апартаментов «Добрый дом Тюмень».
-Gate + Afisha Scout (понедельник) + retry до 3 тем при FAIL.
+Ежедневный пайплайн Telegram «Добрый дом Тюмень».
+По умолчанию: 1 изображение + 3 текста → менеджер выбирает вариант.
+Публикация в канал: --publish --variant 1|2|3
 """
 
 import argparse
@@ -13,13 +14,21 @@ from datetime import datetime
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+WORKSPACE_ROOT = SCRIPT_DIR.parent
+OUTPUT_DIR = WORKSPACE_ROOT / "memory" / "telegram_posts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from generate_telegram_post import build_post, send_to_telegram, generate_image_grsai, save_post, record_published_id
+from generate_telegram_post import (
+    build_post,
+    send_to_telegram,
+    generate_image_grsai,
+    record_published_id,
+)
 from telegram_credentials import load_telegram_credentials
 from telegram_content_gate import check_post
 from telegram_content_bank import get_next_topic
-from telegram_post_history import load_ledger
+from telegram_post_history import load_ledger, strip_html
+from telegram_text_variants import build_text_variants
 
 CATEGORIES_SCHEDULE = [
     "afisha",
@@ -35,18 +44,16 @@ MAX_GATE_RETRIES = 3
 
 
 def get_today_category():
-    weekday = datetime.now().weekday()
-    return CATEGORIES_SCHEDULE[weekday]
+    return CATEGORIES_SCHEDULE[datetime.now().weekday()]
 
 
 def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = False):
-    """Подбирает тему с прохождением gate; до MAX_GATE_RETRIES попыток."""
     ledger = load_ledger()
     exclude_ids: set[str] = set()
 
     if category == "afisha" and datetime.now().weekday() == 0 and not topic and use_scout:
         try:
-            from telegram_afisha_scout import scout_afisha_topic
+            from telegram_afisha_scout import scout_afisha_topic, is_valid_event_title
             scout_topic = scout_afisha_topic()
             if scout_topic:
                 post_probe = {
@@ -59,14 +66,10 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
                     "evergreen": scout_topic.get("evergreen", True),
                 }
                 status, reasons = check_post(post_probe, ledger)
-                if status == "PASS":
-                    from telegram_afisha_scout import is_valid_event_title
-                    if is_valid_event_title(scout_topic.get("title", "")):
-                        print(f"Scout: тема прошла gate — {scout_topic.get('id')}")
-                        return scout_topic, None
-                    print("Scout FAIL: некачественный заголовок — fallback на банк")
-                else:
-                    print(f"Scout FAIL: {reasons} — fallback на банк")
+                if status == "PASS" and is_valid_event_title(scout_topic.get("title", "")):
+                    print(f"Scout: тема прошла gate — {scout_topic.get('id')}")
+                    return scout_topic, None
+                print(f"Scout FAIL — fallback на банк: {reasons}")
         except Exception as e:
             print(f"Scout недоступен: {e} — fallback на банк")
 
@@ -99,10 +102,8 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
         print(f"Gate попытка {attempt}/{MAX_GATE_RETRIES}: {status} — {topic_data.get('id')}")
         if reasons:
             print(f"  Причины: {reasons}")
-
         if status == "PASS":
             return topic_data, None
-
         tid = topic_data.get("id")
         if tid:
             exclude_ids.add(tid)
@@ -110,30 +111,96 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
     return None, f"Gate FAIL после {MAX_GATE_RETRIES} попыток"
 
 
-def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True, use_scout: bool = False):
+def save_bundle(bundle: dict) -> Path:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = OUTPUT_DIR / f"post_bundle_{bundle['category_id']}_{ts}.json"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(bundle, f, ensure_ascii=False, indent=2)
+    return path
+
+
+def send_manager_preview(bundle: dict, bot_token: str, manager_chat_id: str) -> None:
+    """Отправляет менеджеру фото + 3 текста для выбора."""
+    header = (
+        f"📋 <b>Черновик поста · {bundle.get('category_name', bundle.get('category_id'))}</b>\n"
+        f"Тема: {bundle.get('title')}\n"
+        f"id: <code>{bundle.get('id')}</code>\n\n"
+        f"Выберите вариант текста (1–3). Публикация в канал:\n"
+        f"<code>python3 scripts/publish_telegram_bundle.py --bundle {bundle.get('_bundle_path')} --variant N</code>"
+    )
+    send_to_telegram(
+        bot_token=bot_token,
+        chat_id=manager_chat_id,
+        text=header,
+        photo_url=bundle.get("photo_url"),
+        reply_markup=None,
+        silent=True,
+    )
+    for v in bundle.get("variants", []):
+        plain = strip_html(v["text_html"])
+        msg = f"<b>Вариант {v['number']} · {v.get('label', '')}</b>\n\n{plain[:3500]}"
+        send_to_telegram(
+            bot_token=bot_token,
+            chat_id=manager_chat_id,
+            text=msg,
+            silent=True,
+        )
+
+
+def run_daily_pipeline(
+    category: str = None,
+    topic: str = "",
+    use_scout: bool = False,
+    publish: bool = False,
+    variant: int = 0,
+    bundle_path: str = "",
+):
     cat = category or get_today_category()
-    print(f"=== Запуск ежедневного пайплайна [Категория: {cat}] ===")
+    print(f"=== Пайплайн Telegram [Категория: {cat}] ===")
+
+    if publish:
+        if not bundle_path or variant not in (1, 2, 3):
+            print("Для --publish укажите --bundle и --variant 1|2|3")
+            sys.exit(1)
+        import subprocess
+        cmd = [
+            sys.executable,
+            str(SCRIPT_DIR / "publish_telegram_bundle.py"),
+            "--bundle",
+            bundle_path,
+            "--variant",
+            str(variant),
+        ]
+        subprocess.run(cmd, check=True)
+        return
 
     topic_data, gate_error = select_topic_with_gate(cat, topic=topic, use_scout=use_scout)
     if gate_error:
         print(f"КРИТИЧЕСКАЯ ОШИБКА: {gate_error}")
         sys.exit(1)
 
+    variants = build_text_variants(topic_data)
+    for v in variants:
+        probe = {
+            "id": topic_data.get("id", ""),
+            "category_id": cat,
+            "title": topic_data.get("title", ""),
+            "text_html": v["text_html"],
+            "entities": topic_data.get("entities", []),
+            "event_date": topic_data.get("event_date", ""),
+            "evergreen": topic_data.get("evergreen", True),
+        }
+        status, reasons = check_post(probe, load_ledger())
+        if status != "PASS":
+            print(f"Gate FAIL для варианта {v['number']}: {reasons}")
+            sys.exit(1)
+
     post = build_post(category_id=cat, topic=topic, topic_data=topic_data)
-    saved_path = save_post(post)
-    print(f"Черновик поста сохранен в: {saved_path}")
-
-    # Финальный gate перед генерацией изображения
-    status, reasons = check_post(post, load_ledger())
-    if status != "PASS":
-        print(f"КРИТИЧЕСКАЯ ОШИБКА gate перед публикацией: {reasons}")
-        sys.exit(1)
-
-    photo_url = None
     prompt = post["image_prompt"]["prompt"]
 
     input_urls = []
-    tenant_cfg = SCRIPT_DIR.parent / "shared" / "tenant-config.json"
+    tenant_cfg = WORKSPACE_ROOT / "shared" / "tenant-config.json"
     cfg_logo_url = ""
     if tenant_cfg.exists():
         try:
@@ -145,96 +212,94 @@ def run_daily_pipeline(category: str = None, topic: str = "", send: bool = True,
     cdn_logo_url = os.environ.get("BRAND_LOGO_URL", "") or cfg_logo_url
     if cdn_logo_url:
         input_urls.append(cdn_logo_url)
-        print(f"Используем эталонный логотип (Image-to-Image URL): {cdn_logo_url}")
     else:
-        logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "logo_full.jpg"
+        logo_file = WORKSPACE_ROOT / "memory" / "branding" / "logo_full.jpg"
         if not logo_file.exists():
-            logo_file = SCRIPT_DIR.parent / "memory" / "branding" / "site_logo.png"
+            logo_file = WORKSPACE_ROOT / "memory" / "branding" / "site_logo.png"
         if logo_file.exists():
             import base64
             with open(logo_file, "rb") as f:
                 b64_logo = base64.b64encode(f.read()).decode("utf-8")
             input_urls.append(f"data:image/jpeg;base64,{b64_logo}")
-            print(f"Используем локальный эталонный логотип (base64): {logo_file.name}")
 
     pexels_ref = post.get("image_prompt", {}).get("pexels_reference_url", "")
     if pexels_ref:
         input_urls.append(pexels_ref)
-        print(f"Используем свежий стиль из Pexels (Image-to-Image reference): {pexels_ref}")
 
-    print(f"Генерация изображения через GRSAI API (до 3 попыток, input_urls: {len(input_urls)})...")
-
-    max_retries = 3
-    retry_delay_seconds = 5
-    for attempt in range(1, max_retries + 1):
+    print(f"Генерация одного изображения (GRSAI, до 3 попыток)...")
+    photo_url = None
+    for attempt in range(1, 4):
         try:
-            print(f"Попытка генерации {attempt} из {max_retries}...")
-            photo_url = generate_image_grsai(prompt, input_urls=input_urls if input_urls else None)
+            photo_url = generate_image_grsai(prompt, input_urls=input_urls or None)
             if photo_url:
-                print(f"Изображение успешно получено: {photo_url}")
+                print(f"Изображение: {photo_url}")
                 break
-            print(f"Попытка {attempt}: API не вернул URL изображения.")
         except Exception as e:
-            print(f"Попытка {attempt} завершилась с ошибкой: {e}")
-        if attempt < max_retries:
-            print(f"Ожидание {retry_delay_seconds} сек перед следующей попыткой...")
-            time.sleep(retry_delay_seconds)
+            print(f"Попытка {attempt}: {e}")
+        if attempt < 3:
+            time.sleep(5)
 
     if not photo_url:
-        print("КРИТИЧЕСКАЯ ОШИБКА: Не удалось сгенерировать изображение после 3 попыток.")
+        print("КРИТИЧЕСКАЯ ОШИБКА: не удалось сгенерировать изображение")
         sys.exit(1)
 
-    if send:
-        creds = load_telegram_credentials()
-        bot_token = creds["bot_token"]
-        target_chat = creds["chat_id"]
-        if not bot_token or not target_chat:
-            print("Ошибка: TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID должны быть заданы!")
-            sys.exit(1)
-        print(f"Отправка единого поста в Telegram {target_chat}...")
+    bundle = {
+        "id": post.get("id", ""),
+        "title": post.get("title", ""),
+        "category_id": cat,
+        "category_name": post.get("category_name", ""),
+        "entities": post.get("entities", []),
+        "event_date": post.get("event_date", ""),
+        "evergreen": post.get("evergreen", True),
+        "photo_url": photo_url,
+        "image_prompt": post.get("image_prompt"),
+        "reply_markup": post.get("reply_markup"),
+        "variants": variants,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "awaiting_manager_choice",
+    }
+    saved = save_bundle(bundle)
+    bundle["_bundle_path"] = str(saved)
+    with open(saved, "w", encoding="utf-8") as f:
+        json.dump({k: v for k, v in bundle.items() if not k.startswith("_")}, f, ensure_ascii=False, indent=2)
 
-        res = send_to_telegram(
-            bot_token=bot_token,
-            chat_id=target_chat,
-            text=post["text_html"],
-            reply_markup=post["reply_markup"],
-            photo_url=photo_url,
-            photo_path=None,
-            silent=True,
-        )
-        if res.get("ok"):
-            msg_id = res.get("result", {}).get("message_id")
-            print(f"Пост успешно опубликован! Telegram Message ID: {msg_id}")
-            record_published_id(
-                post.get("id", ""),
-                category_id=post.get("category_id", cat),
-                title=post.get("title", ""),
-                text_html=post.get("text_html", ""),
-                entities=post.get("entities"),
-                event_date=post.get("event_date", ""),
-            )
-        else:
-            print(f"Ошибка публикации: {res}")
-            sys.exit(1)
+    print(f"Bundle сохранён: {saved}")
+    print("\n--- 3 варианта текста (одно изображение) ---")
+    for v in variants:
+        print(f"\n### Вариант {v['number']} · {v['label']}")
+        print(strip_html(v["text_html"]))
 
-    print("=== Ежедневный пайплайн завершен успешно ===")
+    creds = load_telegram_credentials()
+    manager_chat = creds.get("manager_chat_id") or os.environ.get("TELEGRAM_MANAGER_CHAT_ID", "")
+    if manager_chat and creds.get("bot_token"):
+        print(f"\nОтправка превью менеджеру {manager_chat}...")
+        try:
+            send_manager_preview(bundle, creds["bot_token"], manager_chat)
+            print("Превью отправлено менеджеру.")
+        except Exception as e:
+            print(f"Не удалось отправить менеджеру: {e}")
+    else:
+        print("\nTELEGRAM_MANAGER_CHAT_ID не задан — превью только в bundle и в логе выше.")
+        print(f"Публикация в канал: python3 scripts/publish_telegram_bundle.py --bundle {saved} --variant 1|2|3")
+
+    print("\n=== Готово: менеджер выбирает вариант, в канал не публиковали ===")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Запуск ежедневного поста Добрый дом Тюмень")
-    parser.add_argument("--category", default=None, help="Принудительно выбрать рубрику")
-    parser.add_argument("--topic", default="", help="Тема поста")
-    parser.add_argument("--no-send", action="store_true", help="Не отправлять в Telegram, только сформировать")
-    parser.add_argument(
-        "--use-scout",
-        action="store_true",
-        help="Включить Afisha Scout (эксперимент; по умолчанию только банк тем)",
-    )
+    parser = argparse.ArgumentParser(description="Telegram-пайплайн Добрый дом")
+    parser.add_argument("--category", default=None)
+    parser.add_argument("--topic", default="")
+    parser.add_argument("--use-scout", action="store_true")
+    parser.add_argument("--publish", action="store_true", help="Опубликовать выбранный вариант в канал")
+    parser.add_argument("--bundle", default="", help="Путь к post_bundle_*.json для --publish")
+    parser.add_argument("--variant", type=int, default=0, choices=[0, 1, 2, 3])
     args = parser.parse_args()
 
     run_daily_pipeline(
         category=args.category,
         topic=args.topic,
-        send=not args.no_send,
         use_scout=args.use_scout,
+        publish=args.publish,
+        variant=args.variant,
+        bundle_path=args.bundle,
     )
