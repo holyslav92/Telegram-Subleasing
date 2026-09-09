@@ -91,6 +91,11 @@ def build_image_prompt(
             "Luxury spa relaxation zone after thermal bathing: soft towels, warm ambient light, "
             "calm wellness interior with hints of pine forest outside the windows."
         ),
+        "special_referral_friend": (
+            "Warm inviting Scandinavian apartment in Tyumen: cozy living room, two steaming tea cups on wooden table, "
+            "soft golden evening light, feeling of sharing a good recommendation with a close friend, "
+            "subtle friendly atmosphere, low-rise windows, no skyscrapers."
+        ),
     }
 
     scene_prompts = {
@@ -101,7 +106,7 @@ def build_image_prompt(
         "service_lifehack": "Immaculately clean hotel-standard bathroom, fluffy white towels, sparkling cleanliness.",
         "weekend_thermal": scene_by_topic.get(topic_id, scene_by_topic["city_dzerzhinskogo_excursions"]),
         "city_guide": scene_by_topic.get(topic_id, scene_by_topic["city_dzerzhinskogo_excursions"]),
-        "special_offers": "Bright stylish studio interior, comfortable sofa, warm sunlight, welcoming atmosphere.",
+        "special_offers": scene_by_topic.get(topic_id, "Bright stylish studio interior, comfortable sofa, warm sunlight, welcoming atmosphere."),
         "siberian_hospitality": "Tranquil cozy Sunday morning in Scandinavian apartment, soft sunlight on white linens, calm mood.",
     }
 
