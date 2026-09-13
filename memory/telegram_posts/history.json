@@ -13,5 +13,10 @@
     "id": "special_early_booking",
     "category_id": "special_offers",
     "published_at": "2026-09-04 16:56:49"
+  },
+  {
+    "id": "siberian_sunday_morning",
+    "category_id": "siberian_hospitality",
+    "published_at": "2026-09-13 03:19:50"
   }
 ]
