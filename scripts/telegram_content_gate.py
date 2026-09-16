@@ -17,6 +17,7 @@ from telegram_content_rules import check_forbidden_content
 from telegram_post_history import (
     extract_entities_from_text,
     extract_event_dates_from_text,
+    get_category_in_cooldown,
     get_entities_in_cooldown,
     get_ids_in_cooldown,
     is_event_date_past,

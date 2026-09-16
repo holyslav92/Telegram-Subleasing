@@ -16,6 +16,8 @@ LEDGER_FILE = POSTS_DIR / "ledger.json"
 
 TOPIC_COOLDOWN_DAYS = 60
 ENTITY_COOLDOWN_DAYS = 45
+# Одна рубрика — не чаще раза в 7 дней (среда = host_story и т.д.)
+CATEGORY_COOLDOWN_DAYS = 7
 
 # Известные сущности для анти-дубля (нижний регистр)
 KNOWN_ENTITIES = [
@@ -36,6 +38,12 @@ KNOWN_ENTITIES = [
     "верхний бор",
     "дзержинского",
     "visit tyumen",
+    "сатин",
+    "отельный сатин",
+    "постельное белье",
+    "постельное бельё",
+    "отельное белье",
+    "отельное бельё",
 ]
 
 MONTHS_RU = {
