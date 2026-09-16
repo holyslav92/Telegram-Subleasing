@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-09-16 05:22:56",
+  "week": "2026-W38",
+  "status": "NEEDS_ATTENTION",
+  "published_total": 14,
+  "recent_publications": [
+    {
+      "id": "care_kitchen_pans",
+      "category_id": "host_story",
+      "title": "Заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода",
+      "published_at": "2026-09-16 05:22:56"
+    },
+    {
+      "id": "special_referral_friend",
+      "category_id": "special_offers",
+      "title": "Программа «Добрые рекомендации»",
+      "published_at": "2026-09-09 07:18:35"
+    },
+    {
+      "id": "afisha_philharmonic_concerts",
+      "category_id": "afisha",
+      "title": "Музыкальные сезоны Тюменской Филармонии",
+      "published_at": "2026-09-07 05:00:08"
+    },
+    {
+      "id": "afisha_comedy_club",
+      "category_id": "afisha",
+      "title": "Stand-up и юмор: лёгкий вечер в Тюмени",
+      "published_at": "2026-09-07 04:57:23"
+    },
+    {
+      "id": "special_early_booking",
+      "category_id": "special_offers",
+      "title": "Скидка 10% на раннее бронирование",
+      "published_at": "2026-09-06 08:00:00"
+    },
+    {
+      "id": "city_thermal_pools",
+      "category_id": "weekend_thermal",
+      "title": "Планы на выходные в термальной столице",
+      "published_at": "2026-09-04 08:00:00"
+    },
+    {
+      "id": "city_dzerzhinskogo_excursions",
+      "category_id": "weekend_thermal",
+      "title": "Пешеходная улица Дзержинского и партнерские экскурсии",
+      "published_at": "2026-09-04 04:58:21"
+    }
+  ],
+  "lessons_recorded": 1,
+  "repetition_risks": [
+    "Opening hook повторялся 2×: «куда сходить в тюмени: термальные комплексы, экскурсии и отдых планируете визит …»"
+  ],
+  "recommendations": [
+    "Не использовать один opening hook дважды за 8 недель.",
+    "3 варианта текста должны отличаться структурой, не только длиной.",
+    "Каждую неделю — новый angle в рубрике; gate + similarity обязательны.",
+    "После публикации: learner записывает урок в memory/telegram_posts/lessons.json."
+  ],
+  "next_checks": [
+    "python3 scripts/telegram_content_learner.py --report",
+    "python3 scripts/telegram_history_backfill.py"
+  ]
+}
