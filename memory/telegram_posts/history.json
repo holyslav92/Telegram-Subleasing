@@ -68,5 +68,10 @@
     "id": "care_kitchen_pans",
     "category_id": "host_story",
     "published_at": "2026-09-16 05:22:56"
+  },
+  {
+    "id": "care_blanket",
+    "category_id": "host_story",
+    "published_at": "2026-09-16 07:00:32"
   }
 ]

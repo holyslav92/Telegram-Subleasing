@@ -285,6 +285,23 @@ def _compose_save_block(category_id: str, topic_id: str, topic_craft: dict, memo
     return text, picked["id"]
 
 
+def _dedupe_paragraphs(parts: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in parts:
+        key = strip_html(p).lower()[:120]
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out
+
+
+def _too_similar(a: str, b: str, threshold: float = 0.72) -> bool:
+    from telegram_similarity import similarity_score
+    return similarity_score(a, b) >= threshold
+
+
 def compose_variant(
     topic_data: dict,
     category_id: str,
@@ -342,14 +359,17 @@ def compose_variant(
     if variant == 1:
         # narrative: заголовок после сцены или сцена первой
         if _seed(topic_id, "v1order") % 2 == 0:
-            parts.extend([scene, title_html])
+            block = [scene, title_html]
         else:
-            parts.extend([title_html, scene])
+            block = [title_html, scene]
+        if core_paragraphs and _too_similar(scene, core_paragraphs[0]):
+            block = [title_html] + core_paragraphs[:1]
+        parts.extend(block)
         if urgency:
             parts.append(urgency)
         if audience:
             parts.append(audience)
-        parts.extend(core_paragraphs[:2])
+        parts.extend(core_paragraphs[1:3] if _too_similar(scene, core_paragraphs[0]) else core_paragraphs[:2])
         if benefit and _seed(topic_id, "ben") % 3 != 0:
             parts.append(f"Для нас это не мелочь: {benefit}.")
         if proof:
@@ -398,7 +418,7 @@ def compose_variant(
             parts.append(benefit + ".")
         parts.append(cta_html)
 
-    text_html = "\n\n".join(p for p in parts if p and p.strip())
+    text_html = "\n\n".join(p for p in _dedupe_paragraphs(parts) if p and p.strip())
     craft_meta["audience_tag"] = topic_craft.get("audience_tag", "general")
     return text_html, craft_meta
 
