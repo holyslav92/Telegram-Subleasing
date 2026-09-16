@@ -58,10 +58,17 @@ def load_published_ids():
     return get_all_published_ids()
 
 
-def record_published_id(topic_id: str, category_id: str = ""):
-    record_publication(topic_id, category_id=category_id)
+def record_published_id(topic_id: str, category_id: str = "", title: str = "", text_html: str = "", entities: list = None, event_date: str = ""):
+    record_publication(
+        topic_id,
+        category_id=category_id,
+        title=title,
+        text_html=text_html,
+        entities=entities,
+        event_date=event_date,
+    )
 
-def build_post(category_id: str, topic: str = "", details: str = "", image_title: str = "") -> dict:
+def build_post(category_id: str, topic: str = "", details: str = "", image_title: str = "", topic_data: dict | None = None) -> dict:
     templates_data = load_templates()
     categories = {cat["id"]: cat for cat in templates_data.get("categories", [])}
     cat = categories.get(category_id, categories.get("afisha", {}))
@@ -76,7 +83,8 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
 
     # Если тема не задана вручную, подбираем свежую тему из банка с cooldown ~60 дней
     history = load_history()
-    topic_data = get_next_topic(category_id, history)
+    if topic_data is None:
+        topic_data = get_next_topic(category_id, history)
     topic_id = topic_data.get("id", "")
     
     title = topic or topic_data.get("title", "")
@@ -111,6 +119,9 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "text_html": body,
         "body": body,
+        "entities": topic_data.get("entities", []),
+        "event_date": topic_data.get("event_date", ""),
+        "evergreen": topic_data.get("evergreen", True),
         "image_prompt": image_meta,
         "reply_markup": {
             "inline_keyboard": inline_keyboard

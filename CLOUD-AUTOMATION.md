@@ -74,15 +74,40 @@ Cover-text (Gemini) || Schema (inherit) → Cover (inherit); Indexer; Publish; m
 - Editorial-стиль: cinematic grading, magazine layout, не «плоский сток».
 - Защита качества: до 3 попыток генерации фото с интервалом. Если фото не получено — сухой пост без фото не отправлять!
 
-### 3. Выполнение пайплайна и Фиксик:
+### 3. Выполнение пайплайна и Фиксик
+
 Перед запуском проверь секреты:
+
 ```bash
 python3 scripts/telegram_doctor.py
 ```
-Выполни скрипт:
+
+**Запрещено** писать пост вручную или обходить gate. Только:
+
 ```bash
-python3 scripts/daily_telegram_pipeline.py
+python3 scripts/telegram_ledger_sync.py
+python3 scripts/telegram_content_director.py --prepare
 ```
+
+Результат: `post_bundle_*.json` — **одно фото**, **3 текста** (разная структура, anti-repeat). Менеджер выбирает вариант:
+
+```bash
+python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_bundle_....json --variant 2
+```
+
+Отчёт директора (обязателен после прогона):
+
+```bash
+python3 scripts/telegram_content_director.py --report-only
+```
+
+См. также `TELEGRAM-AGENTS.md`.
+
+Scout **не включать** без доработки парсера (`--use-scout` только вручную).
+
+При FAIL gate (`scripts/telegram_content_gate.py`) — pipeline автоматически берёт другую тему (до 3 попыток). **Не обходить gate** и не публиковать через произвольный текст.
+
+Память: `memory/telegram_posts/ledger.json` (entities, event_date, fingerprint, text_html). Backfill: `python3 scripts/telegram_history_backfill.py` и `python3 scripts/telegram_ledger_sync.py`.
 
 Если возникла ошибка выполнения или генерации:
 1. Запусти субагента Фиксика (excalibur-blog-fixer), чтобы он локализовал причину ошибки в коде или параметрах API, устранил баг и перезапустил пайплайн.
