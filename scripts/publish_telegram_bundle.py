@@ -75,6 +75,19 @@ def main():
         entities=post.get("entities"),
         event_date=post.get("event_date", ""),
     )
+
+    import subprocess
+    subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_DIR / "telegram_content_learner.py"),
+            "--record",
+            str(bundle_path),
+            "--variant",
+            str(args.variant),
+        ],
+        check=False,
+    )
     print(f"Опубликован вариант {args.variant} ({chosen.get('label', '')})")
 
 

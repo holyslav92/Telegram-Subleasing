@@ -78,14 +78,23 @@ Cover-text (Gemini) || Schema (inherit) → Cover (inherit); Indexer; Publish; m
 **Запрещено** писать пост вручную или обходить gate. Только:
 
 ```bash
-python3 scripts/daily_telegram_pipeline.py
+python3 scripts/telegram_ledger_sync.py
+python3 scripts/telegram_content_director.py --prepare
 ```
 
-Результат: `post_bundle_*.json` — **одно фото**, **3 текста**. Менеджер выбирает вариант:
+Результат: `post_bundle_*.json` — **одно фото**, **3 текста** (разная структура, anti-repeat). Менеджер выбирает вариант:
 
 ```bash
 python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_bundle_....json --variant 2
 ```
+
+Отчёт директора (обязателен после прогона):
+
+```bash
+python3 scripts/telegram_content_director.py --report-only
+```
+
+См. также `TELEGRAM-AGENTS.md`.
 
 Scout **не включать** без доработки парсера (`--use-scout` только вручную).
 

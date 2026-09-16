@@ -25,7 +25,7 @@ from generate_telegram_post import (
     record_published_id,
 )
 from telegram_credentials import load_telegram_credentials
-from telegram_content_gate import check_post
+from telegram_content_gate import check_post, check_variants_gate
 from telegram_content_bank import get_next_topic
 from telegram_post_history import load_ledger, strip_html
 from telegram_text_variants import build_text_variants
@@ -180,7 +180,14 @@ def run_daily_pipeline(
         print(f"КРИТИЧЕСКАЯ ОШИБКА: {gate_error}")
         sys.exit(1)
 
+    topic_data = {**topic_data, "category_id": cat}
     variants = build_text_variants(topic_data)
+    variant_texts = [v["text_html"] for v in variants]
+    v_status, v_reasons = check_variants_gate(variant_texts, load_ledger())
+    if v_status != "PASS":
+        print(f"Gate FAIL: варианты слишком похожи или повторяют corpus: {v_reasons}")
+        sys.exit(1)
+
     for v in variants:
         probe = {
             "id": topic_data.get("id", ""),

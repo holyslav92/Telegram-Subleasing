@@ -35,8 +35,33 @@
     "published_at": "2026-09-02 20:26:37"
   },
   {
+    "id": "city_dzerzhinskogo_excursions",
+    "category_id": "weekend_thermal",
+    "published_at": "2026-09-04 04:58:21"
+  },
+  {
+    "id": "city_thermal_pools",
+    "category_id": "weekend_thermal",
+    "published_at": "2026-09-04 08:00:00"
+  },
+  {
+    "id": "special_early_booking",
+    "category_id": "special_offers",
+    "published_at": "2026-09-06 08:00:00"
+  },
+  {
     "id": "afisha_comedy_club",
     "category_id": "afisha",
     "published_at": "2026-09-07 04:57:23"
+  },
+  {
+    "id": "afisha_philharmonic_concerts",
+    "category_id": "afisha",
+    "published_at": "2026-09-07 05:00:08"
+  },
+  {
+    "id": "special_referral_friend",
+    "category_id": "special_offers",
+    "published_at": "2026-09-09 07:18:35"
   }
 ]

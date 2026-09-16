@@ -160,7 +160,14 @@ def normalize_ledger_entry(entry) -> dict | None:
         if ev_dates:
             event_date = ev_dates[0]
     fp = entry.get("text_fingerprint") or text_fingerprint(text_src)
-    return {
+    opening_hook = entry.get("opening_hook", "")
+    if not opening_hook and text_src:
+        try:
+            from telegram_similarity import opening_hook as extract_opening_hook
+            opening_hook = extract_opening_hook(text_src)
+        except Exception:
+            opening_hook = ""
+    result = {
         "id": topic_id or f"anon_{fp}",
         "category_id": entry.get("category_id", ""),
         "title": entry.get("title", ""),
@@ -169,6 +176,11 @@ def normalize_ledger_entry(entry) -> dict | None:
         "event_date": event_date,
         "text_fingerprint": fp,
     }
+    if text_src:
+        result["text_html"] = text_src
+    if opening_hook:
+        result["opening_hook"] = opening_hook
+    return result
 
 
 def load_ledger() -> list[dict]:
@@ -273,6 +285,7 @@ def rebuild_ledger_from_posts() -> list[dict]:
             "entities": entities,
             "event_date": event_date,
             "text_fingerprint": fp,
+            "text_html": text,
         }
         key = topic_id if not topic_id.startswith("manual_") else fp
         existing = entries_by_key.get(key)
@@ -310,6 +323,13 @@ def record_publication(
     if not ev and text_html:
         evs = extract_event_dates_from_text(text_html)
         ev = evs[0] if evs else ""
+    hook = ""
+    if text_html:
+        try:
+            from telegram_similarity import opening_hook as extract_opening_hook
+            hook = extract_opening_hook(text_html)
+        except Exception:
+            hook = ""
 
     updated = False
     for entry in ledger:
@@ -325,11 +345,15 @@ def record_publication(
                 entry["event_date"] = ev
             if fp:
                 entry["text_fingerprint"] = fp
+            if text_html:
+                entry["text_html"] = text_html
+            if hook:
+                entry["opening_hook"] = hook
             updated = True
             break
 
     if not updated:
-        ledger.append({
+        new_entry = {
             "id": topic_id or f"anon_{fp}",
             "category_id": category_id,
             "title": title,
@@ -337,7 +361,12 @@ def record_publication(
             "entities": ent,
             "event_date": ev,
             "text_fingerprint": fp,
-        })
+        }
+        if text_html:
+            new_entry["text_html"] = text_html
+        if hook:
+            new_entry["opening_hook"] = hook
+        ledger.append(new_entry)
 
     save_ledger(ledger)
 

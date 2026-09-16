@@ -23,6 +23,7 @@ from telegram_post_history import (
     load_ledger,
     text_fingerprint,
 )
+from telegram_similarity import check_similarity_against_corpus, variants_too_similar
 
 
 def check_post(
@@ -78,6 +79,24 @@ def check_post(
             reasons.append("дубликат text_fingerprint среди последних публикаций")
             break
 
+    # Анти-повтор по смыслу и opening hook
+    if text:
+        too_similar, sim_reasons = check_similarity_against_corpus(text, ledger)
+        if too_similar:
+            reasons.extend(sim_reasons[:5])
+
+    status = "FAIL" if reasons else "PASS"
+    return status, reasons
+
+
+def check_variants_gate(variants: list[str], ledger: list | None = None) -> tuple[str, list[str]]:
+    """PASS если три варианта достаточно различаются и не похожи на corpus."""
+    ledger = ledger or load_ledger()
+    reasons = variants_too_similar(variants)
+    for i, text in enumerate(variants):
+        too_similar, sim_reasons = check_similarity_against_corpus(text, ledger)
+        if too_similar:
+            reasons.append(f"вариант {i + 1}: {sim_reasons[0]}")
     status = "FAIL" if reasons else "PASS"
     return status, reasons
 
