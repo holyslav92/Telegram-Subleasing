@@ -58,6 +58,24 @@ python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_b
 - Cooldown: topic_id 60 дней, entities 45 дней.
 - Similarity: opening hook + n-grams против всего ledger.
 
+## Craft-композитор (anti-robot)
+
+Файлы:
+- `shared/telegram-content-craft.json` — сцены, CTA, proof, save-worthy, аудитория
+- `shared/telegram-topic-craft.json` — метаданные по topic_id
+- `scripts/telegram_post_composer.py` — сборка текста
+
+Принципы:
+1. **Сцена** — разные стили захода, не «Планируете поездку…»
+2. **Срочность** — когда уместно (событие, сезон, выходные)
+3. **Micro-proof** — короткая цитата из отзыва, не «читайте Авито»
+4. **Аудитория** — business/family/couple, не в каждом посте
+5. **Контраст** — только если `contrast_ok` и в тему
+6. **Save-worthy** — чек-лист ~1 раз в неделю или по флагу темы
+7. **CTA** — ротация 9 типов, learner запоминает `used_cta_ids`
+
+Три варианта: **История** | **Чек-лист** | **Диалог**
+
 ## Документация
 
 - `docs/TELEGRAM_CONTENT_SYSTEM.md` — пайплайн, бренд, API.

@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "scene_styles": [
+    {"id": "door_moment", "template": "Вы только что закрыли за собой дверь — {detail}. В такие минуты хочется одного: {feeling}."},
+    {"id": "evening_city", "template": "За окном уже темнеет, в телефоне — уведомление о рейсе или поезде. {detail}"},
+    {"id": "familiar_question", "template": "Знакомо: {pain}? Мы в «Добром доме» это слышим чаще, чем кажется."},
+    {"id": "friday_plan", "template": "Пятница близко — а план на вечер ещё плавает? {detail}"},
+    {"id": "morning_kitchen", "template": "Утро в незнакомом городе: чайник, тишина, первый глоток. {detail}"},
+    {"id": "road_fatigue", "template": "Дорога вымотала — и в этот момент мелочи решают всё. {detail}"},
+    {"id": "winter_contrast", "template": "На улице сибирский мороз, а внутри — тепло и свет. {detail}"},
+    {"id": "quiet_notice", "template": "Иногда достаточно одной детали, чтобы поездка перестала ощущаться «на чемоданах». {detail}"}
+  ],
+  "audience_lines": {
+    "business": [
+      "Если едете в командировку — этот текст для вас.",
+      "Для тех, кому после совещаний нужна тишина, а не шумный холл.",
+      "Командировочным особенно важно: заезд без ожидания и документы без сюрпризов."
+    ],
+    "family": [
+      "С детьми в поездке каждая мелочь на вес золота — мы это учитываем.",
+      "Семейный выезд — это когда «удобно всем», а не только взрослым.",
+      "Если едете с детьми, обратите внимание на деталь ниже."
+    ],
+    "couple": [
+      "На выходные вдвоём хочется атмосферы — без суеты заселения.",
+      "Для пары важнее настроение, чем «красивые слова в объявлении».",
+      "Романтический вечер в городе начинается не с очереди у администратора."
+    ],
+    "general": [
+      "Неважно, впервые вы в Тюмени или уже были — мысль ниже пригодится.",
+      "Коротко и по делу — без рекламного шума.",
+      "Одна деталь, которую мы проверяем перед каждым заездом."
+    ]
+  },
+  "micro_proofs": [
+    {"id": "proof_late_checkin", "text": "Недавний отзыв: «Прилетели в полночь — код сработал с первого раза, зашли за пару минут»."},
+    {"id": "proof_bedding", "text": "Гость написал после выезда: «Спали лучше, чем в отеле — бельё плотное, не скрипит»."},
+    {"id": "proof_receipt", "text": "Из отзыва командировочного: «Чек с QR пришёл сразу — бухгалтерия приняла без лишних вопросов»."},
+    {"id": "proof_clean", "text": "В отзыве на этой неделе: «Зашли — пахнет свежестью, полотенца белые, как новые»."},
+    {"id": "proof_kitchen", "text": "Один гость отметил: «Наконец-то нормальная сковорода — яичница не прилипла»."},
+    {"id": "proof_quiet", "text": "«Тишина в квартире — выспались после дороги», — так пишут чаще, чем про «красивый ремонт»."}
+  ],
+  "contrast_templates": [
+    {"id": "contrast_generic", "before": "В объявлении часто пишут «всё есть».", "after": "Мы проверяем конкретику: {specific}."},
+    {"id": "contrast_sleep", "before": "«Уютно» — слишком размыто.", "after": "У нас — {specific}, чтобы выспаться, а не просто «переночевать»."},
+    {"id": "contrast_checkin", "before": "Классика аренды: ждать ключи у подъезда.", "after": "У нас — {specific} в любое время суток."}
+  ],
+  "save_worthy_blocks": [
+    {"id": "save_tyumen_evening", "title": "Мини-чек-лист вечера в Тюмени", "items": ["Выберите одно событие, не три — так приятнее", "Заложите 20 минут на дорогу обратно", "После программы — тишина в квартире важнее, чем «ещё одна точка»"]},
+    {"id": "save_checkin", "title": "3 шага спокойного заезда", "items": ["Сохраните код доступа в заметках телефона", "Проверьте Wi‑Fi сразу — пригодится для такси и карт", "Если что-то непонятно — менеджер на связи, не гуглите ночью"]},
+    {"id": "save_district", "title": "Как выбрать район под поездку", "items": ["Центр/Новин — если важны деловые точки", "Европейский — если рядом вода и прогулки", "Видный/Звёздный — если нужен шопинг и кино рядом"]},
+    {"id": "save_weekend", "title": "Выходные без спешки", "items": ["Утро — термы или прогулка, не оба сразу", "День — одна локация + кофе", "Вечер — вернуться пораньше, выспаться"]},
+    {"id": "save_business", "title": "Командировка без нервов", "items": ["Бронируйте с запасом по времени заезда", "Сохраните чек с QR сразу после оплаты", "Попросите документы заранее — мы готовим пакет"]}
+  ],
+  "cta_endings": [
+    {"id": "cta_site_direct", "html": "Забронировать по <b>прямым ценам</b> — на <b><a href=\"https://добрыйдом-72.рф/\">нашем сайте</a></b>."},
+    {"id": "cta_site_avito", "html": "Каталог и живые <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">отзывы</a></b> — на <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b>; бронь без переплат — на <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b>."},
+    {"id": "cta_excursions", "html": "А после прогулок — авторские <b><a href=\"https://добрыйдом-72.рф/excursions/\">экскурсии партнёров</a></b> и бронь квартир на <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b>."},
+    {"id": "cta_manager", "html": "Не уверены с районом? Напишите <b><a href=\"https://t.me/Dobriy_dom_Tyumen\">менеджеру</a></b> — подберём за пару сообщений."},
+    {"id": "cta_max", "html": "Новости и акции — в канале <b><a href=\"https://max.ru/id660300569233_biz\">Макс</a></b>; бронь — на <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b>."},
+    {"id": "cta_early_booking", "html": "Планируете заранее? На <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b> действует <b>скидка 10% при бронировании за 20 дней</b>."},
+    {"id": "cta_soft_save", "html": "Если пригодилось — сохраните пост. Бронь, когда созреете: <b><a href=\"https://добрыйдом-72.рф/\">добрыйдом-72.рф</a></b>."},
+    {"id": "cta_question", "html": "А вы в Тюмень едете впервые или уже знаете город? Напишите в комментариях — подскажем маршрут. Бронь: <b><a href=\"https://добрыйдом-72.рф/\">сайт</a></b>."},
+    {"id": "cta_proof_close", "html": "Хотите так же — выбирайте квартиру на <b><a href=\"https://добрыйдом-72.рф/\">официальном сайте</a></b> (<b>прямые цены</b>, без комиссий)."}
+  ],
+  "urgency_phrases": [
+    {"id": "urgency_weekend", "template": "На этих выходных в городе особенно много поводов выйти — имеет смысл заранее присмотреть жильё рядом с маршрутом."},
+    {"id": "urgency_event", "template": "Если даты поездки совпадают с событием — лучше забронировать квартиру заранее: хорошие варианты разбирают быстро."},
+    {"id": "urgency_season", "template": "Сейчас как раз сезон, когда Тюмень приятнее всего сочетать с прогулками и теплом после улицы."},
+    {"id": "urgency_late_arrival", "template": "При позднем прилёте важнее не «красивая картинка в объявлении», а гарантированный заезд без ожидания."}
+  ],
+  "category_defaults": {
+    "afisha": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_tyumen_evening", "save_weekend"], "cta_pool": ["cta_excursions", "cta_site_avito", "cta_question", "cta_soft_save"]},
+    "district_guide": {"audience_tag": "family", "contrast_ok": false, "save_worthy_pool": ["save_district"], "cta_pool": ["cta_manager", "cta_site_direct", "cta_site_avito"]},
+    "host_story": {"audience_tag": "general", "contrast_ok": true, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_proof_close", "cta_site_direct", "cta_soft_save", "cta_manager"]},
+    "service_standards": {"audience_tag": "business", "contrast_ok": true, "save_worthy_pool": ["save_business", "save_checkin"], "cta_pool": ["cta_site_direct", "cta_early_booking", "cta_proof_close"]},
+    "weekend_thermal": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_excursions", "cta_site_avito", "cta_max"]},
+    "special_offers": {"audience_tag": "general", "contrast_ok": false, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_early_booking", "cta_site_direct", "cta_site_avito"]},
+    "siberian_hospitality": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_soft_save", "cta_max", "cta_site_direct"]}
+  }
+}

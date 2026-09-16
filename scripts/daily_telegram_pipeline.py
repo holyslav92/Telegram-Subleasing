@@ -28,6 +28,7 @@ from telegram_credentials import load_telegram_credentials
 from telegram_content_gate import check_post, check_variants_gate
 from telegram_content_bank import get_next_topic
 from telegram_post_history import load_ledger, strip_html
+from telegram_post_composer import enrich_topic_data
 from telegram_text_variants import build_text_variants
 
 CATEGORIES_SCHEDULE = [
@@ -93,7 +94,7 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
             "id": topic_data.get("id", ""),
             "category_id": category,
             "title": topic_data.get("title", ""),
-            "text_html": topic_data.get("body", ""),
+            "text_html": enrich_topic_data(topic_data, category).get("body", ""),
             "entities": topic_data.get("entities", []),
             "event_date": topic_data.get("event_date", ""),
             "evergreen": topic_data.get("evergreen", True),
@@ -180,7 +181,9 @@ def run_daily_pipeline(
         print(f"КРИТИЧЕСКАЯ ОШИБКА: {gate_error}")
         sys.exit(1)
 
-    topic_data = {**topic_data, "category_id": cat}
+    from telegram_post_composer import enrich_topic_data
+    topic_data = enrich_topic_data(topic_data, cat)
+
     variants = build_text_variants(topic_data)
     variant_texts = [v["text_html"] for v in variants]
     v_status, v_reasons = check_variants_gate(variant_texts, load_ledger())
@@ -262,6 +265,7 @@ def run_daily_pipeline(
         "image_prompt": post.get("image_prompt"),
         "reply_markup": post.get("reply_markup"),
         "variants": variants,
+        "craft_meta": variants[0].get("craft_meta", topic_data.get("craft_meta", {})),
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "status": "awaiting_manager_choice",
     }

@@ -96,11 +96,8 @@ python3 scripts/daily_telegram_pipeline.py
    - **Понедельник Afisha Scout:** `scripts/telegram_afisha_scout.py` — **выключен по умолчанию** (HTML afisha.72.ru даёт UI-мусор). В pipeline только с `--use-scout`. Обычный понедельник — тема из банка (17 evergreen-тем afisha).
    - Backfill ledger из старых `post_*.json`: `python3 scripts/telegram_history_backfill.py`.
    - **Director + Learner (anti-repeat):** см. `TELEGRAM-AGENTS.md`.
-     - `python3 scripts/telegram_ledger_sync.py` — синхронизация всех публикаций.
-     - `python3 scripts/telegram_content_director.py --prepare` — bundle с gate + similarity.
-     - `python3 scripts/telegram_content_learner.py --report` — отчёт рисков повторов.
-     - `memory/telegram_posts/lessons.json` — уроки после каждой публикации (hooks, angles).
-     - `scripts/telegram_similarity.py` — opening hook + n-grams против ledger; 3 варианта должны различаться.
+     - `scripts/telegram_post_composer.py` — craft: сцена, proof, CTA, save-worthy.
+     - `shared/telegram-content-craft.json` + `shared/telegram-topic-craft.json`.
 3. **Роль Fixer (Фиксик):** В случае программных сбоев или ошибок субагент Фиксик локализует причину, устраняет баг в коде/конфигурации и доводит публикацию до безупречного выхода без паллиативных «пустышек».
 
 

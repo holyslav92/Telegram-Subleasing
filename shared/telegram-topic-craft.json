@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "topics": {
+    "afisha_quiet_lake": {
+      "audience_tag": "couple",
+      "scene_seeds": [
+        "Огни над водой, музыка с берега — и впереди ещё целый вечер у озера Тихое.",
+        "Фейерверк отражается в глади — такие вечера в Тюмени запоминаются надолго."
+      ],
+      "urgency": "Если едете на «Пошумим на Тихом» — имеет смысл заранее выбрать жильё в шаговой доступности от набережной.",
+      "micro_proof": "После позднего концерта гости часто пишут: «Дошли пешком — не пришлось вызывать такси в ночи»."
+    },
+    "afisha_drama_theater": {
+      "audience_tag": "couple",
+      "scene_seeds": ["Занавес опустился, зал аплодирует — и хочется не спешить домой, а прогуляться по вечернему центру."],
+      "contrast_specific": "тихая квартира в центре после спектакля — без шума холла"
+    },
+    "afisha_philharmonic_concerts": {
+      "audience_tag": "couple",
+      "scene_seeds": ["Последний аккорд затих — а в голове ещё звучит зал филармонии."],
+      "micro_proof": "«После концерта вернулись пешком — квартира в центре сэкономила нервы», — типичный отзыв."
+    },
+    "afisha_comedy_club": {
+      "audience_tag": "couple",
+      "scene_seeds": ["Смеётесь до слёз — и понимаете, что вечер удался. Осталось только не убить настроение дорогой до «дома»."],
+      "save_worthy": false
+    },
+    "care_blanket": {
+      "audience_tag": "general",
+      "contrast_ok": true,
+      "contrast_before": "«Уютно» в объявлении — часто про подушку с пятном.",
+      "contrast_after": "Мы стелем <b>отельный сатин</b> — плотный, дышащий, без синтетики.",
+      "scene_seeds": ["Вы падаете на кровать после дороги — и первое, что чувствуете, это ткань, а не усталость."]
+    },
+    "care_welcome_tea": {
+      "audience_tag": "general",
+      "scene_seeds": ["Поздний вечер, холод у подъезда — а на кухне уже можно поставить чайник, не бегая в магазин."],
+      "micro_proof": "«Не искал чай ночью — всё было на месте», — пишут чаще, чем про декор."
+    },
+    "care_keypad": {
+      "audience_tag": "business",
+      "contrast_ok": true,
+      "contrast_specific": "<b>бесконтактный заезд 24/7</b> — код на двери, без встреч у подъезда",
+      "scene_seeds": ["Рейс задержали — и единственная мысль: «только бы не ждать ключей»."]
+    },
+    "care_kitchen_pans": {
+      "audience_tag": "family",
+      "contrast_ok": true,
+      "contrast_before": "На чужой кухне яичница прилипает — и утро испорчено.",
+      "contrast_after": "У нас проверяют посуду так же строго, как бельё: <b>нормальная сковорода</b>, не «что нашлось».",
+      "micro_proof": "«Наконец-то нормальная сковорода — яичница не прилипла», — свежий отзыв."
+    },
+    "service_hotel_clean": {
+      "audience_tag": "general",
+      "contrast_ok": true,
+      "contrast_specific": "уборка по регламенту 4–5★ и одноразовые наборы гигиены"
+    },
+    "service_accounting_docs": {
+      "audience_tag": "business",
+      "save_worthy": true,
+      "scene_seeds": ["Отчёт в бухгалтерии — и каждая мелочь должна сойтись с первого раза."],
+      "micro_proof": "Командировочный: «Чек с QR приняли сразу — не пришлось объяснять, что это не «серый» сервис»."
+    },
+    "special_early_booking": {
+      "audience_tag": "general",
+      "urgency": "Даты уже известны? Раннее бронирование на сайте — <b>минус 10%</b>, без промокодных игр."
+    },
+    "special_referral_friend": {
+      "audience_tag": "general",
+      "scene_seeds": ["Хороший сервис хочется рекомендовать — и приятно, когда это выгодно обеим сторонам."]
+    },
+    "city_thermal_pools": {
+      "audience_tag": "couple",
+      "save_worthy": true,
+      "scene_seeds": ["Пар над водой, мороз на ресницах — классика тюменских выходных."]
+    },
+    "city_dzerzhinskogo_excursions": {
+      "audience_tag": "couple",
+      "scene_seeds": ["Деревянные фасады, кофе на улице Дзержинского — Тюмень умеет быть камерной."]
+    },
+    "district_novin": {
+      "audience_tag": "business",
+      "save_worthy_pool": ["save_district"]
+    },
+    "district_evropeyskiy": {
+      "audience_tag": "family",
+      "scene_seeds": ["Прогулка у воды, дети на площадке — район задаёт ритм поездки."]
+    },
+    "siberian_sunday_morning": {
+      "audience_tag": "couple",
+      "save_worthy": true,
+      "scene_seeds": ["Воскресное утро: солнце на подоконнике, чайник, тишина перед новой неделей."]
+    }
+  }
+}

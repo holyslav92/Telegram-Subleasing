@@ -54,12 +54,14 @@ def record_publication_lesson(
     title: str,
     text_html: str,
     variant_number: int = 1,
+    craft_meta: dict | None = None,
 ) -> dict:
-    """Записывает урок после публикации; обновляет lessons.json."""
+    """Записывает урок после публикации; обновляет lessons.json и craft-память."""
     lessons = load_lessons()
     hook = opening_hook(text_html)
     fp = text_fingerprint(text_html)
     week = iso_week()
+    craft_meta = craft_meta or {}
 
     entry = {
         "id": f"pub_{topic_id}_{datetime.now().strftime('%Y%m%d')}",
@@ -70,6 +72,7 @@ def record_publication_lesson(
         "text_fingerprint": fp,
         "variant_number": variant_number,
         "week": week,
+        "craft_meta": craft_meta,
         "recorded_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "lesson": f"Опубликовано: {title}. Не повторять hook и topic_id 60+ дней.",
     }
@@ -88,9 +91,31 @@ def record_publication_lesson(
     if topic_id not in by_cat[category_id]:
         by_cat[category_id].append(topic_id)
 
+    _record_craft_memory(lessons, craft_meta, week)
+
     lessons["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     save_lessons(lessons)
     return entry
+
+
+def _append_unique(lst: list, value) -> None:
+    if value and value not in lst:
+        lst.append(value)
+
+
+def _record_craft_memory(lessons: dict, craft_meta: dict, week: str) -> None:
+    """Запоминает использованные craft-элементы для ротации."""
+    if not craft_meta:
+        return
+    _append_unique(lessons.setdefault("used_cta_ids", []), craft_meta.get("cta_id"))
+    _append_unique(lessons.setdefault("used_scene_ids", []), craft_meta.get("scene_id"))
+    _append_unique(lessons.setdefault("used_audience_lines", []), craft_meta.get("audience_id"))
+    _append_unique(lessons.setdefault("used_contrast_ids", []), craft_meta.get("contrast_id"))
+    _append_unique(lessons.setdefault("used_micro_proof_ids", []), craft_meta.get("micro_proof_id"))
+    _append_unique(lessons.setdefault("used_urgency_ids", []), craft_meta.get("urgency_id"))
+    if craft_meta.get("save_worthy_id"):
+        _append_unique(lessons.setdefault("used_save_worthy_ids", []), craft_meta.get("save_worthy_id"))
+        _append_unique(lessons.setdefault("save_worthy_weeks", []), week)
 
 
 def analyze_repetition_risks() -> dict:
@@ -158,9 +183,9 @@ def build_director_report() -> dict:
         "repetition_risks": analysis["risks"],
         "recommendations": [
             "Не использовать один opening hook дважды за 8 недель.",
-            "3 варианта текста должны отличаться структурой, не только длиной.",
-            "Каждую неделю — новый angle в рубрике; gate + similarity обязательны.",
-            "После публикации: learner записывает урок в memory/telegram_posts/lessons.json.",
+            "3 варианта: История / Чек-лист / Диалог — craft-композитор.",
+            "CTA, сцены и proof ротируются — см. used_* в lessons.json.",
+            "Конtrast и save-worthy — только в тему, не в каждом посте.",
         ],
         "next_checks": [
             "python3 scripts/telegram_content_learner.py --report",
@@ -210,12 +235,18 @@ def main():
         variants = data.get("variants") or []
         chosen = variants[args.variant - 1] if variants else data
         text = chosen.get("text_html") if isinstance(chosen, dict) else data.get("text_html", "")
+        craft_meta = (
+            chosen.get("craft_meta")
+            if isinstance(chosen, dict)
+            else data.get("craft_meta", {})
+        ) or {}
         entry = record_publication_lesson(
             data.get("id", ""),
             data.get("category_id", ""),
             data.get("title", ""),
             text,
             variant_number=args.variant,
+            craft_meta=craft_meta,
         )
         print(json.dumps({"recorded": entry}, ensure_ascii=False, indent=2))
         return

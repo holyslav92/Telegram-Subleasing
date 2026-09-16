@@ -26,6 +26,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from image_prompt_builder import build_image_prompt
 from pexels_client import fetch_pexels_idea
 from telegram_content_bank import get_next_topic
+from telegram_post_composer import enrich_topic_data
 from telegram_post_history import load_history, record_publication
 from telegram_credentials import load_telegram_credentials
 
@@ -85,6 +86,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
     history = load_history()
     if topic_data is None:
         topic_data = get_next_topic(category_id, history)
+    topic_data = enrich_topic_data(topic_data, category_id)
     topic_id = topic_data.get("id", "")
     
     title = topic or topic_data.get("title", "")
@@ -122,6 +124,7 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         "entities": topic_data.get("entities", []),
         "event_date": topic_data.get("event_date", ""),
         "evergreen": topic_data.get("evergreen", True),
+        "craft_meta": topic_data.get("craft_meta", {}),
         "image_prompt": image_meta,
         "reply_markup": {
             "inline_keyboard": inline_keyboard
