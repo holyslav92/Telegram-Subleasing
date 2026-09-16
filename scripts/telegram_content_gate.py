@@ -15,6 +15,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from telegram_content_bank import TOPIC_BANK, get_next_topic
 from telegram_content_rules import check_forbidden_content
 from telegram_post_history import (
+    CATEGORY_COOLDOWN_DAYS,
     extract_entities_from_text,
     extract_event_dates_from_text,
     get_category_in_cooldown,
@@ -62,6 +63,11 @@ def check_post(
     blocked_ids = get_ids_in_cooldown(ledger, category_id=category_id or None)
     if topic_id and topic_id in blocked_ids:
         reasons.append(f"topic_id '{topic_id}' в cooldown {60} дней")
+
+    if category_id and category_id in get_category_in_cooldown(ledger):
+        reasons.append(
+            f"рубрика '{category_id}' уже публиковалась за последние {CATEGORY_COOLDOWN_DAYS} дней"
+        )
 
     blocked_entities = get_entities_in_cooldown(ledger)
     overlap = [e for e in entities if e.lower() in blocked_entities]

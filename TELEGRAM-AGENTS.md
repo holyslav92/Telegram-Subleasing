@@ -55,7 +55,7 @@ python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_b
 ## Память
 
 - `memory/telegram_posts/ledger.json` — **единственный источник** опубликованного.
-- Cooldown: topic_id 60 дней, entities 45 дней.
+- Cooldown: topic_id 60 дней, entities 45 дней, **рубрика (category) 21 день**.
 - Similarity: opening hook + n-grams против всего ledger.
 
 ## Craft-композитор (anti-robot)

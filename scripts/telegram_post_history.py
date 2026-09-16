@@ -16,8 +16,8 @@ LEDGER_FILE = POSTS_DIR / "ledger.json"
 
 TOPIC_COOLDOWN_DAYS = 60
 ENTITY_COOLDOWN_DAYS = 45
-# Одна рубрика — не чаще раза в 7 дней (среда = host_story и т.д.)
-CATEGORY_COOLDOWN_DAYS = 7
+# Одна рубрика — не чаще раза в 21 день (≈3 недели; среда = host_story и т.д.)
+CATEGORY_COOLDOWN_DAYS = 21
 
 # Известные сущности для анти-дубля (нижний регистр)
 KNOWN_ENTITIES = [
@@ -377,6 +377,20 @@ def record_publication(
         ledger.append(new_entry)
 
     save_ledger(ledger)
+
+
+def get_category_in_cooldown(ledger: list[dict] | None = None) -> set[str]:
+    """Рубрики, опубликованные недавно — нельзя повторять в ту же неделю."""
+    ledger = ledger or load_ledger()
+    cutoff = datetime.now() - timedelta(days=CATEGORY_COOLDOWN_DAYS)
+    blocked: set[str] = set()
+    for entry in ledger:
+        published_dt = _parse_date(entry.get("published_at", ""))
+        if published_dt is None or published_dt >= cutoff:
+            cat = entry.get("category_id", "")
+            if cat:
+                blocked.add(cat)
+    return blocked
 
 
 def get_ids_in_cooldown(ledger: list[dict], category_id: str | None = None) -> set[str]:
