@@ -392,6 +392,9 @@ def compose_variant(
         core_paragraphs = extract_body_core(topic_data.get("body", ""))
     core_paragraphs = [soften_pompous(p) for p in core_paragraphs]
     title = soften_pompous(title)
+    variant_paragraphs = topic_craft.get("variant_paragraphs") or {}
+    if str(variant) in variant_paragraphs:
+        core_paragraphs = [soften_pompous(p) for p in variant_paragraphs[str(variant)]]
 
     title_html = f"<b>{title}</b>" if title else ""
     craft_meta: dict = {"variant": variant, "topic_id": topic_id, "craft_density": density}
@@ -431,10 +434,12 @@ def compose_variant(
             audience, aud_id = None, None
             craft_meta.pop("audience_id", None)
     elif density == "minimal":
-        urgency, urgency_id = None, None
+        if not topic_craft.get("urgency"):
+            urgency, urgency_id = None, None
         audience, aud_id = None, None
         contrast, contrast_id = None, None
-        proof, proof_id = None, None
+        if not topic_craft.get("micro_proof"):
+            proof, proof_id = None, None
         scene, scene_id = "", "skipped"
         craft_meta = {"variant": variant, "topic_id": topic_id, "craft_density": density}
 
