@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Ежедневный пайплайн Telegram «Добрый дом Тюмень».
-По умолчанию: 1 изображение + 3 текста → менеджер выбирает вариант.
-Публикация в канал: --publish --variant 1|2|3
+Генерирует 1 изображение + 3 текста, затем публикует в канал (вариант 1),
+если в shared/telegram-content-rules.json → auto_publish_to_channel = true.
+Превью менеджеру — при заданном TELEGRAM_MANAGER_CHAT_ID и auto_publish = false.
 """
 
 import argparse
@@ -42,6 +43,38 @@ CATEGORIES_SCHEDULE = [
 ]
 
 MAX_GATE_RETRIES = 3
+RULES_FILE = WORKSPACE_ROOT / "shared" / "telegram-content-rules.json"
+
+
+def load_publish_workflow() -> dict:
+    if not RULES_FILE.exists():
+        return {}
+    try:
+        with open(RULES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f).get("publish_workflow", {})
+    except Exception:
+        return {}
+
+
+def should_auto_publish_channel() -> bool:
+    if os.environ.get("TELEGRAM_AUTO_PUBLISH", "").lower() in ("1", "true", "yes"):
+        return True
+    if os.environ.get("TELEGRAM_AUTO_PUBLISH", "").lower() in ("0", "false", "no"):
+        return False
+    return bool(load_publish_workflow().get("auto_publish_to_channel"))
+
+
+def publish_bundle_to_channel(bundle_path: str, variant: int = 1) -> None:
+    import subprocess
+    cmd = [
+        sys.executable,
+        str(SCRIPT_DIR / "publish_telegram_bundle.py"),
+        "--bundle",
+        bundle_path,
+        "--variant",
+        str(variant),
+    ]
+    subprocess.run(cmd, check=True)
 
 
 def get_today_category():
@@ -310,18 +343,37 @@ def run_daily_pipeline(
 
     creds = load_telegram_credentials()
     manager_chat = creds.get("manager_chat_id") or os.environ.get("TELEGRAM_MANAGER_CHAT_ID", "")
-    if manager_chat and creds.get("bot_token"):
+    auto_publish = should_auto_publish_channel()
+    publish_variant = int(load_publish_workflow().get("auto_publish_variant", 1) or 1)
+
+    if auto_publish:
+        if not creds.get("bot_token") or not creds.get("chat_id"):
+            print("\nКРИТИЧЕСКАЯ ОШИБКА: для автопубликации нужны TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID")
+            sys.exit(1)
+        print(f"\nАвтопубликация в канал {creds['chat_id']} (вариант {publish_variant})...")
+        try:
+            publish_bundle_to_channel(str(saved), variant=publish_variant)
+            print("Пост опубликован в канал.")
+        except Exception as e:
+            print(f"КРИТИЧЕСКАЯ ОШИБКА публикации: {e}")
+            sys.exit(1)
+    elif manager_chat and creds.get("bot_token"):
         print(f"\nОтправка превью менеджеру {manager_chat}...")
         try:
             send_manager_preview(bundle, creds["bot_token"], manager_chat)
-            print("Превью отправлено менеджеру.")
+            print("Превью отправлено менеджеру. В канал не публиковали — выберите вариант вручную.")
         except Exception as e:
             print(f"Не удалось отправить менеджеру: {e}")
+            sys.exit(1)
     else:
-        print("\nTELEGRAM_MANAGER_CHAT_ID не задан — превью только в bundle и в логе выше.")
-        print(f"Публикация в канал: python3 scripts/publish_telegram_bundle.py --bundle {saved} --variant 1|2|3")
+        print("\nАвтопубликация выключена, TELEGRAM_MANAGER_CHAT_ID не задан.")
+        print(f"Публикация вручную: python3 scripts/publish_telegram_bundle.py --bundle {saved} --variant 1|2|3")
+        print("\n=== Готово: bundle создан, в канал не публиковали ===")
+        return
 
-    print("\n=== Готово: менеджер выбирает вариант, в канал не публиковали ===")
+    if manager_chat and creds.get("bot_token") and not auto_publish:
+        return
+    print("\n=== Готово ===")
 
 
 if __name__ == "__main__":
