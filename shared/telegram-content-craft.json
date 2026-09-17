@@ -73,7 +73,7 @@
     "afisha": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_tyumen_evening", "save_weekend"], "cta_pool": ["cta_excursions", "cta_site_avito", "cta_question", "cta_soft_save"]},
     "district_guide": {"audience_tag": "family", "contrast_ok": false, "save_worthy_pool": ["save_district"], "cta_pool": ["cta_manager", "cta_site_direct", "cta_site_avito"]},
     "host_story": {"audience_tag": "general", "contrast_ok": true, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_proof_close", "cta_site_direct", "cta_soft_save", "cta_manager"]},
-    "service_standards": {"audience_tag": "business", "contrast_ok": true, "save_worthy_pool": ["save_business", "save_checkin"], "cta_pool": ["cta_site_direct", "cta_early_booking", "cta_proof_close"]},
+    "service_standards": {"audience_tag": "general", "craft_density": "light", "contrast_ok": false, "save_worthy_pool": ["save_business", "save_checkin"], "cta_pool": ["cta_site_direct", "cta_soft_save", "cta_manager"]},
     "weekend_thermal": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_excursions", "cta_site_avito", "cta_max"]},
     "special_offers": {"audience_tag": "general", "contrast_ok": false, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_early_booking", "cta_site_direct", "cta_site_avito"]},
     "siberian_hospitality": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_soft_save", "cta_max", "cta_site_direct"]}

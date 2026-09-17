@@ -25,6 +25,42 @@ BANNED_OPENERS = [
     "собрали ключевые идеи",
 ]
 
+# Фразы, которые звучат как рекламный пафос — заменяем или не добавляем
+POMPOUS_PHRASES = [
+    "абсолютный фундамент",
+    "безупречное пространство",
+    "регламент идеальной",
+    "строгим гостиничным регламентам",
+    "абсолютно безупреч",
+    "сертифицированных гипоаллергенных",
+    "профессиональный клининг",
+    "мы в «добром доме» это слышим чаще, чем кажется",
+    "для нас это не мелочь",
+    "4-5 звезд",
+    "4–5★",
+    "4-5★",
+]
+
+POMPOUS_REPLACEMENTS = [
+    ("абсолютный фундамент доверия", "обычная чистота, которой можно доверять"),
+    ("строгим гостиничным регламентам", "простому чек-листу перед каждым заездом"),
+    ("абсолютно безупречное пространство", "чистую квартиру"),
+    ("профессиональный клининг", "уборку"),
+    ("сертифицированных гипоаллергенных эко-средств", "нормальных средств для уборки"),
+    ("стандарты 4-5 звезд", "как готовим квартиру"),
+    ("регламент идеальной чистоты", "уборку перед заездом"),
+]
+
+CATEGORY_PROOF_POOL: dict[str, list[str]] = {
+    "service_standards": ["proof_clean", "proof_quiet", "proof_receipt"],
+    "host_story": ["proof_bedding", "proof_kitchen", "proof_quiet", "proof_clean"],
+    "district_guide": ["proof_quiet", "proof_late_checkin"],
+    "afisha": ["proof_late_checkin", "proof_quiet"],
+    "weekend_thermal": ["proof_quiet", "proof_bedding"],
+    "special_offers": ["proof_receipt", "proof_late_checkin"],
+    "siberian_hospitality": ["proof_quiet", "proof_bedding"],
+}
+
 SITE = "https://добрыйдом-72.рф/"
 AVITO = "https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4"
 MAX = "https://max.ru/id660300569233_biz"
@@ -96,8 +132,8 @@ def _infer_benefit(topic_data: dict, category_id: str) -> str:
     defaults = {
         "afisha": "после события — тихая квартира с <b>бесконтактным заездом 24/7</b>",
         "district_guide": "квартира в нужном районе — без суеты при заезде",
-        "host_story": "забота в деталях — не лозунг, а стандарт перед каждым заездом",
-        "service_standards": "отельная чистота и документы для командировочных — без сюрпризов",
+        "host_story": "мелочи на кухне и в спальне проверяем так же, как бельё",
+        "service_standards": "чистая ванная, свежее бельё и набор гигиены — без сюрпризов",
         "weekend_thermal": "термы + уютная квартира рядом — выходные без спешки",
         "special_offers": "<b>прямые цены</b> на сайте — без комиссий агрегаторов",
         "siberian_hospitality": "сибирское гостеприимство — в чайнике, белье и тишине",
@@ -107,6 +143,28 @@ def _infer_benefit(topic_data: dict, category_id: str) -> str:
 
 def strip_html(text: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text or "")).strip()
+
+
+def _count_pompous(text: str) -> int:
+    low = strip_html(text).lower()
+    return sum(1 for phrase in POMPOUS_PHRASES if phrase in low)
+
+
+def soften_pompous(text: str) -> str:
+    """Смягчает канцелярский/рекламный тон без потери смысла."""
+    out = text or ""
+    for old, new in POMPOUS_REPLACEMENTS:
+        out = re.sub(re.escape(old), new, out, flags=re.IGNORECASE)
+    return out
+
+
+def _craft_density(topic_craft: dict, category_id: str) -> str:
+    """full — все craft-блоки; light — сцена + суть + CTA; minimal — только суть."""
+    if topic_craft.get("craft_density"):
+        return str(topic_craft["craft_density"])
+    cfg = load_craft_config()
+    cat = (cfg.get("category_defaults") or {}).get(category_id, {})
+    return str(cat.get("craft_density") or "full")
 
 
 def _is_cta_paragraph(p: str) -> bool:
@@ -220,14 +278,24 @@ def _compose_audience(audience_tag: str, topic_id: str, variant: int, memory: di
     return lines[start], f"{audience_tag}_repeat"
 
 
-def _compose_micro_proof(topic_craft: dict, topic_id: str, variant: int, memory: dict) -> tuple[str | None, str | None]:
+def _compose_micro_proof(
+    topic_craft: dict,
+    topic_id: str,
+    variant: int,
+    memory: dict,
+    category_id: str = "",
+) -> tuple[str | None, str | None]:
     cfg = load_craft_config()
     if topic_craft.get("micro_proof"):
-        return topic_craft["micro_proof"], "topic_proof"
+        return topic_craft["micro_proof"], topic_craft.get("micro_proof_id") or "topic_proof"
     # proof не всегда: ~60% постов
     if _seed(topic_id, "proof", variant) % 5 == 0:
         return None, None
-    pool = cfg.get("micro_proofs", [])
+    all_proofs = {p["id"]: p for p in cfg.get("micro_proofs", [])}
+    allowed_ids = topic_craft.get("micro_proof_pool") or CATEGORY_PROOF_POOL.get(category_id, [])
+    pool = [all_proofs[pid] for pid in allowed_ids if pid in all_proofs]
+    if not pool:
+        pool = cfg.get("micro_proofs", [])
     picked = _pick_from_pool(pool, memory.get("used_micro_proof_ids", []), f"{topic_id}:proof:{variant}")
     if picked:
         return picked["text"], picked["id"]
@@ -318,14 +386,20 @@ def compose_variant(
     topic_id = topic_data.get("id", "")
     title = topic_data.get("title", "")
     topic_craft = get_topic_craft(topic_id, category_id, topic_data)
+    density = _craft_density(topic_craft, category_id)
     core_paragraphs = topic_craft.get("insight_paragraphs") or extract_body_core(topic_data.get("body", ""))
     if not core_paragraphs and topic_data.get("body"):
         core_paragraphs = extract_body_core(topic_data.get("body", ""))
+    core_paragraphs = [soften_pompous(p) for p in core_paragraphs]
+    title = soften_pompous(title)
 
     title_html = f"<b>{title}</b>" if title else ""
-    craft_meta: dict = {"variant": variant, "topic_id": topic_id}
+    craft_meta: dict = {"variant": variant, "topic_id": topic_id, "craft_density": density}
 
     scene, scene_id = _compose_scene(topic_craft, topic_data, variant, memory)
+    if scene and _count_pompous(scene) > 0:
+        scene = ""
+        scene_id = "skipped_pompous_scene"
     craft_meta["scene_id"] = scene_id
 
     urgency, urgency_id = _compose_urgency(topic_data, topic_craft, memory)
@@ -336,7 +410,7 @@ def compose_variant(
     if aud_id:
         craft_meta["audience_id"] = aud_id
 
-    proof, proof_id = _compose_micro_proof(topic_craft, topic_id, variant, memory)
+    proof, proof_id = _compose_micro_proof(topic_craft, topic_id, variant, memory, category_id)
     if proof_id:
         craft_meta["micro_proof_id"] = proof_id
 
@@ -344,6 +418,25 @@ def compose_variant(
     if contrast_id:
         craft_meta["contrast_id"] = contrast_id
         craft_meta["contrast_used"] = True
+
+    if density == "light":
+        if not topic_craft.get("urgency"):
+            urgency, urgency_id = None, None
+            craft_meta.pop("urgency_id", None)
+        if not topic_craft.get("contrast_before"):
+            contrast, contrast_id = None, None
+            craft_meta.pop("contrast_id", None)
+            craft_meta.pop("contrast_used", None)
+        if variant == 1:
+            audience, aud_id = None, None
+            craft_meta.pop("audience_id", None)
+    elif density == "minimal":
+        urgency, urgency_id = None, None
+        audience, aud_id = None, None
+        contrast, contrast_id = None, None
+        proof, proof_id = None, None
+        scene, scene_id = "", "skipped"
+        craft_meta = {"variant": variant, "topic_id": topic_id, "craft_density": density}
 
     save_block, save_id = _compose_save_block(category_id, topic_id, topic_craft, memory, variant)
     if save_id:
@@ -358,10 +451,12 @@ def compose_variant(
 
     if variant == 1:
         # narrative: заголовок после сцены или сцена первой
-        if _seed(topic_id, "v1order") % 2 == 0:
+        if _seed(topic_id, "v1order") % 2 == 0 and scene:
             block = [scene, title_html]
-        else:
+        elif scene:
             block = [title_html, scene]
+        else:
+            block = [title_html]
         if core_paragraphs and _too_similar(scene, core_paragraphs[0]):
             block = [title_html] + core_paragraphs[:1]
         parts.extend(block)
@@ -369,12 +464,19 @@ def compose_variant(
             parts.append(urgency)
         if audience:
             parts.append(audience)
-        parts.extend(core_paragraphs[1:3] if _too_similar(scene, core_paragraphs[0]) else core_paragraphs[:2])
-        if benefit and _seed(topic_id, "ben") % 3 != 0:
-            parts.append(f"Для нас это не мелочь: {benefit}.")
-        if proof:
+        core_limit = 2 if density == "light" else 3
+        parts.extend(core_paragraphs[1:core_limit] if _too_similar(scene, core_paragraphs[0]) else core_paragraphs[:core_limit])
+        use_benefit_bridge = (
+            benefit
+            and not topic_craft.get("benefit_skip")
+            and density == "full"
+            and _seed(topic_id, "ben") % 3 != 0
+        )
+        if use_benefit_bridge:
+            parts.append(f"Коротко: {benefit}.")
+        if proof and density != "minimal":
             parts.append(proof)
-        if contrast:
+        if contrast and density != "minimal":
             parts.append(contrast)
         parts.append(cta_html)
 
@@ -419,7 +521,9 @@ def compose_variant(
         parts.append(cta_html)
 
     text_html = "\n\n".join(p for p in _dedupe_paragraphs(parts) if p and p.strip())
+    text_html = soften_pompous(text_html)
     craft_meta["audience_tag"] = topic_craft.get("audience_tag", "general")
+    craft_meta["pompous_hits"] = _count_pompous(text_html)
     return text_html, craft_meta
 
 

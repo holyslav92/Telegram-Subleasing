@@ -54,8 +54,15 @@
     },
     "service_hotel_clean": {
       "audience_tag": "general",
-      "contrast_ok": true,
-      "contrast_specific": "уборка по регламенту 4–5★ и одноразовые наборы гигиены"
+      "craft_density": "light",
+      "urgency_skip": true,
+      "benefit_skip": true,
+      "contrast_ok": false,
+      "scene_seeds": [
+        "Открываете дверь после дороги — пахнет свежестью, полотенца белые, ничего не бросается в глаза «на скорую руку»."
+      ],
+      "micro_proof": "В отзыве на этой неделе: «Зашли — пахнет свежестью, полотенца белые, как новые».",
+      "micro_proof_id": "proof_clean"
     },
     "service_accounting_docs": {
       "audience_tag": "business",
