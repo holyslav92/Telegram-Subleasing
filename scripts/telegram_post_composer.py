@@ -356,20 +356,32 @@ def compose_variant(
 
     parts: list[str] = []
 
+    def _filter_core(used_blocks: list[str], paragraphs: list[str], limit: int = 2) -> list[str]:
+        """Убирает абзацы, слишком похожие на уже добавленные блоки."""
+        picked: list[str] = []
+        for p in paragraphs:
+            if any(_too_similar(p, u, threshold=0.55) for u in used_blocks):
+                continue
+            picked.append(p)
+            if len(picked) >= limit:
+                break
+        return picked
+
     if variant == 1:
         # narrative: заголовок после сцены или сцена первой
-        if _seed(topic_id, "v1order") % 2 == 0:
+        if core_paragraphs and _too_similar(scene, core_paragraphs[0], threshold=0.55):
+            block = [title_html] + core_paragraphs[:1]
+        elif _seed(topic_id, "v1order") % 2 == 0:
             block = [scene, title_html]
         else:
             block = [title_html, scene]
-        if core_paragraphs and _too_similar(scene, core_paragraphs[0]):
-            block = [title_html] + core_paragraphs[:1]
         parts.extend(block)
         if urgency:
             parts.append(urgency)
         if audience:
             parts.append(audience)
-        parts.extend(core_paragraphs[1:3] if _too_similar(scene, core_paragraphs[0]) else core_paragraphs[:2])
+        used_for_filter = [scene, title_html] + parts
+        parts.extend(_filter_core(used_for_filter, core_paragraphs, limit=2))
         if benefit and _seed(topic_id, "ben") % 3 != 0:
             parts.append(f"Для нас это не мелочь: {benefit}.")
         if proof:
@@ -398,22 +410,37 @@ def compose_variant(
         parts.append(cta_html)
 
     else:
-        # variant 3 — диалог / proof-first (без дубля сцены)
-        if core_paragraphs:
-            opener = strip_html(core_paragraphs[0])
-            if not opener.endswith("?"):
-                opener = opener.rstrip(".") + " — знакомо?"
-            parts.append(f"<b>{opener}</b>" if len(opener) < 120 else opener)
+        # variant 3 — диалог: вопрос, контраст/insight, proof — без повтора сцены и лида варианта 1
+        dialogue_openers = topic_craft.get("dialogue_openers") or []
+        if dialogue_openers:
+            idx = _seed(topic_id, "dlg", variant) % len(dialogue_openers)
+            parts.append(f"<b>{dialogue_openers[idx]}</b>")
+        elif core_paragraphs:
+            candidate = None
+            for p in core_paragraphs[1:] + core_paragraphs[:1]:
+                if not _too_similar(p, scene, threshold=0.55):
+                    candidate = p
+                    break
+            if candidate:
+                opener = strip_html(candidate)
+                if not opener.endswith("?"):
+                    opener = opener.rstrip(".") + " — знакомо?"
+                parts.append(f"<b>{opener}</b>" if len(opener) < 120 else opener)
+            else:
+                parts.append(scene if "?" in scene else f"{scene.rstrip('.')} — знакомо?")
         else:
             parts.append(scene if "?" in scene else f"{scene.rstrip('.')} — знакомо?")
         if contrast:
             parts.append(contrast)
         elif len(core_paragraphs) > 1:
-            parts.append(core_paragraphs[1])
+            alt = _filter_core(parts, core_paragraphs[1:], limit=1)
+            if alt:
+                parts.append(alt[0])
         if proof:
             parts.append(proof)
-        if len(core_paragraphs) > 2:
-            parts.append(core_paragraphs[2])
+        insight_pool = _filter_core(parts, core_paragraphs, limit=1)
+        if insight_pool:
+            parts.append(insight_pool[0])
         elif benefit and not contrast:
             parts.append(benefit + ".")
         parts.append(cta_html)
