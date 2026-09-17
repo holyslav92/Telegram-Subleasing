@@ -19,6 +19,6 @@
     "variants_count": 3,
     "one_image_multiple_texts": true,
     "manager_picks_variant": true,
-    "auto_publish_to_channel": false
+    "auto_publish_to_channel": true
   }
 }
