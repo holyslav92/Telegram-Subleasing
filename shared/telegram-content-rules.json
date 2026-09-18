@@ -29,7 +29,9 @@
   "publish_workflow": {
     "variants_count": 3,
     "one_image_multiple_texts": true,
-    "manager_picks_variant": true,
-    "auto_publish_to_channel": false
+    "manager_picks_variant": false,
+    "auto_publish_to_channel": true,
+    "default_variant": 1,
+    "publish_time_utc": "05:00"
   }
 }

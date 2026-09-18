@@ -32,16 +32,62 @@
       },
       "recorded_at": "2026-09-16 07:00:32",
       "lesson": "Опубликовано: Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_event_gadkiy_utyonok_20260918_20260917",
+      "topic_id": "event_gadkiy_utyonok_20260918",
+      "category_id": "weekend_thermal",
+      "title": "event_gadkiy_utyonok_20260918",
+      "opening_hook": "что посмотреть в тюмени 18 сентября: «гадкий утёнок» спектакль уже в эту пятницу, 18 сентября, начало в 19:00.",
+      "text_fingerprint": "05f65ff070b2c83e",
+      "variant_number": 1,
+      "week": "2026-W38",
+      "craft_meta": {
+        "variant": 1,
+        "topic_id": "event_gadkiy_utyonok_20260918",
+        "craft_density": "minimal",
+        "cta_id": "cta_excursions",
+        "audience_tag": "family",
+        "pompous_hits": 0
+      },
+      "recorded_at": "2026-09-17 08:07:02",
+      "lesson": "Опубликовано: event_gadkiy_utyonok_20260918. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_event_tyumen_autumn_20260918_20260918",
+      "topic_id": "event_tyumen_autumn_20260918",
+      "category_id": "weekend_thermal",
+      "title": "event_tyumen_autumn_20260918",
+      "opening_hook": "«тюменская осень»: куда сходить 18–20 сентября фестиваль начинается уже сегодня и продлится до 20 сентября.",
+      "text_fingerprint": "2622ef989b23c2ea",
+      "variant_number": 1,
+      "week": "2026-W38",
+      "craft_meta": {
+        "variant": 1,
+        "topic_id": "event_tyumen_autumn_20260918",
+        "craft_density": "minimal",
+        "cta_id": "cta_manager",
+        "audience_tag": "general",
+        "pompous_hits": 0
+      },
+      "recorded_at": "2026-09-18 05:29:26",
+      "lesson": "Опубликовано: event_tyumen_autumn_20260918. Не повторять hook и topic_id 60+ дней."
     }
   ],
   "used_opening_hooks": [
     "заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода бывало у вас такое: снимаете жилье на несколько дней, решаете утр",
-    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это "
+    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это ",
+    "что посмотреть в тюмени 18 сентября: «гадкий утёнок» спектакль уже в эту пятницу, 18 сентября, начало в 19:00.",
+    "«тюменская осень»: куда сходить 18–20 сентября фестиваль начинается уже сегодня и продлится до 20 сентября."
   ],
   "used_angles_by_category": {
     "host_story": [
       "care_kitchen_pans",
       "care_blanket"
+    ],
+    "weekend_thermal": [
+      "event_gadkiy_utyonok_20260918",
+      "event_tyumen_autumn_20260918"
     ]
   },
   "banned_hooks": [
@@ -49,9 +95,11 @@
     "планируете визит в тюмень",
     "знаете даты предстоящей поездки"
   ],
-  "last_updated": "2026-09-16 07:00:32",
+  "last_updated": "2026-09-18 05:29:26",
   "used_cta_ids": [
-    "cta_proof_close"
+    "cta_proof_close",
+    "cta_excursions",
+    "cta_manager"
   ],
   "used_scene_ids": [
     "custom_scene_0"

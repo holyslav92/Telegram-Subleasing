@@ -154,6 +154,7 @@ def run_daily_pipeline(
     topic: str = "",
     use_scout: bool = False,
     publish: bool = False,
+    auto_publish: bool = False,
     variant: int = 0,
     bundle_path: str = "",
 ):
@@ -267,7 +268,7 @@ def run_daily_pipeline(
         "variants": variants,
         "craft_meta": variants[0].get("craft_meta", topic_data.get("craft_meta", {})),
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "status": "awaiting_manager_choice",
+        "status": "auto_publish_variant_1" if auto_publish else "awaiting_manager_choice",
     }
     saved = save_bundle(bundle)
     bundle["_bundle_path"] = str(saved)
@@ -275,6 +276,23 @@ def run_daily_pipeline(
         json.dump({k: v for k, v in bundle.items() if not k.startswith("_")}, f, ensure_ascii=False, indent=2)
 
     print(f"Bundle сохранён: {saved}")
+    if auto_publish:
+        import subprocess
+        print("Автопубликация варианта 1...")
+        subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "publish_telegram_bundle.py"),
+                "--bundle",
+                str(saved),
+                "--variant",
+                "1",
+            ],
+            check=True,
+        )
+        print("Пост опубликован в Telegram.")
+        return
+
     print("\n--- 3 варианта текста (одно изображение) ---")
     for v in variants:
         print(f"\n### Вариант {v['number']} · {v['label']}")
@@ -302,6 +320,7 @@ if __name__ == "__main__":
     parser.add_argument("--topic", default="")
     parser.add_argument("--use-scout", action="store_true")
     parser.add_argument("--publish", action="store_true", help="Опубликовать выбранный вариант в канал")
+    parser.add_argument("--auto-publish", action="store_true", help="После gate и генерации изображения сразу опубликовать вариант 1")
     parser.add_argument("--bundle", default="", help="Путь к post_bundle_*.json для --publish")
     parser.add_argument("--variant", type=int, default=0, choices=[0, 1, 2, 3])
     args = parser.parse_args()
@@ -311,6 +330,7 @@ if __name__ == "__main__":
         topic=args.topic,
         use_scout=args.use_scout,
         publish=args.publish,
+        auto_publish=args.auto_publish,
         variant=args.variant,
         bundle_path=args.bundle,
     )

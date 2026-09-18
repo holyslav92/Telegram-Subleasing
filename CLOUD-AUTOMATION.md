@@ -86,13 +86,13 @@ python3 scripts/telegram_doctor.py
 
 ```bash
 python3 scripts/telegram_ledger_sync.py
-python3 scripts/telegram_content_director.py --prepare
+python3 scripts/telegram_content_director.py --prepare --auto-publish
 ```
 
-Результат: `post_bundle_*.json` — **одно фото**, **3 текста** (разная структура, anti-repeat). Менеджер выбирает вариант:
+Результат: `post_bundle_*.json` — **одно фото**, **3 текста** (разная структура, anti-repeat). После успешных gate automation сразу публикует вариант 1:
 
 ```bash
-python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_bundle_....json --variant 2
+python3 scripts/daily_telegram_pipeline.py --auto-publish
 ```
 
 Отчёт директора (обязателен после прогона):
