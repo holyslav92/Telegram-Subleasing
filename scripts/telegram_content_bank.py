@@ -540,6 +540,7 @@ TOPIC_BANK = {
         {
             "id": "weekend_embankment_walk",
             "title": "Вечерняя прогулка по четырёхуровневой набережной Туры",
+            "entities": ["набережная туры", "мост влюблённых", "европейский берег"],
             "body": """<b>Вечерняя прогулка по четырёхуровневой набережной Туры</b>
 
 Пятница в Тюмени — идеальный момент для неспешной прогулки по единственной в России четырёхуровневой набережной реки Туры.
@@ -730,6 +731,10 @@ def get_next_topic(
         load_history,
     )
     from telegram_content_rules import get_blocked_topic_ids
+    from telegram_visual_reference import (
+        get_curated_reference_url,
+        requires_curated_reference,
+    )
 
     history = history if history is not None else load_history()
     blocked_topics = get_blocked_topic_ids()
@@ -751,6 +756,8 @@ def get_next_topic(
             return False
         if tid in blocked_ids or tid in exclude_ids:
             return False
+        if requires_curated_reference(topic) and not get_curated_reference_url(topic):
+            return False
         if entity_overlap(topic):
             return False
         if prefer_evergreen and not topic.get("evergreen", True):
@@ -762,10 +769,28 @@ def get_next_topic(
         eligible = [t for t in topics if is_eligible({**t, "evergreen": True}) or is_eligible(t)]
 
     if not eligible:
-        # Fallback: evergreen без пересечения entities
-        eligible = [t for t in topics if t.get("evergreen", True) and not entity_overlap(t)]
+        # Fallback не должен возвращать заблокированную локацию или тему без фото.
+        eligible = [
+            t
+            for t in topics
+            if t["id"] not in blocked_topics
+            and not (
+                requires_curated_reference(t)
+                and not get_curated_reference_url(t)
+            )
+            and t.get("evergreen", True)
+            and not entity_overlap(t)
+        ]
     if not eligible:
-        eligible = topics[:]
+        eligible = [
+            t
+            for t in topics
+            if t["id"] not in blocked_topics
+            and not (
+                requires_curated_reference(t)
+                and not get_curated_reference_url(t)
+            )
+        ]
 
     published_ids = get_all_published_ids(history)
 

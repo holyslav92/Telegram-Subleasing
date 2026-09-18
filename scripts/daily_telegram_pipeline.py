@@ -30,6 +30,7 @@ from telegram_content_bank import get_next_topic
 from telegram_post_history import load_ledger, strip_html
 from telegram_post_composer import enrich_topic_data
 from telegram_text_variants import build_text_variants
+from telegram_visual_reference import validate_reference_policy
 
 CATEGORIES_SCHEDULE = [
     "afisha",
@@ -232,11 +233,26 @@ def run_daily_pipeline(
                 b64_logo = base64.b64encode(f.read()).decode("utf-8")
             input_urls.append(f"data:image/jpeg;base64,{b64_logo}")
 
-    pexels_ref = post.get("image_prompt", {}).get("pexels_reference_url", "")
-    if pexels_ref:
-        input_urls.append(pexels_ref)
+    reference_url = (
+        post.get("image_prompt", {}).get("reference_url")
+        or post.get("image_prompt", {}).get("pexels_reference_url")
+        or ""
+    )
+    if reference_url:
+        input_urls.append(reference_url)
 
-    print(f"Генерация одного изображения (GRSAI, до 3 попыток)...")
+    reference_errors = validate_reference_policy(input_urls)
+    if reference_errors:
+        print(
+            "КРИТИЧЕСКАЯ ОШИБКА: генерация остановлена — "
+            + "; ".join(reference_errors)
+        )
+        sys.exit(1)
+
+    print(
+        "Генерация одного изображения (GRSAI, до 3 попыток; "
+        "референсная фотография обязательна)..."
+    )
     photo_url = None
     for attempt in range(1, 4):
         try:
