@@ -29,6 +29,7 @@ from telegram_content_bank import get_next_topic
 from telegram_post_composer import enrich_topic_data
 from telegram_post_history import load_history, record_publication
 from telegram_credentials import load_telegram_credentials
+from telegram_visual_reference import validate_reference_policy
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES_PATH = WORKSPACE_ROOT / "shared" / "telegram-post-templates.json"
@@ -93,15 +94,26 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
     body = topic_data.get("body", "")
     image_title = image_title or topic_data.get("image_title", "")
     
-    # Визуальный референс через Pexels API под конкретную тему
+    # Сначала используем кураторский референс темы, затем реальную фотографию Pexels.
+    curated_reference = (
+        topic_data.get("visual_reference_url")
+        or topic_data.get("reference_image_url")
+        or ""
+    ).strip()
     pexels_term = topic_data.get("search_query", "cozy modern scandinavian apartment interior")
-    pexels_data = fetch_pexels_idea(pexels_term)
-    
+    pexels_data = {} if curated_reference else fetch_pexels_idea(pexels_term)
+
     visual_idea = ""
-    pexels_url = ""
-    if pexels_data and pexels_data.get("alt"):
-        visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
-        pexels_url = pexels_data.get("url", "")
+    reference_url = curated_reference
+    reference_source = "curated_topic" if curated_reference else "pexels"
+    if curated_reference:
+        visual_idea = "Use the supplied curated source photograph as the exact scene reference."
+    elif pexels_data and pexels_data.get("alt"):
+        visual_idea = (
+            "Use the supplied Pexels photograph as the exact source scene; "
+            f"its visible composition is: {pexels_data['alt']}."
+        )
+        reference_url = pexels_data.get("url", "")
 
     image_meta = build_image_prompt(
         category_id,
@@ -109,9 +121,13 @@ def build_post(category_id: str, topic: str = "", details: str = "", image_title
         image_title,
         visual_idea=visual_idea,
         topic_id=topic_id,
+        scene_override=visual_idea if curated_reference else "",
     )
-    if pexels_url:
-        image_meta["pexels_reference_url"] = pexels_url
+    if reference_url:
+        image_meta["reference_url"] = reference_url
+        image_meta["reference_source"] = reference_source
+        if reference_source == "pexels":
+            image_meta["pexels_reference_url"] = reference_url
 
     post_data = {
         "id": topic_id,
@@ -353,11 +369,23 @@ def main():
                 input_urls.append(f"data:image/jpeg;base64,{b64_logo}")
                 print(f"Используем локальный логотип (base64): {logo_local.name}")
 
-        pexels_u = post.get("image_prompt", {}).get("pexels_reference_url", "")
-        if pexels_u:
-            input_urls.append(pexels_u)
+        reference_u = (
+            post.get("image_prompt", {}).get("reference_url")
+            or post.get("image_prompt", {}).get("pexels_reference_url")
+            or ""
+        )
+        if reference_u:
+            input_urls.append(reference_u)
+
+        reference_errors = validate_reference_policy(input_urls)
+        if reference_errors:
+            print("Генерация остановлена: " + "; ".join(reference_errors))
+            sys.exit(1)
             
-        print(f"Подготовлено референсов (ровно логотип + 1 идея из Pexels): {len(input_urls)}")
+        print(
+            "Подготовлено референсов (логотип + исходная фотография): "
+            f"{len(input_urls)}"
+        )
         for idx, u in enumerate(input_urls, 1):
             print(f"  [Референс {idx}] -> {u}")
 

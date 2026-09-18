@@ -27,6 +27,16 @@ HEADLINE_STYLE = (
     "elegant letter-spacing, subtle soft shadow or gentle gradient mask for perfect legibility over the scene."
 )
 
+REFERENCE_FIRST_RULE = (
+    "REFERENCE-FIRST RULE (CRITICAL): Reference image 2 is the real source photograph for the scene. "
+    "Use it as the image-to-image base, preserving its actual perspective, architecture, proportions, "
+    "lighting direction and recognizable objects. Transform the source photograph conservatively into an "
+    "editorial poster. Do not invent, add or replace bridges, landmarks, buildings, skylines, roads, "
+    "waterfront structures or other location-specific details that are absent from reference image 2. "
+    "If the source photo does not show a landmark clearly, do not depict that landmark. "
+    "Never create a fictional Tyumen location from the text prompt alone."
+)
+
 
 def build_image_prompt(
     category_id: str,
@@ -117,12 +127,12 @@ def build_image_prompt(
     )
 
     if category_id in ("weekend_thermal", "city_guide"):
-        subject = scene_by_topic.get(topic_id) or base_scene
+        subject = base_scene if scene_override else (scene_by_topic.get(topic_id) or base_scene)
         full_prompt = (
             f"Square 1:1 premium travel editorial poster for a Russian apartment brand in Tyumen. "
             f"{DESIGN_STYLE} "
             f"Scene: {subject} "
-            f"Reference image 2 may inspire mood, lighting and composition only — not the logo. "
+            f"{REFERENCE_FIRST_RULE} "
             f"{headline_prompt} "
             f"{LOGO_COMPOSITE_RULE} "
             f"Photorealistic 4K, 35mm lens, natural cinematic lighting, no text other than the headline and logo."
@@ -133,7 +143,7 @@ def build_image_prompt(
             f"{DESIGN_STYLE} "
             f"Subject: {base_scene} "
             f"Authentic cozy Scandinavian apartment in Tyumen, low-rise neighborhood outside windows, absolutely no skyscrapers. "
-            f"Reference image 2 may inspire mood and composition only — not the logo. "
+            f"{REFERENCE_FIRST_RULE} "
             f"{headline_prompt} "
             f"{LOGO_COMPOSITE_RULE} "
             f"Photorealistic 4K interior photography, 35mm lens, natural soft warm lighting."

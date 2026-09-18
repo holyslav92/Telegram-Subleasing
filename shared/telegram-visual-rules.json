@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "reference_first": true,
+  "require_two_references": true,
+  "allow_prompt_only_generation": false,
+  "pexels_reference_mode": "source_photo",
+  "curated_reference_required_topic_ids": [
+    "afisha_quiet_lake",
+    "afisha_jazz_embankment",
+    "district_novin",
+    "district_evropeyskiy",
+    "district_vidniy",
+    "district_zvezdny",
+    "city_thermal_pools",
+    "city_dzerzhinskogo_excursions",
+    "weekend_embankment_walk",
+    "weekend_letoleto_spa"
+  ],
+  "blocked_topic_ids": [
+    "afisha_jazz_embankment",
+    "weekend_embankment_walk"
+  ],
+  "blocked_topic_reasons": {
+    "afisha_jazz_embankment": "Набережная уже использовалась; нужна новая локация и отдельный реальный референс.",
+    "weekend_embankment_walk": "Набережная уже использовалась; нужна новая локация и отдельный реальный референс."
+  }
+}

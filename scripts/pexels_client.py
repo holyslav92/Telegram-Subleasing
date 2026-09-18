@@ -7,7 +7,6 @@
 
 import json
 import os
-import random
 import urllib.request
 import urllib.parse
 
@@ -20,7 +19,7 @@ def fetch_pexels_idea(query: str, api_key: str = None) -> dict:
     if not key:
         return {}
     
-    url = f"https://api.pexels.com/v1/search?query={urllib.parse.quote(query)}&per_page=5&orientation=square"
+    url = f"https://api.pexels.com/v1/search?query={urllib.parse.quote(query)}&per_page=1&orientation=square"
     req = urllib.request.Request(url, headers={"Authorization": key, "User-Agent": "ExcaliburPexelsClient/1.0"})
     
     try:
@@ -28,11 +27,14 @@ def fetch_pexels_idea(query: str, api_key: str = None) -> dict:
             data = json.loads(resp.read().decode("utf-8"))
             photos = data.get("photos", [])
             if photos:
-                chosen = random.choice(photos)
+                chosen = photos[0]
                 return {
                     "alt": chosen.get("alt", ""),
                     "url": chosen.get("src", {}).get("large", ""),
-                    "photographer": chosen.get("photographer", "")
+                    "source_url": chosen.get("url", ""),
+                    "photographer": chosen.get("photographer", ""),
+                    "width": chosen.get("width", 0),
+                    "height": chosen.get("height", 0),
                 }
     except Exception as e:
         print(f"Pexels API note: {e}")

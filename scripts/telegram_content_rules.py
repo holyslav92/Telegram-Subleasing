@@ -27,7 +27,14 @@ def load_content_rules() -> dict:
 
 def get_blocked_topic_ids() -> set[str]:
     rules = load_content_rules()
-    return {str(x) for x in rules.get("blocked_topic_ids") or []}
+    blocked = {str(x) for x in rules.get("blocked_topic_ids") or []}
+    try:
+        from telegram_visual_reference import get_visual_blocked_topic_ids
+
+        blocked.update(get_visual_blocked_topic_ids())
+    except Exception:
+        pass
+    return blocked
 
 
 def check_forbidden_content(
