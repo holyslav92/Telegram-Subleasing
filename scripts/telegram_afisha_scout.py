@@ -30,7 +30,7 @@ TENANT_CONFIG = WORKSPACE_ROOT / "shared" / "tenant-config.json"
 WEEKDAY_ABBR = ("пн", "вт", "ср", "чт", "пт", "сб", "вс")
 
 CTA_BLOCK = """
-Бронируйте по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">нашем сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> читайте на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>."""
+Бронь — на <b><a href="https://добрыйдом-72.рф/booking/">странице бронирования</a></b>; отзывы — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>; новости и общение — в <b><a href="https://max.ru/id660300569233_biz">Максе</a></b>."""
 
 
 def load_scout_urls() -> list[str]:
@@ -114,6 +114,12 @@ def parse_events_from_html(html: str, source: str) -> list[dict]:
         r"(\d{1,2}\s+(?:январ\w+|феврал\w+|март\w+|апрел\w+|апрел\w+|ма\w+|июн\w+|"
         r"июл\w+|август\w+|сентябр\w+|октябр\w+|ноябр\w+|декабр\w+)\w*)"
         r"[^.]{0,80}?([А-ЯЁ][а-яё]{4,}(?:\s+[А-ЯЁa-z«][^.]{4,40}){0,4})",
+        # Новостные материалы часто начинают с «18 сентября стартует фестиваль».
+        # Вытаскиваем только название события, а не весь заголовок статьи.
+        r"(\d{1,2}\s+(?:январ\w+|феврал\w+|март\w+|апрел\w+|ма\w+|июн\w+|"
+        r"июл\w+|август\w+|сентябр\w+|октябр\w+|ноябр\w+|декабр\w+))"
+        r"[^.]{0,100}?(?:фестиваль|концерт|спектакль|выставк\w*)\s+"
+        r"[«\"]?([А-ЯЁ][^»\".!?]{4,70})[»\"]?",
     ]
     for pat in patterns:
         for m in re.finditer(pat, text, flags=re.I):
@@ -164,9 +170,9 @@ def build_dynamic_post(event: dict) -> dict:
     title = event["title"]
     body = f"""<b>{title}</b>
 
-<b>Афиша Тюмени:</b> {date_human} — отличный повод спланировать поездку в город.
+{date_human} — повод выбраться в город. Проверьте время, площадку и билеты перед поездкой.
 
-Остановиться удобнее всего в апартаментах «Добрый дом»: отельный сатин, чистота и <b>бесконтактный заезд 24/7</b> в шаговой доступности от центра и набережной.{CTA_BLOCK}"""
+Если едете из другого города, «Добрый дом» поможет подобрать квартиру под маршрут. Короткая бронь, понятные условия, заезд 24/7.{CTA_BLOCK}"""
     return {
         "id": f"scout_{event['event_date'].replace('-', '')}_{hash(title) % 100000:05d}",
         "title": title,

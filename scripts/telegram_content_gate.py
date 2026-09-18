@@ -64,7 +64,9 @@ def check_post(
     if topic_id and topic_id in blocked_ids:
         reasons.append(f"topic_id '{topic_id}' в cooldown {60} дней")
 
-    if category_id and category_id in get_category_in_cooldown(ledger):
+    # Актуальная афиша не должна блокироваться evergreen-cooldown рубрики:
+    # событие привязано к конкретной дате и не повторяет обычный тематический пост.
+    if category_id and category_id in get_category_in_cooldown(ledger) and not (event_date and not evergreen):
         reasons.append(
             f"рубрика '{category_id}' уже публиковалась за последние {CATEGORY_COOLDOWN_DAYS} дней"
         )

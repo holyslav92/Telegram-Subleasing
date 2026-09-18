@@ -15,10 +15,23 @@
     "care_tea": "В апартаментах не кладут конфету к чаю — тема вводит в заблуждение.",
     "конфет": "Не обещаем конфеты/сладости к чаю — такого сервиса нет."
   },
+  "tone": {
+    "avoid_pompous": [
+      "абсолютный фундамент",
+      "безупречное пространство",
+      "регламент идеальной",
+      "4-5 звезд",
+      "мы в «добром доме» это слышим чаще, чем кажется",
+      "для нас это не мелочь"
+    ],
+    "prefer": "простой разговорный русский, как объясняет менеджер в чате — без «регламентов», «фундаментов» и звёзд отелей"
+  },
   "publish_workflow": {
     "variants_count": 3,
     "one_image_multiple_texts": true,
-    "manager_picks_variant": true,
-    "auto_publish_to_channel": false
+    "manager_picks_variant": false,
+    "auto_publish_to_channel": true,
+    "default_variant": 1,
+    "publish_time_utc": "05:00"
   }
 }

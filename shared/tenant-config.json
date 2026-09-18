@@ -41,8 +41,10 @@
   "dzen_rf_pack": true,
   "scout_signal_urls": [
     "https://visittyumen.ru",
-    "https://afisha.72.ru"
+    "https://afisha.72.ru",
+    "https://megatyumen.ru"
   ],
+  "booking_url": "https://добрыйдом-72.рф/booking/",
   "interlink_old_articles": false,
   "style_files": {
     "soul": "shared/SOUL.md",

@@ -53,11 +53,13 @@
     {"id": "save_business", "title": "Командировка без нервов", "items": ["Бронируйте с запасом по времени заезда", "Сохраните чек с QR сразу после оплаты", "Попросите документы заранее — мы готовим пакет"]}
   ],
   "cta_endings": [
-    {"id": "cta_site_direct", "html": "Забронировать по <b>прямым ценам</b> — на <b><a href=\"https://добрыйдом-72.рф/\">нашем сайте</a></b>."},
-    {"id": "cta_site_avito", "html": "Каталог и живые <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">отзывы</a></b> — на <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b>; бронь без переплат — на <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b>."},
+    {"id": "cta_all_channels", "html": "Бронь: <b><a href=\"https://добрыйдом-72.рф/booking/\">сайт</a></b> · отзывы: <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b> · новости и общение: <b><a href=\"https://max.ru/id660300569233_biz\">Макс</a></b>."},
+    {"id": "cta_site_direct", "html": "Забронировать по <b>прямым ценам</b> можно на <b><a href=\"https://добрыйдом-72.рф/booking/\">странице бронирования</a></b>."},
+    {"id": "cta_site_avito", "html": "Каталог и живые <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">отзывы</a></b> — на <b><a href=\"https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4\">Авито</a></b>; забронировать — на <b><a href=\"https://добрыйдом-72.рф/booking/\">странице бронирования</a></b>."},
+    {"id": "cta_site_max", "html": "Квартиры и бронь — на <b><a href=\"https://добрыйдом-72.рф/booking/\">странице бронирования</a></b>; новости и общение — в <b><a href=\"https://max.ru/id660300569233_biz\">Максе</a></b>."},
     {"id": "cta_excursions", "html": "А после прогулок — авторские <b><a href=\"https://добрыйдом-72.рф/excursions/\">экскурсии партнёров</a></b> и бронь квартир на <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b>."},
     {"id": "cta_manager", "html": "Не уверены с районом? Напишите <b><a href=\"https://t.me/Dobriy_dom_Tyumen\">менеджеру</a></b> — подберём за пару сообщений."},
-    {"id": "cta_max", "html": "Новости и акции — в канале <b><a href=\"https://max.ru/id660300569233_biz\">Макс</a></b>; бронь — на <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b>."},
+    {"id": "cta_max", "html": "Новости и общение — в <b><a href=\"https://max.ru/id660300569233_biz\">Максе</a></b>; бронь — на <b><a href=\"https://добрыйдом-72.рф/booking/\">странице бронирования</a></b>."},
     {"id": "cta_early_booking", "html": "Планируете заранее? На <b><a href=\"https://добрыйдом-72.рф/\">сайте</a></b> действует <b>скидка 10% при бронировании за 20 дней</b>."},
     {"id": "cta_soft_save", "html": "Если пригодилось — сохраните пост. Бронь, когда созреете: <b><a href=\"https://добрыйдом-72.рф/\">добрыйдом-72.рф</a></b>."},
     {"id": "cta_question", "html": "А вы в Тюмень едете впервые или уже знаете город? Напишите в комментариях — подскажем маршрут. Бронь: <b><a href=\"https://добрыйдом-72.рф/\">сайт</a></b>."},
@@ -70,12 +72,12 @@
     {"id": "urgency_late_arrival", "template": "При позднем прилёте важнее не «красивая картинка в объявлении», а гарантированный заезд без ожидания."}
   ],
   "category_defaults": {
-    "afisha": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_tyumen_evening", "save_weekend"], "cta_pool": ["cta_excursions", "cta_site_avito", "cta_question", "cta_soft_save"]},
-    "district_guide": {"audience_tag": "family", "contrast_ok": false, "save_worthy_pool": ["save_district"], "cta_pool": ["cta_manager", "cta_site_direct", "cta_site_avito"]},
+    "afisha": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_tyumen_evening", "save_weekend"], "cta_pool": ["cta_all_channels", "cta_site_avito", "cta_question", "cta_soft_save"]},
+    "district_guide": {"audience_tag": "family", "contrast_ok": false, "save_worthy_pool": ["save_district"], "cta_pool": ["cta_all_channels", "cta_manager", "cta_site_direct", "cta_site_avito"]},
     "host_story": {"audience_tag": "general", "contrast_ok": true, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_proof_close", "cta_site_direct", "cta_soft_save", "cta_manager"]},
-    "service_standards": {"audience_tag": "business", "contrast_ok": true, "save_worthy_pool": ["save_business", "save_checkin"], "cta_pool": ["cta_site_direct", "cta_early_booking", "cta_proof_close"]},
-    "weekend_thermal": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_excursions", "cta_site_avito", "cta_max"]},
-    "special_offers": {"audience_tag": "general", "contrast_ok": false, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_early_booking", "cta_site_direct", "cta_site_avito"]},
-    "siberian_hospitality": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_soft_save", "cta_max", "cta_site_direct"]}
+    "service_standards": {"audience_tag": "general", "craft_density": "light", "contrast_ok": false, "save_worthy_pool": ["save_business", "save_checkin"], "cta_pool": ["cta_site_direct", "cta_site_avito", "cta_site_max", "cta_manager"]},
+    "weekend_thermal": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_all_channels", "cta_site_avito", "cta_site_max", "cta_max", "cta_manager"]},
+    "special_offers": {"audience_tag": "general", "contrast_ok": false, "save_worthy_pool": ["save_checkin"], "cta_pool": ["cta_all_channels", "cta_early_booking", "cta_site_direct", "cta_site_avito"]},
+    "siberian_hospitality": {"audience_tag": "couple", "contrast_ok": false, "save_worthy_pool": ["save_weekend", "save_tyumen_evening"], "cta_pool": ["cta_all_channels", "cta_soft_save", "cta_max", "cta_site_max", "cta_site_direct"]}
   }
 }

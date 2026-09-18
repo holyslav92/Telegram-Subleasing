@@ -6,6 +6,12 @@
 import os
 from pexels_client import fetch_pexels_idea
 
+REAL_SITE_PHOTOS = [
+    "https://xn---72-9cdob8azaodt6k.xn--p1ai/wp-content/uploads/2023/05/8-dobryj-dom-tyumen-kvartiry-posutochno-evropejskij-zarechnyj-snyat-kvartiru.jpg",
+    "https://xn---72-9cdob8azaodt6k.xn--p1ai/wp-content/uploads/2023/05/15-dobryj-dom-tyumen-kvartiry-posutochno-novin-czentr-snyat-na-sutki-kv-scaled.jpg",
+    "https://xn---72-9cdob8azaodt6k.xn--p1ai/wp-content/uploads/2023/05/12-dobryj-dom-tyumen-kvartiry-posutochno-novin-czentr-snyat-na-sutki-kvartiru.jpg",
+]
+
 # Жёсткое правило: логотип только копируется с reference image 1, без перерисовки
 LOGO_COMPOSITE_RULE = (
     "LOGO RULE (CRITICAL, HIGHEST PRIORITY): Reference image 1 is the official brand logo asset. "
@@ -51,6 +57,9 @@ def build_image_prompt(
         text_on_image = titles_map.get(category_id, "Добрый дом Тюмень")
 
     pexels_image_url = ""
+    site_reference_url = ""
+    if category_id in ("district_guide", "host_story", "service_standards", "special_offers", "siberian_hospitality"):
+        site_reference_url = REAL_SITE_PHOTOS[abs(hash(topic_id or category_id)) % len(REAL_SITE_PHOTOS)]
     if not visual_idea:
         search_terms = {
             "afisha": "city evening concert theater celebration warm lights",
@@ -66,7 +75,6 @@ def build_image_prompt(
         pexels_data = fetch_pexels_idea(search_terms.get(category_id, "cozy apartment interior"))
         if pexels_data and pexels_data.get("alt"):
             visual_idea = f"Realistic photography scene inspired by real life aesthetic: {pexels_data['alt']}."
-            pexels_image_url = pexels_data.get("url", "")
 
     scene_by_topic = {
         "city_thermal_pools": (
@@ -144,5 +152,5 @@ def build_image_prompt(
         "text_on_image": text_on_image,
         "aspect_ratio": "1:1",
         "resolution": "1K",
-        "pexels_reference_url": pexels_image_url,
+        "pexels_reference_url": site_reference_url or pexels_image_url,
     }
