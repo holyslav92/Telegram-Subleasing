@@ -518,7 +518,7 @@ TOPIC_BANK = {
             "event_date": "2026-09-18",
             "evergreen": False,
             "signal_urls": [
-                "https://megatyumen.ru/obshestvo/festival-tyumenskaya-osen-1820-sentyabrya-2026-goda-degustaciya-oladushek-koncerty-i-masterklass/"
+                "https://megatyumen.ru/obshestvo/festival-tyumenskaya-osen-1820-sentyabrya-2026-goda-degustaciya-oladushek-koncerty-i-masterklassy/"
             ],
             "image_title": "Фестиваль «Тюменская осень»",
             "search_query": "Tyumen autumn festival concert food market warm real city photography"

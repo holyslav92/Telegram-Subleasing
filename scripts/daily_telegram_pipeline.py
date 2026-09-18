@@ -52,7 +52,7 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
     ledger = load_ledger()
     exclude_ids: set[str] = set()
 
-    if category == "afisha" and datetime.now().weekday() == 0 and not topic and use_scout:
+    if category in ("afisha", "weekend_thermal") and not topic and use_scout:
         try:
             from telegram_afisha_scout import scout_afisha_topic, is_valid_event_title
             scout_topic = scout_afisha_topic()
@@ -68,7 +68,7 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
                 }
                 status, reasons = check_post(post_probe, ledger)
                 if status == "PASS" and is_valid_event_title(scout_topic.get("title", "")):
-                    print(f"Scout: тема прошла gate — {scout_topic.get('id')}")
+                    print(f"Live research: тема прошла gate — {scout_topic.get('id')}")
                     return scout_topic, None
                 print(f"Scout FAIL — fallback на банк: {reasons}")
         except Exception as e:

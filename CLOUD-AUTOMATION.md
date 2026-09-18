@@ -86,7 +86,7 @@ python3 scripts/telegram_doctor.py
 
 ```bash
 python3 scripts/telegram_ledger_sync.py
-python3 scripts/telegram_content_director.py --prepare --auto-publish
+python3 scripts/telegram_content_director.py --prepare --use-scout --auto-publish
 ```
 
 Результат: `post_bundle_*.json` — **одно фото**, **3 текста** (разная структура, anti-repeat). После успешных gate automation сразу публикует вариант 1:
