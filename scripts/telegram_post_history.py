@@ -16,8 +16,8 @@ LEDGER_FILE = POSTS_DIR / "ledger.json"
 
 TOPIC_COOLDOWN_DAYS = 60
 ENTITY_COOLDOWN_DAYS = 45
-# Одна рубрика — не чаще раза в 21 день (≈3 недели; среда = host_story и т.д.)
-CATEGORY_COOLDOWN_DAYS = 21
+# Одна рубрика — не чаще раза в 7 дней (среда = host_story и т.д.)
+CATEGORY_COOLDOWN_DAYS = 7
 
 # Известные сущности для анти-дубля (нижний регистр)
 KNOWN_ENTITIES = [
@@ -65,9 +65,10 @@ MONTHS_RU = {
 def _parse_date(value: str) -> datetime | None:
     if not value:
         return None
+    value = value.strip()
     for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
         try:
-            return datetime.strptime(value[: len(fmt)], fmt)
+            return datetime.strptime(value, fmt)
         except ValueError:
             continue
     return None
