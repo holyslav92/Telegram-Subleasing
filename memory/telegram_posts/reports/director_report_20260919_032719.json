@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-09-19 03:27:19",
+  "week": "2026-W38",
+  "status": "NEEDS_ATTENTION",
+  "published_total": 16,
+  "recent_publications": [
+    {
+      "id": "special_long_stay",
+      "category_id": "special_offers",
+      "title": "Тариф «Длительное проживание»: скидка 10% от 10 ночей со сменой белья",
+      "published_at": "2026-09-19 03:27:16"
+    },
+    {
+      "id": "care_blanket",
+      "category_id": "host_story",
+      "title": "Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину",
+      "published_at": "2026-09-16 07:00:32"
+    },
+    {
+      "id": "care_kitchen_pans",
+      "category_id": "host_story",
+      "title": "Заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода",
+      "published_at": "2026-09-16 05:22:56"
+    },
+    {
+      "id": "special_referral_friend",
+      "category_id": "special_offers",
+      "title": "Программа «Добрые рекомендации»",
+      "published_at": "2026-09-09 07:18:35"
+    },
+    {
+      "id": "afisha_philharmonic_concerts",
+      "category_id": "afisha",
+      "title": "Музыкальные сезоны Тюменской Филармонии",
+      "published_at": "2026-09-07 05:00:08"
+    },
+    {
+      "id": "afisha_comedy_club",
+      "category_id": "afisha",
+      "title": "Stand-up и юмор: лёгкий вечер в Тюмени",
+      "published_at": "2026-09-07 04:57:23"
+    },
+    {
+      "id": "special_early_booking",
+      "category_id": "special_offers",
+      "title": "Скидка 10% на раннее бронирование",
+      "published_at": "2026-09-06 08:00:00"
+    }
+  ],
+  "lessons_recorded": 3,
+  "repetition_risks": [
+    "Opening hook повторялся 2×: «куда сходить в тюмени: термальные комплексы, экскурсии и отдых планируете визит …»"
+  ],
+  "recommendations": [
+    "Не использовать один opening hook дважды за 8 недель.",
+    "3 варианта: История / Чек-лист / Диалог — craft-композитор.",
+    "CTA, сцены и proof ротируются — см. used_* в lessons.json.",
+    "Конtrast и save-worthy — только в тему, не в каждом посте."
+  ],
+  "next_checks": [
+    "python3 scripts/telegram_content_learner.py --report",
+    "python3 scripts/telegram_history_backfill.py"
+  ]
+}

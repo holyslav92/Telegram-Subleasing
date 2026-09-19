@@ -32,16 +32,43 @@
       },
       "recorded_at": "2026-09-16 07:00:32",
       "lesson": "Опубликовано: Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_special_long_stay_20260919",
+      "topic_id": "special_long_stay",
+      "category_id": "special_offers",
+      "title": "Тариф «Длительное проживание»: скидка 10% от 10 ночей со сменой белья",
+      "opening_hook": "тариф «длительное проживание»: скидка 10% от 10 ночей со сменой белья неважно, впервые вы в тюмени или уже были — мысль ниже пригодится.",
+      "text_fingerprint": "895cf6526f930b34",
+      "variant_number": 2,
+      "week": "2026-W38",
+      "craft_meta": {
+        "variant": 2,
+        "topic_id": "special_long_stay",
+        "scene_id": "familiar_question",
+        "urgency_id": "urgency_event",
+        "audience_id": "general_7342",
+        "micro_proof_id": "proof_receipt",
+        "save_worthy_id": "save_checkin",
+        "cta_id": "cta_site_direct",
+        "audience_tag": "general"
+      },
+      "recorded_at": "2026-09-19 03:27:16",
+      "lesson": "Опубликовано: Тариф «Длительное проживание»: скидка 10% от 10 ночей со сменой белья. Не повторять hook и topic_id 60+ дней."
     }
   ],
   "used_opening_hooks": [
     "заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода бывало у вас такое: снимаете жилье на несколько дней, решаете утр",
-    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это "
+    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это ",
+    "тариф «длительное проживание»: скидка 10% от 10 ночей со сменой белья неважно, впервые вы в тюмени или уже были — мысль ниже пригодится."
   ],
   "used_angles_by_category": {
     "host_story": [
       "care_kitchen_pans",
       "care_blanket"
+    ],
+    "special_offers": [
+      "special_long_stay"
     ]
   },
   "banned_hooks": [
@@ -49,17 +76,30 @@
     "планируете визит в тюмень",
     "знаете даты предстоящей поездки"
   ],
-  "last_updated": "2026-09-16 07:00:32",
+  "last_updated": "2026-09-19 03:27:16",
   "used_cta_ids": [
-    "cta_proof_close"
+    "cta_proof_close",
+    "cta_site_direct"
   ],
   "used_scene_ids": [
-    "custom_scene_0"
+    "custom_scene_0",
+    "familiar_question"
   ],
-  "used_audience_lines": [],
+  "used_audience_lines": [
+    "general_7342"
+  ],
   "used_contrast_ids": [],
   "used_micro_proof_ids": [
-    "proof_bedding"
+    "proof_bedding",
+    "proof_receipt"
   ],
-  "used_urgency_ids": []
+  "used_urgency_ids": [
+    "urgency_event"
+  ],
+  "used_save_worthy_ids": [
+    "save_checkin"
+  ],
+  "save_worthy_weeks": [
+    "2026-W38"
+  ]
 }
