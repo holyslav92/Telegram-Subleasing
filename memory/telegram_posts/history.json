@@ -73,5 +73,10 @@
     "id": "care_blanket",
     "category_id": "host_story",
     "published_at": "2026-09-16 07:00:32"
+  },
+  {
+    "id": "special_long_stay",
+    "category_id": "special_offers",
+    "published_at": "2026-09-19 03:27:16"
   }
 ]
