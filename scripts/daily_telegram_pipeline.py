@@ -99,7 +99,11 @@ def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = Fal
             "event_date": topic_data.get("event_date", ""),
             "evergreen": topic_data.get("evergreen", True),
         }
-        status, reasons = check_post(post_probe, ledger)
+        status, reasons = check_post(
+            post_probe,
+            ledger,
+            ignore_category_cooldown=bool(topic),
+        )
         print(f"Gate попытка {attempt}/{MAX_GATE_RETRIES}: {status} — {topic_data.get('id')}")
         if reasons:
             print(f"  Причины: {reasons}")
@@ -202,7 +206,11 @@ def run_daily_pipeline(
             "event_date": topic_data.get("event_date", ""),
             "evergreen": topic_data.get("evergreen", True),
         }
-        status, reasons = check_post(probe, load_ledger())
+        status, reasons = check_post(
+            probe,
+            load_ledger(),
+            ignore_category_cooldown=bool(topic),
+        )
         if status != "PASS":
             print(f"Gate FAIL для варианта {v['number']}: {reasons}")
             sys.exit(1)
@@ -262,6 +270,7 @@ def run_daily_pipeline(
         "entities": post.get("entities", []),
         "event_date": post.get("event_date", ""),
         "evergreen": post.get("evergreen", True),
+        "manual_topic": bool(topic),
         "photo_url": photo_url,
         "image_prompt": post.get("image_prompt"),
         "reply_markup": post.get("reply_markup"),

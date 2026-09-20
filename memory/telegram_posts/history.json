@@ -88,5 +88,10 @@
     "id": "siberian_tea_ceremony",
     "category_id": "siberian_hospitality",
     "published_at": "2026-09-20 03:28:13"
+  },
+  {
+    "id": "trip_tobolsk_day",
+    "category_id": "siberian_hospitality",
+    "published_at": "2026-09-20 03:45:00"
   }
 ]

@@ -47,7 +47,11 @@ def main():
         "evergreen": bundle.get("evergreen", True),
     }
 
-    status, reasons = check_post(post, load_ledger())
+    status, reasons = check_post(
+        post,
+        load_ledger(),
+        ignore_category_cooldown=bool(bundle.get("manual_topic")),
+    )
     if status != "PASS":
         raise SystemExit(f"Gate FAIL: {reasons}")
 

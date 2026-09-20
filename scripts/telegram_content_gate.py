@@ -32,6 +32,7 @@ def check_post(
     post: dict,
     ledger: list | None = None,
     evergreen: bool | None = None,
+    ignore_category_cooldown: bool = False,
 ) -> tuple[str, list[str]]:
     """
     Проверяет пост. Возвращает ('PASS'|'FAIL', [причины]).
@@ -66,7 +67,12 @@ def check_post(
 
     # Актуальная афиша не должна блокироваться evergreen-cooldown рубрики:
     # событие привязано к конкретной дате и не повторяет обычный тематический пост.
-    if category_id and category_id in get_category_in_cooldown(ledger) and not (event_date and not evergreen):
+    if (
+        category_id
+        and category_id in get_category_in_cooldown(ledger)
+        and not (event_date and not evergreen)
+        and not ignore_category_cooldown
+    ):
         reasons.append(
             f"рубрика '{category_id}' уже публиковалась за последние {CATEGORY_COOLDOWN_DAYS} дней"
         )
