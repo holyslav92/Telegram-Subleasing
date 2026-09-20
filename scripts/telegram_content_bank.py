@@ -739,7 +739,30 @@ TOPIC_BANK = {
 
 Выбирайте подходящий вариант по <b>прямым ценам</b> на <b><a href="https://добрыйдом-72.рф/">официальном сайте</a></b>. <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Отзывы гостей</a></b> смотрите на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, а новости читайте в <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
             "image_title": "Сибирский уютный вечер",
-            "search_query": "herbal tea pot steam ceramic cups wooden table warm soft lights"
+            "search_query": "herbal tea pot steam ceramic cups wooden table warm soft lights",
+            "body_variants": [
+                """<b>Сибирское чаепитие после дороги: простой вечер без спешки</b>
+
+После долгой дороги не всегда хочется снова куда-то идти. Горячий чай, душ и немного тишины — уже хороший план на вечер.
+
+Любимый травяной сбор можно взять с собой в поездку и заварить, когда захочется переключиться на отдых.
+
+Бронь: <b><a href="https://добрыйдом-72.рф/booking/">страница бронирования</a></b> · отзывы: <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b> · новости: <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+                """<b>Что взять в поездку, чтобы вечер получился спокойнее</b>
+
+1️⃣ Любимый чай или травяной сбор.
+2️⃣ Удобную одежду для дома.
+3️⃣ Десять минут без телефона после дороги.
+
+Квартира, душ и тишина — иногда этого достаточно, чтобы почувствовать себя лучше.
+
+Забронировать: <b><a href="https://добрыйдом-72.рф/booking/">сайт</a></b> · посмотреть отзывы: <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b> · общаться с нами: <b><a href="https://max.ru/id660300569233_biz">Макс</a></b>.""",
+                """<b>После дороги вы первым делом ставите чайник или просто ложитесь отдыхать?</b>
+
+В поездке не обязательно придумывать программу на каждый вечер. Иногда хороший сценарий — принять душ, заварить любимый сбор и никуда не торопиться.
+
+Если едете в Тюмень, квартиру можно выбрать на <b><a href="https://добрыйдом-72.рф/booking/">странице бронирования</a></b>. Отзывы — на <b><a href="https://www.avito.ru/brands/dobriydomtymen/all?sellerId=5a9944e5fd6eca88b3c4f0864c03f0b4">Авито</a></b>, новости — в <b><a href="https://max.ru/id660300569233_biz">Максе</a></b>."""
+            ]
         }
     ]
 }

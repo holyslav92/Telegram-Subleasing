@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-09-20 03:28:13",
+  "week": "2026-W38",
+  "status": "NEEDS_ATTENTION",
+  "published_total": 18,
+  "recent_publications": [
+    {
+      "id": "siberian_tea_ceremony",
+      "category_id": "siberian_hospitality",
+      "title": "siberian_tea_ceremony",
+      "published_at": "2026-09-20 03:28:13"
+    },
+    {
+      "id": "event_tyumen_autumn_20260918",
+      "category_id": "weekend_thermal",
+      "title": "event_tyumen_autumn_20260918",
+      "published_at": "2026-09-18 05:29:26"
+    },
+    {
+      "id": "event_gadkiy_utyonok_20260918",
+      "category_id": "weekend_thermal",
+      "title": "event_gadkiy_utyonok_20260918",
+      "published_at": "2026-09-17 08:07:02"
+    },
+    {
+      "id": "care_blanket",
+      "category_id": "host_story",
+      "title": "Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину",
+      "published_at": "2026-09-16 07:00:32"
+    },
+    {
+      "id": "care_kitchen_pans",
+      "category_id": "host_story",
+      "title": "Заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода",
+      "published_at": "2026-09-16 05:22:56"
+    },
+    {
+      "id": "special_referral_friend",
+      "category_id": "special_offers",
+      "title": "Программа «Добрые рекомендации»",
+      "published_at": "2026-09-09 07:18:35"
+    },
+    {
+      "id": "afisha_philharmonic_concerts",
+      "category_id": "afisha",
+      "title": "Музыкальные сезоны Тюменской Филармонии",
+      "published_at": "2026-09-07 05:00:08"
+    }
+  ],
+  "lessons_recorded": 5,
+  "repetition_risks": [
+    "Opening hook повторялся 2×: «куда сходить в тюмени: термальные комплексы, экскурсии и отдых планируете визит …»"
+  ],
+  "recommendations": [
+    "Не использовать один opening hook дважды за 8 недель.",
+    "3 варианта: История / Чек-лист / Диалог — craft-композитор.",
+    "CTA, сцены и proof ротируются — см. used_* в lessons.json.",
+    "Конtrast и save-worthy — только в тему, не в каждом посте."
+  ],
+  "next_checks": [
+    "python3 scripts/telegram_content_learner.py --report",
+    "python3 scripts/telegram_history_backfill.py"
+  ]
+}
