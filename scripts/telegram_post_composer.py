@@ -145,6 +145,35 @@ def strip_html(text: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", text or "")).strip()
 
 
+def _remove_repeated_sentences(text: str) -> str:
+    """Убирает повтор одной и той же фразы внутри абзаца."""
+    parts = re.split(r"(?<=[.!?])\s+", text.strip())
+    seen: set[str] = set()
+    result: list[str] = []
+    for part in parts:
+        key = re.sub(r"\s+", " ", part).strip().lower()
+        if key and key not in seen:
+            seen.add(key)
+            result.append(part.strip())
+    return " ".join(result)
+
+
+def _clean_core_paragraphs(paragraphs: list[str], title: str, scene: str = "") -> list[str]:
+    """Очищает смысловые абзацы от заголовка, сцены и повторов."""
+    title_key = strip_html(title).lower().strip()
+    scene_key = strip_html(scene).lower().strip()
+    result: list[str] = []
+    for paragraph in paragraphs:
+        cleaned = _remove_repeated_sentences(paragraph)
+        key = strip_html(cleaned).lower()
+        if not key or key == title_key or key == scene_key:
+            continue
+        if title_key and title_key in key and len(key) < len(title_key) + 35:
+            continue
+        result.append(cleaned)
+    return result
+
+
 def _count_pompous(text: str) -> int:
     low = strip_html(text).lower()
     return sum(1 for phrase in POMPOUS_PHRASES if phrase in low)
@@ -286,6 +315,8 @@ def _compose_micro_proof(
     category_id: str = "",
 ) -> tuple[str | None, str | None]:
     cfg = load_craft_config()
+    if topic_craft.get("micro_proof_skip"):
+        return None, None
     if topic_craft.get("micro_proof"):
         return topic_craft["micro_proof"], topic_craft.get("micro_proof_id") or "topic_proof"
     # proof не всегда: ~60% постов
@@ -395,6 +426,7 @@ def compose_variant(
     variant_paragraphs = topic_craft.get("variant_paragraphs") or {}
     if str(variant) in variant_paragraphs:
         core_paragraphs = [soften_pompous(p) for p in variant_paragraphs[str(variant)]]
+    core_paragraphs = _clean_core_paragraphs(core_paragraphs, title)
 
     title_html = f"<b>{title}</b>" if title else ""
     craft_meta: dict = {"variant": variant, "topic_id": topic_id, "craft_density": density}
@@ -403,6 +435,7 @@ def compose_variant(
     if scene and _count_pompous(scene) > 0:
         scene = ""
         scene_id = "skipped_pompous_scene"
+    core_paragraphs = _clean_core_paragraphs(core_paragraphs, title, scene)
     craft_meta["scene_id"] = scene_id
 
     urgency, urgency_id = _compose_urgency(topic_data, topic_craft, memory)
@@ -467,7 +500,7 @@ def compose_variant(
         parts.extend(block)
         if urgency:
             parts.append(urgency)
-        if audience:
+        if audience and not topic_craft.get("audience_skip"):
             parts.append(audience)
         core_limit = 2 if density == "light" else 3
         parts.extend(core_paragraphs[1:core_limit] if _too_similar(scene, core_paragraphs[0]) else core_paragraphs[:core_limit])
@@ -487,7 +520,7 @@ def compose_variant(
 
     elif variant == 2:
         parts.append(title_html)
-        if audience:
+        if audience and not topic_craft.get("audience_skip"):
             parts.append(audience)
         if save_block:
             parts.append(save_block)

@@ -136,6 +136,17 @@
       "audience_tag": "family",
       "scene_seeds": ["Прогулка у воды, дети на площадке — район задаёт ритм поездки."]
     },
+    "siberian_tea_ceremony": {
+      "audience_skip": true,
+      "craft_density": "light",
+      "benefit_skip": true,
+      "micro_proof_skip": true,
+      "contrast_ok": false,
+      "cta_pool": ["cta_all_channels", "cta_site_avito", "cta_site_max"],
+      "scene_seeds": [
+        "После дороги хочется не программы на вечер, а горячего чая и десяти минут тишины."
+      ]
+    },
     "siberian_sunday_morning": {
       "audience_tag": "couple",
       "save_worthy": true,
