@@ -93,5 +93,10 @@
     "id": "trip_tobolsk_day",
     "category_id": "siberian_hospitality",
     "published_at": "2026-09-20 03:45:00"
+  },
+  {
+    "id": "event_tyumenskaya_kultura_20260921",
+    "category_id": "afisha",
+    "published_at": "2026-09-21 03:37:42"
   }
 ]
