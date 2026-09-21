@@ -32,16 +32,40 @@
       },
       "recorded_at": "2026-09-16 07:00:32",
       "lesson": "Опубликовано: Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_afisha_street_festival_20260921",
+      "topic_id": "afisha_street_festival",
+      "category_id": "afisha",
+      "title": "Уличные фестивали и ярмарки: атмосфера центра Тюмени",
+      "opening_hook": "уличные фестивали и ярмарки: атмосфера центра тюмени романтический вечер в городе начинается не с очереди у администратора.",
+      "text_fingerprint": "c78f8fa1995655d2",
+      "variant_number": 2,
+      "week": "2026-W39",
+      "craft_meta": {
+        "variant": 2,
+        "topic_id": "afisha_street_festival",
+        "scene_id": "door_moment",
+        "audience_id": "couple_1912",
+        "cta_id": "cta_excursions",
+        "audience_tag": "couple"
+      },
+      "recorded_at": "2026-09-21 03:09:30",
+      "lesson": "Опубликовано: Уличные фестивали и ярмарки: атмосфера центра Тюмени. Не повторять hook и topic_id 60+ дней."
     }
   ],
   "used_opening_hooks": [
     "заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода бывало у вас такое: снимаете жилье на несколько дней, решаете утр",
-    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это "
+    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это ",
+    "уличные фестивали и ярмарки: атмосфера центра тюмени романтический вечер в городе начинается не с очереди у администратора."
   ],
   "used_angles_by_category": {
     "host_story": [
       "care_kitchen_pans",
       "care_blanket"
+    ],
+    "afisha": [
+      "afisha_street_festival"
     ]
   },
   "banned_hooks": [
@@ -49,14 +73,18 @@
     "планируете визит в тюмень",
     "знаете даты предстоящей поездки"
   ],
-  "last_updated": "2026-09-16 07:00:32",
+  "last_updated": "2026-09-21 03:09:30",
   "used_cta_ids": [
-    "cta_proof_close"
+    "cta_proof_close",
+    "cta_excursions"
   ],
   "used_scene_ids": [
-    "custom_scene_0"
+    "custom_scene_0",
+    "door_moment"
   ],
-  "used_audience_lines": [],
+  "used_audience_lines": [
+    "couple_1912"
+  ],
   "used_contrast_ids": [],
   "used_micro_proof_ids": [
     "proof_bedding"
