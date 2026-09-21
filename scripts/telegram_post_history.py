@@ -65,9 +65,10 @@ MONTHS_RU = {
 def _parse_date(value: str) -> datetime | None:
     if not value:
         return None
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+    cleaned = value.strip()
+    for fmt, maxlen in (("%Y-%m-%d %H:%M:%S", 19), ("%Y-%m-%d", 10)):
         try:
-            return datetime.strptime(value[: len(fmt)], fmt)
+            return datetime.strptime(cleaned[:maxlen], fmt)
         except ValueError:
             continue
     return None
@@ -386,7 +387,7 @@ def get_category_in_cooldown(ledger: list[dict] | None = None) -> set[str]:
     blocked: set[str] = set()
     for entry in ledger:
         published_dt = _parse_date(entry.get("published_at", ""))
-        if published_dt is None or published_dt >= cutoff:
+        if published_dt is not None and published_dt >= cutoff:
             cat = entry.get("category_id", "")
             if cat:
                 blocked.add(cat)
