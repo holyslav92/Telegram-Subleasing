@@ -401,6 +401,16 @@ def _too_similar(a: str, b: str, threshold: float = 0.72) -> bool:
     return similarity_score(a, b) >= threshold
 
 
+def _has_phrase_overlap(a: str, b: str, words: int = 6) -> bool:
+    """Проверяет заметное пересечение фраз сцены и основного абзаца."""
+    left = re.findall(r"[а-яёa-z0-9]+", strip_html(a).lower())
+    right = re.findall(r"[а-яёa-z0-9]+", strip_html(b).lower())
+    if len(left) < words or len(right) < words:
+        return False
+    right_ngrams = {" ".join(right[i:i + words]) for i in range(len(right) - words + 1)}
+    return any(" ".join(left[i:i + words]) in right_ngrams for i in range(len(left) - words + 1))
+
+
 def compose_variant(
     topic_data: dict,
     category_id: str,
@@ -495,7 +505,10 @@ def compose_variant(
             block = [title_html, scene]
         else:
             block = [title_html]
-        if core_paragraphs and _too_similar(scene, core_paragraphs[0]):
+        if core_paragraphs and (
+            _too_similar(scene, core_paragraphs[0], threshold=0.45)
+            or _has_phrase_overlap(scene, core_paragraphs[0])
+        ):
             block = [title_html] + core_paragraphs[:1]
         parts.extend(block)
         if urgency:
@@ -503,7 +516,11 @@ def compose_variant(
         if audience and not topic_craft.get("audience_skip"):
             parts.append(audience)
         core_limit = 2 if density == "light" else 3
-        parts.extend(core_paragraphs[1:core_limit] if _too_similar(scene, core_paragraphs[0]) else core_paragraphs[:core_limit])
+        scene_repeats_core = core_paragraphs and (
+            _too_similar(scene, core_paragraphs[0], threshold=0.45)
+            or _has_phrase_overlap(scene, core_paragraphs[0])
+        )
+        parts.extend(core_paragraphs[1:core_limit] if scene_repeats_core else core_paragraphs[:core_limit])
         use_benefit_bridge = (
             benefit
             and not topic_craft.get("benefit_skip")

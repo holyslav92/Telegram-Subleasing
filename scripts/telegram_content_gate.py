@@ -6,6 +6,7 @@ PASS / FAIL: duplicate id, duplicate entity, прошедшая дата соб�
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -26,6 +27,36 @@ from telegram_post_history import (
     text_fingerprint,
 )
 from telegram_similarity import check_similarity_against_corpus, variants_too_similar
+
+
+def check_structural_quality(text: str, title: str = "") -> list[str]:
+    """Не пропускает повтор сцены, заголовок в списке и дубли предложений."""
+    plain = re.sub(r"<[^>]+>", " ", text or "")
+    plain = re.sub(r"\s+", " ", plain).strip()
+    reasons: list[str] = []
+    sentences = [
+        s.strip().lower()
+        for s in re.split(r"(?<=[.!?])\s+", plain)
+        if len(s.strip()) >= 35
+    ]
+    seen: set[str] = set()
+    for sentence in sentences:
+        if sentence in seen:
+            reasons.append("повтор одного предложения в тексте")
+            break
+        seen.add(sentence)
+
+    words = re.findall(r"[а-яёa-z0-9]+", plain.lower())
+    ngrams = {" ".join(words[i:i + 6]) for i in range(len(words) - 5)}
+    if len(ngrams) < len(words) - 5:
+        reasons.append("повтор фразы из 6 и более слов в тексте")
+
+    title_plain = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", title or "")).strip().lower()
+    for line in (text or "").splitlines():
+        if re.match(r"\s*[1-3]️⃣", line) and title_plain and title_plain in re.sub(r"<[^>]+>", " ", line).lower():
+            reasons.append("заголовок попал внутрь нумерованного списка")
+            break
+    return reasons
 
 
 def check_post(
@@ -86,6 +117,7 @@ def check_post(
         reasons.append(f"дата события в прошлом: {event_date}")
 
     reasons.extend(check_forbidden_content(text=text, topic_id=topic_id, title=title))
+    reasons.extend(check_structural_quality(text, title=title))
 
     # Проверка fingerprint против недавних постов
     fp = post.get("text_fingerprint") or text_fingerprint(text)
