@@ -73,5 +73,10 @@
     "id": "care_blanket",
     "category_id": "host_story",
     "published_at": "2026-09-16 07:00:32"
+  },
+  {
+    "id": "afisha_street_festival",
+    "category_id": "afisha",
+    "published_at": "2026-09-21 03:09:30"
   }
 ]

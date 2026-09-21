@@ -16,8 +16,8 @@ LEDGER_FILE = POSTS_DIR / "ledger.json"
 
 TOPIC_COOLDOWN_DAYS = 60
 ENTITY_COOLDOWN_DAYS = 45
-# Одна рубрика — не чаще раза в 21 день (≈3 недели; среда = host_story и т.д.)
-CATEGORY_COOLDOWN_DAYS = 21
+# Одна рубрика — не чаще раза в 7 дней (понедельник = afisha, среда = host_story и т.д.)
+CATEGORY_COOLDOWN_DAYS = 7
 
 # Известные сущности для анти-дубля (нижний регистр)
 KNOWN_ENTITIES = [
@@ -65,9 +65,10 @@ MONTHS_RU = {
 def _parse_date(value: str) -> datetime | None:
     if not value:
         return None
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+    cleaned = value.strip()
+    for fmt, maxlen in (("%Y-%m-%d %H:%M:%S", 19), ("%Y-%m-%d", 10)):
         try:
-            return datetime.strptime(value[: len(fmt)], fmt)
+            return datetime.strptime(cleaned[:maxlen], fmt)
         except ValueError:
             continue
     return None
@@ -386,7 +387,7 @@ def get_category_in_cooldown(ledger: list[dict] | None = None) -> set[str]:
     blocked: set[str] = set()
     for entry in ledger:
         published_dt = _parse_date(entry.get("published_at", ""))
-        if published_dt is None or published_dt >= cutoff:
+        if published_dt is not None and published_dt >= cutoff:
             cat = entry.get("category_id", "")
             if cat:
                 blocked.add(cat)
