@@ -32,16 +32,41 @@
       },
       "recorded_at": "2026-09-16 07:00:32",
       "lesson": "Опубликовано: Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_district_vidniy_20260922",
+      "topic_id": "district_vidniy",
+      "category_id": "district_guide",
+      "title": "ЖК «Видный»: кирпичная эстетика и семейный отдых у ТРЦ «Кристалл»",
+      "opening_hook": "жк «видный»: кирпичная эстетика и семейный отдых у трц «кристалл» семейный выезд — это когда «удобно всем», а не только взрослым.",
+      "text_fingerprint": "43d49efe8f429bdc",
+      "variant_number": 2,
+      "week": "2026-W39",
+      "craft_meta": {
+        "variant": 2,
+        "topic_id": "district_vidniy",
+        "scene_id": "familiar_question",
+        "audience_id": "family_8764",
+        "micro_proof_id": "proof_receipt",
+        "cta_id": "cta_site_direct",
+        "audience_tag": "family"
+      },
+      "recorded_at": "2026-09-22 03:06:20",
+      "lesson": "Опубликовано: ЖК «Видный»: кирпичная эстетика и семейный отдых у ТРЦ «Кристалл». Не повторять hook и topic_id 60+ дней."
     }
   ],
   "used_opening_hooks": [
     "заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода бывало у вас такое: снимаете жилье на несколько дней, решаете утр",
-    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это "
+    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это ",
+    "жк «видный»: кирпичная эстетика и семейный отдых у трц «кристалл» семейный выезд — это когда «удобно всем», а не только взрослым."
   ],
   "used_angles_by_category": {
     "host_story": [
       "care_kitchen_pans",
       "care_blanket"
+    ],
+    "district_guide": [
+      "district_vidniy"
     ]
   },
   "banned_hooks": [
@@ -49,17 +74,22 @@
     "планируете визит в тюмень",
     "знаете даты предстоящей поездки"
   ],
-  "last_updated": "2026-09-16 07:00:32",
+  "last_updated": "2026-09-22 03:06:20",
   "used_cta_ids": [
-    "cta_proof_close"
+    "cta_proof_close",
+    "cta_site_direct"
   ],
   "used_scene_ids": [
-    "custom_scene_0"
+    "custom_scene_0",
+    "familiar_question"
   ],
-  "used_audience_lines": [],
+  "used_audience_lines": [
+    "family_8764"
+  ],
   "used_contrast_ids": [],
   "used_micro_proof_ids": [
-    "proof_bedding"
+    "proof_bedding",
+    "proof_receipt"
   ],
   "used_urgency_ids": []
 }

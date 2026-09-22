@@ -63,6 +63,50 @@ KNOWN_CHANNEL_PUBLICATIONS = [
         "published_at": "2026-09-02 20:26:37",
         "post_file": "post_host_story_20260902_202637.json",
     },
+    {
+        "id": "afisha_tikhoe_fireworks",
+        "category_id": "afisha",
+        "title": "Куда сходить в Тюмени: салют и фестиваль на озере Тихое",
+        "published_at": "2026-09-14 08:00:00",
+    },
+    {
+        "id": "district_novin",
+        "category_id": "district_guide",
+        "title": "ЖК «Новин»: эталон комфорта для деловых поездок и командировок",
+        "published_at": "2026-09-15 08:00:00",
+    },
+    {
+        "id": "care_blanket",
+        "category_id": "host_story",
+        "title": "Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину",
+        "published_at": "2026-09-16 08:00:00",
+        "entities": ["сатин", "отельный сатин", "постельное белье"],
+    },
+    {
+        "id": "embankment_evening_walk",
+        "category_id": "weekend_thermal",
+        "title": "Вечерняя прогулка по четырёхуровневой набережной Туры",
+        "published_at": "2026-09-18 08:00:00",
+        "entities": ["набережная туры"],
+    },
+    {
+        "id": "special_long_stay",
+        "category_id": "special_offers",
+        "title": "Тариф «Длительное проживание»: скидка 10% от 10 ночей со сменой белья",
+        "published_at": "2026-09-19 08:00:00",
+    },
+    {
+        "id": "siberian_herbal_tea",
+        "category_id": "siberian_hospitality",
+        "title": "Сибирское чаепитие: как травяной сбор помогает снять усталость с дороги",
+        "published_at": "2026-09-20 08:00:00",
+    },
+    {
+        "id": "afisha_street_festivals",
+        "category_id": "afisha",
+        "title": "Уличные фестивали и ярмарки: атмосфера центра Тюмени",
+        "published_at": "2026-09-21 08:00:00",
+    },
 ]
 
 
