@@ -32,16 +32,39 @@
       },
       "recorded_at": "2026-09-16 07:00:32",
       "lesson": "Опубликовано: Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_care_keypad_20260923",
+      "topic_id": "care_keypad",
+      "category_id": "host_story",
+      "title": "Заметки радушного «хозяина»: как устроен тихий и быстрый заезд",
+      "opening_hook": "заметки радушного «хозяина»: как устроен тихий и быстрый заезд командировочным особенно важно: заезд без ожидания и документы без сюрпризов.",
+      "text_fingerprint": "07db898d4ec85ada",
+      "variant_number": 2,
+      "week": "2026-W39",
+      "craft_meta": {
+        "variant": 2,
+        "topic_id": "care_keypad",
+        "scene_id": "custom_scene_0",
+        "audience_id": "business_9501",
+        "micro_proof_id": "topic_proof",
+        "cta_id": "cta_site_direct",
+        "audience_tag": "business"
+      },
+      "recorded_at": "2026-09-23 03:07:50",
+      "lesson": "Опубликовано: Заметки радушного «хозяина»: как устроен тихий и быстрый заезд. Не повторять hook и topic_id 60+ дней."
     }
   ],
   "used_opening_hooks": [
     "заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода бывало у вас такое: снимаете жилье на несколько дней, решаете утр",
-    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это "
+    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это ",
+    "заметки радушного «хозяина»: как устроен тихий и быстрый заезд командировочным особенно важно: заезд без ожидания и документы без сюрпризов."
   ],
   "used_angles_by_category": {
     "host_story": [
       "care_kitchen_pans",
-      "care_blanket"
+      "care_blanket",
+      "care_keypad"
     ]
   },
   "banned_hooks": [
@@ -49,17 +72,21 @@
     "планируете визит в тюмень",
     "знаете даты предстоящей поездки"
   ],
-  "last_updated": "2026-09-16 07:00:32",
+  "last_updated": "2026-09-23 03:07:50",
   "used_cta_ids": [
-    "cta_proof_close"
+    "cta_proof_close",
+    "cta_site_direct"
   ],
   "used_scene_ids": [
     "custom_scene_0"
   ],
-  "used_audience_lines": [],
+  "used_audience_lines": [
+    "business_9501"
+  ],
   "used_contrast_ids": [],
   "used_micro_proof_ids": [
-    "proof_bedding"
+    "proof_bedding",
+    "topic_proof"
   ],
   "used_urgency_ids": []
 }
