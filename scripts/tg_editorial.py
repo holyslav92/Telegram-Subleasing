@@ -784,12 +784,13 @@ def render_caption(d: dict, cfg: dict, history: list[dict] | None = None) -> str
     esc = lambda s: html.escape((s or "").strip(), quote=False)
     history = history if history is not None else []
     parts = [f"<b>{esc(d.get('title'))}</b>"]
-    for p in d.get("paragraphs") or []:
-        if p and p.strip():
-            parts.append(esc(p))
+    paras = [esc(p) for p in d.get("paragraphs") or [] if p and p.strip()]
     items = [i for i in d.get("list_items") or [] if i and i.strip()]
+    # со списком: крючок → пункты → вывод
+    parts += paras[:1]
     if items:
         parts.append("\n".join(f"{KEYCAPS[i]} {esc(it)}" for i, it in enumerate(items[:5])))
+    parts += paras[1:]
     if (d.get("question") or "").strip():
         parts.append(f"<i>{esc(d['question'])}</i>")
     cta = pick_cta(cfg, history, d.get("cta", ""))
