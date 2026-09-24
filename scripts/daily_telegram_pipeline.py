@@ -48,9 +48,14 @@ def get_today_category():
     return CATEGORIES_SCHEDULE[datetime.now().weekday()]
 
 
-def select_topic_with_gate(category: str, topic: str = "", use_scout: bool = False):
+def select_topic_with_gate(
+    category: str,
+    topic: str = "",
+    use_scout: bool = False,
+    exclude_ids: set[str] | None = None,
+):
     ledger = load_ledger()
-    exclude_ids: set[str] = set()
+    exclude_ids = set(exclude_ids or ())
 
     if category == "afisha" and datetime.now().weekday() == 0 and not topic and use_scout:
         try:
@@ -176,35 +181,66 @@ def run_daily_pipeline(
         subprocess.run(cmd, check=True)
         return
 
-    topic_data, gate_error = select_topic_with_gate(cat, topic=topic, use_scout=use_scout)
-    if gate_error:
-        print(f"КРИТИЧЕСКАЯ ОШИБКА: {gate_error}")
-        sys.exit(1)
-
     from telegram_post_composer import enrich_topic_data
-    topic_data = enrich_topic_data(topic_data, cat)
 
-    variants = build_text_variants(topic_data)
-    variant_texts = [v["text_html"] for v in variants]
-    v_status, v_reasons = check_variants_gate(variant_texts, load_ledger())
-    if v_status != "PASS":
-        print(f"Gate FAIL: варианты слишком похожи или повторяют corpus: {v_reasons}")
+    topic_data = None
+    variants = None
+    variant_exclude: set[str] = set()
+    gate_error = None
+
+    for bundle_attempt in range(1, MAX_GATE_RETRIES + 1):
+        topic_data, gate_error = select_topic_with_gate(
+            cat,
+            topic=topic if bundle_attempt == 1 else "",
+            use_scout=use_scout,
+            exclude_ids=variant_exclude,
+        )
+        if gate_error:
+            break
+
+        topic_data = enrich_topic_data(topic_data, cat)
+        variants = build_text_variants(topic_data)
+        variant_texts = [v["text_html"] for v in variants]
+        v_status, v_reasons = check_variants_gate(variant_texts, load_ledger())
+        if v_status != "PASS":
+            tid = topic_data.get("id", "")
+            print(
+                f"Gate вариантов попытка {bundle_attempt}/{MAX_GATE_RETRIES}: FAIL — {tid}: {v_reasons}"
+            )
+            if tid:
+                variant_exclude.add(tid)
+            topic_data = None
+            variants = None
+            continue
+
+        ledger = load_ledger()
+        variant_fail = False
+        for v in variants:
+            probe = {
+                "id": topic_data.get("id", ""),
+                "category_id": cat,
+                "title": topic_data.get("title", ""),
+                "text_html": v["text_html"],
+                "entities": topic_data.get("entities", []),
+                "event_date": topic_data.get("event_date", ""),
+                "evergreen": topic_data.get("evergreen", True),
+            }
+            status, reasons = check_post(probe, ledger)
+            if status != "PASS":
+                print(f"Gate FAIL для варианта {v['number']}: {reasons}")
+                tid = topic_data.get("id", "")
+                if tid:
+                    variant_exclude.add(tid)
+                topic_data = None
+                variants = None
+                variant_fail = True
+                break
+        if not variant_fail:
+            break
+
+    if gate_error or not topic_data or not variants:
+        print(f"КРИТИЧЕСКАЯ ОШИБКА: {gate_error or 'не удалось пройти gate вариантов'}")
         sys.exit(1)
-
-    for v in variants:
-        probe = {
-            "id": topic_data.get("id", ""),
-            "category_id": cat,
-            "title": topic_data.get("title", ""),
-            "text_html": v["text_html"],
-            "entities": topic_data.get("entities", []),
-            "event_date": topic_data.get("event_date", ""),
-            "evergreen": topic_data.get("evergreen", True),
-        }
-        status, reasons = check_post(probe, load_ledger())
-        if status != "PASS":
-            print(f"Gate FAIL для варианта {v['number']}: {reasons}")
-            sys.exit(1)
 
     post = build_post(category_id=cat, topic=topic, topic_data=topic_data)
     prompt = post["image_prompt"]["prompt"]

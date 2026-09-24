@@ -32,16 +32,42 @@
       },
       "recorded_at": "2026-09-16 07:00:32",
       "lesson": "Опубликовано: Заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину. Не повторять hook и topic_id 60+ дней."
+    },
+    {
+      "id": "pub_service_hotel_clean_20260924",
+      "topic_id": "service_hotel_clean",
+      "category_id": "service_standards",
+      "title": "service_hotel_clean",
+      "opening_hook": "стандарты 4-5 звезд: регламент идеальной чистоты перед каждым заездом коротко и по делу — без рекламного шума.",
+      "text_fingerprint": "e59859866ea81bf8",
+      "variant_number": 2,
+      "week": "2026-W39",
+      "craft_meta": {
+        "variant": 2,
+        "topic_id": "service_hotel_clean",
+        "scene_id": "familiar_question",
+        "urgency_id": "urgency_late_arrival",
+        "audience_id": "general_374",
+        "micro_proof_id": "proof_receipt",
+        "cta_id": "cta_early_booking",
+        "audience_tag": "general"
+      },
+      "recorded_at": "2026-09-24 03:06:41",
+      "lesson": "Опубликовано: service_hotel_clean. Не повторять hook и topic_id 60+ дней."
     }
   ],
   "used_opening_hooks": [
     "заметки радушного «хозяина»: почему на кухне должна быть хорошая сковорода бывало у вас такое: снимаете жилье на несколько дней, решаете утр",
-    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это "
+    "заметки радушного «хозяина»: почему мы так придирчивы к отельному сатину вы падаете на кровать после дороги — и первое, что чувствуете, это ",
+    "стандарты 4-5 звезд: регламент идеальной чистоты перед каждым заездом коротко и по делу — без рекламного шума."
   ],
   "used_angles_by_category": {
     "host_story": [
       "care_kitchen_pans",
       "care_blanket"
+    ],
+    "service_standards": [
+      "service_hotel_clean"
     ]
   },
   "banned_hooks": [
@@ -49,17 +75,24 @@
     "планируете визит в тюмень",
     "знаете даты предстоящей поездки"
   ],
-  "last_updated": "2026-09-16 07:00:32",
+  "last_updated": "2026-09-24 03:06:41",
   "used_cta_ids": [
-    "cta_proof_close"
+    "cta_proof_close",
+    "cta_early_booking"
   ],
   "used_scene_ids": [
-    "custom_scene_0"
+    "custom_scene_0",
+    "familiar_question"
   ],
-  "used_audience_lines": [],
+  "used_audience_lines": [
+    "general_374"
+  ],
   "used_contrast_ids": [],
   "used_micro_proof_ids": [
-    "proof_bedding"
+    "proof_bedding",
+    "proof_receipt"
   ],
-  "used_urgency_ids": []
+  "used_urgency_ids": [
+    "urgency_late_arrival"
+  ]
 }

@@ -73,5 +73,10 @@
     "id": "care_blanket",
     "category_id": "host_story",
     "published_at": "2026-09-16 07:00:32"
+  },
+  {
+    "id": "service_hotel_clean",
+    "category_id": "service_standards",
+    "published_at": "2026-09-24 03:06:41"
   }
 ]
