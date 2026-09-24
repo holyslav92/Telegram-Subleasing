@@ -65,6 +65,16 @@
     "published_at": "2026-09-09 07:18:35"
   },
   {
+    "id": "afisha_tikhoe_fireworks",
+    "category_id": "afisha",
+    "published_at": "2026-09-14 08:00:00"
+  },
+  {
+    "id": "district_novin",
+    "category_id": "district_guide",
+    "published_at": "2026-09-15 08:00:00"
+  },
+  {
     "id": "care_kitchen_pans",
     "category_id": "host_story",
     "published_at": "2026-09-16 05:22:56"
@@ -85,6 +95,16 @@
     "published_at": "2026-09-18 05:29:26"
   },
   {
+    "id": "embankment_evening_walk",
+    "category_id": "weekend_thermal",
+    "published_at": "2026-09-18 08:00:00"
+  },
+  {
+    "id": "special_long_stay",
+    "category_id": "special_offers",
+    "published_at": "2026-09-19 08:00:00"
+  },
+  {
     "id": "siberian_tea_ceremony",
     "category_id": "siberian_hospitality",
     "published_at": "2026-09-20 03:28:13"
@@ -95,8 +115,43 @@
     "published_at": "2026-09-20 03:45:00"
   },
   {
+    "id": "siberian_herbal_tea",
+    "category_id": "siberian_hospitality",
+    "published_at": "2026-09-20 08:00:00"
+  },
+  {
+    "id": "afisha_street_festival",
+    "category_id": "afisha",
+    "published_at": "2026-09-21 03:09:30"
+  },
+  {
     "id": "event_tyumenskaya_kultura_20260921",
     "category_id": "afisha",
     "published_at": "2026-09-21 03:37:42"
+  },
+  {
+    "id": "afisha_street_festivals",
+    "category_id": "afisha",
+    "published_at": "2026-09-21 08:00:00"
+  },
+  {
+    "id": "district_vidniy",
+    "category_id": "district_guide",
+    "published_at": "2026-09-22 03:06:20"
+  },
+  {
+    "id": "care_keypad",
+    "category_id": "host_story",
+    "published_at": "2026-09-23 03:07:50"
+  },
+  {
+    "id": "service_hotel_clean",
+    "category_id": "service_standards",
+    "published_at": "2026-09-24 03:06:41"
+  },
+  {
+    "id": "tyumen_frost_and_maslovsky_closure_20260926",
+    "category_id": "city_news",
+    "published_at": "2026-09-24 04:11:50"
   }
 ]
