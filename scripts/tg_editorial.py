@@ -190,7 +190,11 @@ def _kw_regex(keyword: str) -> re.Pattern:
 
 
 def cluster_hits(text: str, cfg: dict) -> dict[str, int]:
-    plain = " " + norm(text) + " "
+    # дубли предложений (старые посты с шаблонной сценой) считаются один раз
+    sentences = dict.fromkeys(
+        re.sub(r"^[^а-яa-z]+", "", s.strip()) for s in re.split(r"(?<=[.!?…])\s+|\n+", norm(text)) if s.strip()
+    )
+    plain = " " + " ".join(sentences) + " "
     hits: dict[str, int] = {}
     for cid, cl in cfg["clusters"].items():
         n = sum(len(_kw_regex(kw).findall(plain)) for kw in cl["keywords"])
@@ -1022,7 +1026,12 @@ def cmd_publish(args) -> int:
     caption = render_caption(d, cfg, history)
     cta = pick_cta(cfg, history, d.get("cta", ""))
     image_url, ref, how = "", "", "text_only"
-    if not args.no_image:
+    if args.image_url:
+        if not is_image_url(args.image_url):
+            print(f"--image-url не открывается как картинка: {args.image_url}")
+            return 1
+        image_url, how = args.image_url, "preapproved"
+    elif not args.no_image:
         print("Готовлю картинку…")
         image_url, ref, how = make_image(d, cfg, pages)
         print(f"  картинка ({how}): {image_url}")
@@ -1086,6 +1095,7 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--no-image", action="store_true", help="только если заказчик прямо попросил пост без картинки")
     p.add_argument("--no-sync", action="store_true")
+    p.add_argument("--image-url", help="готовая картинка из предыдущего --dry-run (не генерировать заново)")
     p.set_defaults(fn=cmd_publish)
     p = sub.add_parser("sync-memory", help="записать память публикаций в main")
     p.add_argument("--message")
