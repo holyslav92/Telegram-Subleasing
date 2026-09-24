@@ -146,8 +146,8 @@ class PlanAndMemoryTests(unittest.TestCase):
             self.assertIn(self.cfg["weekday_pillars"][str(i)], self.cfg["pillars"])
 
     def test_merge_lists_dedupes(self):
-        a = [{"message_id": 1, "chat_id": "x", "date": "2026-09-01"}]
-        b = [{"message_id": 1, "chat_id": "x", "date": "2026-09-01"}, {"message_id": 2, "chat_id": "x", "date": "2026-09-02"}]
+        a = [{"message_id": 1, "date": "2026-09-01"}]
+        b = [{"message_id": 1, "date": "2026-09-01"}, {"message_id": 2, "date": "2026-09-02"}]
         self.assertEqual(len(ed.merge_lists(a, b)), 2)
 
     def test_cluster_detection(self):

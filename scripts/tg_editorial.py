@@ -829,14 +829,13 @@ def make_image(d: dict, cfg: dict, pages: list[dict] | None = None) -> tuple[str
 
 # ───────────────────────── память ─────────────────────────
 
-def record_published(d: dict, cfg: dict, caption: str, message_id, chat_id, image_url: str,
+def record_published(d: dict, cfg: dict, caption: str, message_id, image_url: str,
                      clusters: list[str], cta_id: str) -> dict:
     POSTS_DIR.mkdir(parents=True, exist_ok=True)
     entry = {
         "date": d["date"],
         "published_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         "message_id": message_id,
-        "chat_id": str(chat_id),
         "pillar": d["pillar"],
         "format": d["format"],
         "topic_id": d["topic_id"],
@@ -865,7 +864,7 @@ def _entry_key(e) -> str:
     if not isinstance(e, dict):
         return json.dumps(e, ensure_ascii=False, sort_keys=True)
     if e.get("message_id"):
-        return f"m{e.get('chat_id', '')}:{e['message_id']}"
+        return f"m{e['message_id']}"
     return f"{e.get('id') or e.get('topic_id', '')}|{e.get('published_at') or e.get('date', '')}"
 
 
@@ -1055,7 +1054,7 @@ def cmd_publish(args) -> int:
     d.setdefault("_published", {}).update({"message_id": msg_id, "image_url": image_url, "image_mode": how, "reference": ref})
     draft_path = Path(args.draft) if Path(args.draft).is_absolute() else ROOT / args.draft
     draft_path.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
-    record_published(d, cfg, caption, msg_id, creds["chat_id"], image_url, res["clusters"], cta["id"])
+    record_published(d, cfg, caption, msg_id, image_url, res["clusters"], cta["id"])
     if not args.no_sync:
         if not sync_memory_to_main(f"Telegram: память публикации {d['date']} — {d['title'][:60]}"):
             print("ВНИМАНИЕ: память не попала в main. Выполни: python3 scripts/tg_editorial.py sync-memory")
