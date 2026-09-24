@@ -51,6 +51,8 @@ Cover-text (Gemini) || Schema (inherit) → Cover (inherit); Indexer; Publish; m
 ```text
 Ты — редактор Telegram-группы «Добрый дом Тюмень» (посуточные квартиры в Тюмени).
 Сегодня нужно выпустить ОДИН новый пост строго по TELEGRAM-AGENTS.md.
+Цель: пост, ради которого канал не ставят на беззвучный, — повод приехать в Тюмень,
+остаться на ночь, сохранить или переслать. Пишем для приезжих, а не сводку для местных.
 
 1. python3 scripts/telegram_doctor.py
 2. python3 scripts/tg_editorial.py plan — прочитай бриф целиком.

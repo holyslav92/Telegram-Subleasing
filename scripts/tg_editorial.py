@@ -280,6 +280,8 @@ def load_history(cfg: dict, include_channel: bool = True) -> list[dict]:
             "clusters": e.get("clusters") or [],
             "entities": e.get("entities") or [],
             "cta_id": e.get("cta_id", ""),
+            "hook_type": e.get("hook_type", ""),
+            "audience": e.get("audience", ""),
         })
     for e in load_json_list(LEDGER_PATH):
         if not isinstance(e, dict):
@@ -394,7 +396,10 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "format": formats[0],
         "topic_id": "латиница_через_подчёркивание_уникально",
         "clusters": ["1–3 id из free_clusters, о чём пост на самом деле"],
-        "title": "Заголовок 18–80 символов, живой, с конкретикой",
+        "hook_type": "один из hook_types (не как в прошлом посте)",
+        "audience": "один из audiences — для кого пост",
+        "stay_reason": "одной фразой: почему этот человек приедет/останется в Тюмени (для проверки, в текст не выводится)",
+        "title": "Заголовок 18–80 символов: имя, число или «название» — конкретика, не общие слова",
         "paragraphs": ["1–3 абзаца по 40–320 символов, каждый с новым фактом"],
         "list_items": ["только если формат требует список: 2–5 пунктов с датой/цифрой"],
         "question": "вопрос подписчикам (обязателен для fact_question/poll_question, иначе можно пусто)",
@@ -404,9 +409,13 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "image_headline": "надпись на картинке до 34 символов",
         "image": {"kind": "city|event|apartment", "reference_url": "реальное фото места (og:image из fetch) или пусто", "scene": "описание сцены по-английски, реалистично"},
     }
+    last_hooks = [h.get("hook_type") for h in history if h.get("hook_type")][-2:]
     return {
+        "brand_goal": cfg.get("brand_goal", ""),
         "date": today.isoformat(),
         "weekday": WEEKDAYS[today.weekday()],
+        "hook_types": {k: v for k, v in cfg.get("hook_types", {}).items() if k not in last_hooks},
+        "audiences": cfg.get("audiences", {}),
         "pillar": pillar_id,
         "pillar_name": pillar["name"],
         "goal": pillar["goal"],
@@ -479,6 +488,39 @@ def check_internal_repeats(d: dict) -> list[str]:
         for j in range(i + 1, len(paras)):
             if SequenceMatcher(None, norm(paras[i]), norm(paras[j])).ratio() > 0.6:
                 errors.append(f"абзацы {i + 1} и {j + 1} почти одинаковые")
+    return errors
+
+
+def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: str, history: list[dict]) -> list[str]:
+    """Пост должен цеплять приезжего и вести к поездке, а не быть городской сводкой для местных."""
+    errors = []
+    lim = cfg["limits"]
+    hooks = cfg.get("hook_types", {})
+    auds = cfg.get("audiences", {})
+    if d.get("hook_type") not in hooks:
+        errors.append(f"hook_type обязателен, один из {list(hooks)}")
+    else:
+        last_hooks = [h.get("hook_type") for h in history if h.get("hook_type")][-2:]
+        if d["hook_type"] in last_hooks:
+            errors.append(f"крючок {d['hook_type']} был в последних 2 постах — зайди по-другому")
+    if d.get("audience") not in auds:
+        errors.append(f"audience обязателен, один из {list(auds)}")
+    if len((d.get("stay_reason") or "").strip()) < lim.get("stay_reason_min", 25):
+        errors.append("stay_reason: одной фразой — почему человек приедет или останется в Тюмени")
+    plain = norm(body)
+    if not any(norm(k) in plain for k in cfg.get("stay_link_keywords", [])):
+        errors.append("в тексте нет связи с приездом/проживанием: одна живая фраза, зачем приехать или остаться на ночь")
+    local = set(cfg.get("local_only_clusters", []))
+    hit_local = [c for c in strong_clusters(title, body, cfg) if c in local] + [c for c in d.get("clusters") or [] if c in local]
+    if hit_local:
+        names = sorted({cfg["clusters"][c]["name"] for c in hit_local})
+        errors.append(f"тема для местных, а не для гостей ({', '.join(names)}) — такой пост не даёт повода приехать")
+    if paras and len(paras[0]) > lim.get("first_paragraph_max", 220):
+        errors.append(f"первый абзац {len(paras[0])} симв. — крючок должен уложиться в {lim.get('first_paragraph_max', 220)}")
+    t_words = title.split()
+    concrete = bool(re.search(r"\d", title)) or "«" in title or any(w[:1].isupper() for w in t_words[1:])
+    if not concrete:
+        errors.append("заголовок без конкретики: добавь число, имя или «название»")
     return errors
 
 
@@ -619,6 +661,8 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
     errors += check_internal_repeats({"title": title, "paragraphs": paras, "list_items": items, "question": question})
     errors += check_banned(d, cfg)
 
+    errors += check_brand_value(d, cfg, title, paras, body, history)
+
     # Свежесть событий
     ev = parse_day(d.get("event_date", ""))
     window = pillar.get("event_window_days", 0)
@@ -629,6 +673,8 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
             errors.append(f"event_date {ev} уже прошла")
         elif window and ev > today + timedelta(days=window):
             errors.append(f"event_date {ev} дальше окна рубрики ({window} дн.)")
+        elif pillar.get("min_event_lead_days") and ev < today + timedelta(days=pillar["min_event_lead_days"]):
+            errors.append(f"до события меньше {pillar['min_event_lead_days']} дн. — приезжий не успеет спланировать поездку, возьми событие позже")
     elif pillar_id in ("week_afisha", "weekend") or fmt_id == "big_event":
         errors.append("для афиши/события нужен event_date ближайшего события")
 
@@ -845,6 +891,8 @@ def record_published(d: dict, cfg: dict, caption: str, message_id, image_url: st
         "event_date": d.get("event_date", ""),
         "sources": [s.get("url") for s in d.get("sources") or [] if isinstance(s, dict)],
         "cta_id": cta_id,
+        "hook_type": d.get("hook_type", ""),
+        "audience": d.get("audience", ""),
         "image_url": image_url,
         "text": html_to_text(caption),
     }
