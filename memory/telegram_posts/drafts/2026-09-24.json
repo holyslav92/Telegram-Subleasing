@@ -1,55 +1,73 @@
 {
   "date": "2026-09-24",
-  "pillar": "city_news",
-  "format": "news_useful",
-  "topic_id": "tyumen_frost_and_maslovsky_closure_20260926",
+  "pillar": "reason_to_come",
+  "format": "event_list",
+  "hook_type": "save_list",
+  "audience": "north_weekenders",
+  "stay_reason": "три вечера концертов подряд плюс бесплатные показы днём — ради этого едут в пятницу и остаются до воскресенья",
+  "topic_id": "weekend_16_18_october_savicheva_pilot_fashion_2026",
   "clusters": [
-    "weather",
-    "transport"
+    "concert"
   ],
-  "title": "Ночью до −5, днём до +17: какие выходные ждут гостей Тюмени",
+  "title": "16–18 октября: Савичева, «ПилОт» и Неделя моды — повод приехать в Тюмень",
   "paragraphs": [
-    "Синоптики выпустили предупреждение: с 25 по 27 сентября на юге области заморозки от 0 до −5, ночью местами туман. Днём при этом прогревается до +17, ливней до конца месяца не ждут.",
-    "Для приезжих это значит простую вещь: утром и вечером нужны куртка и шапка, днём хватит лёгкой ветровки. Долгие прогулки лучше ставить на середину дня — это самые тёплые часы.",
-    "Если вы на машине: до 16:00 субботы, 26 сентября, закрыт проезд по Масловскому взвозу от улицы 25-го Октября к реке — там готовят «Кросс нации». Парковки у «Конторы пароходства» на это время тоже недоступны."
+    "Три вечера подряд — три концерта, а днём бесплатные показы «Недели моды. Сибирь». Если выбирать один осенний уикенд, чтобы приехать в Тюмень, то этот.",
+    "Из Сургута или Ханты-Мансийска проще приехать в пятницу и остаться до воскресенья: вечером концерт, утром никуда не нужно гнать по трассе."
   ],
-  "list_items": [],
+  "list_items": [
+    "16 октября, 19:00 — Юлия Савичева, «Глав Клуб», билеты от 3000 ₽",
+    "16–18 октября — «Неделя моды. Сибирь»: дизайнеры из Перми, Ижевска и Екатеринбурга, вход свободный по регистрации",
+    "17 октября, 19:00 — «ПилОт» играет альбом «Осень» к его 15-летию, «Цоколь», от 2700 ₽",
+    "18 октября, 19:00 — «Soprano Турецкого», ДК «Нефтяник», от 2000 ₽"
+  ],
   "question": "",
   "entities": [
-    "Масловский взвоз",
-    "Кросс нации",
-    "Контора пароходства"
+    "Юлия Савичева",
+    "ПилОт",
+    "Неделя моды. Сибирь",
+    "Soprano Турецкого"
   ],
-  "event_date": "2026-09-26",
+  "event_date": "2026-10-16",
   "sources": [
     {
-      "url": "https://ura.news/news/1053130033",
-      "published": "2026-09-23",
+      "url": "https://tmn.kassir.ru/koncert/yuliya-savicheva-7",
       "must_contain": [
-        "заморозки 0...-5",
-        "+10...+17",
-        "Ливней до конца месяца не будет"
+        "Билеты от 3 000",
+        "Глав Клуб"
       ]
     },
     {
-      "url": "https://t-l.ru/408533.html",
-      "published": "2026-09-23",
+      "url": "https://tyumen-info.ru/society/2026/09/21/44408.html",
+      "published": "2026-09-21",
       "must_contain": [
-        "16 часов 26 сентября",
-        "Масловского взвоза",
-        "Контора пароходства"
+        "С 16 по 18 октября",
+        "Вход на мероприятие свободный"
+      ]
+    },
+    {
+      "url": "https://tmn.kassir.ru/koncert/pilot-12",
+      "must_contain": [
+        "15-летие альбома",
+        "Билеты от 2 700"
+      ]
+    },
+    {
+      "url": "https://tmn.kassir.ru/koncert/soprano-turetskogo-21",
+      "must_contain": [
+        "Билеты от 2 000",
+        "ДК Нефтяник"
       ]
     }
   ],
-  "image_headline": "Ночью до −5, днём до +17",
+  "image_headline": "16–18 октября в Тюмени",
   "image": {
-    "kind": "city",
-    "reference_url": "https://images.pexels.com/photos/34383360/pexels-photo-34383360.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-    "scene": "early autumn morning in Tyumen: yellow birch leaves covered with white frost on the grass by a city sidewalk, soft low sun, light morning haze"
+    "kind": "event",
+    "reference_url": "https://images.pexels.com/photos/29755921/pexels-photo-29755921.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "live concert seen from the audience: a smartphone raised above the crowd filming a bright stage with warm spotlights, faces not visible, evening, real concert hall"
   },
   "_published": {
-    "message_id": 575,
-    "image_url": "https://file6.aitohumanize.com/file/d3082f3e69d8441abc1ea798094e7ee4.png",
+    "message_id": 576,
+    "image_url": "https://file6.aitohumanize.com/file/12da7747d1604df3a6ed0a45997fd66f.png",
     "image_mode": "preapproved",
     "reference": ""
   }
