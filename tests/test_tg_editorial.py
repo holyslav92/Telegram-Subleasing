@@ -181,6 +181,11 @@ class PlanAndMemoryTests(unittest.TestCase):
         b = [{"message_id": 1, "date": "2026-09-01"}, {"message_id": 2, "date": "2026-09-02"}]
         self.assertEqual(len(ed.merge_lists(a, b)), 2)
 
+    def test_merge_lists_local_wins(self):
+        remote = [{"message_id": 5, "date": "2026-09-01", "title": "a"}]
+        local = [{"message_id": 5, "date": "2026-09-01", "title": "a", "deleted": True}]
+        self.assertTrue(ed.merge_lists(remote, local)[0].get("deleted"))
+
     def test_cluster_detection(self):
         self.assertIn("thermal", ed.strong_clusters("Термы под Тюменью", "", self.cfg))
         self.assertNotIn("family", ed.strong_clusters("Семь причин", "семь дней", self.cfg))

@@ -918,13 +918,11 @@ def _entry_key(e) -> str:
 
 
 def merge_lists(remote: list, local: list) -> list:
-    out, seen = [], set()
+    """Объединение по ключу; локальная версия записи главнее (например, пометка deleted)."""
+    merged: dict[str, object] = {}
     for e in remote + local:
-        k = _entry_key(e)
-        if k in seen:
-            continue
-        seen.add(k)
-        out.append(e)
+        merged[_entry_key(e)] = e
+    out = list(merged.values())
     out.sort(key=lambda e: (e.get("published_at") or e.get("date") or "") if isinstance(e, dict) else "")
     return out
 
@@ -962,8 +960,7 @@ def sync_memory_to_main(message: str) -> bool:
                 dst = tmp / "memory" / "telegram_posts" / "drafts"
                 dst.mkdir(parents=True, exist_ok=True)
                 for f in DRAFTS_DIR.glob("*.json"):
-                    if not (dst / f.name).exists():
-                        shutil.copy2(f, dst / f.name)
+                    shutil.copy2(f, dst / f.name)
             _git(["add", "memory/telegram_posts"], tmp)
             if _git(["diff", "--cached", "--quiet"], tmp).returncode == 0:
                 print("  память в main уже актуальна")
