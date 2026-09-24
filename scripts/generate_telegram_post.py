@@ -295,6 +295,8 @@ def save_post(post_data: dict) -> Path:
 
 
 def main():
+    from tg_legacy_guard import refuse_legacy
+    refuse_legacy()
     parser = argparse.ArgumentParser(description="Генератор и публикатор постов в Telegram (Добрый дом Тюмень)")
     parser.add_argument("--category", default="afisha", choices=[
         "afisha", "district_guide", "host_story", "service_standards", "service_lifehack", "weekend_thermal", "city_guide", "special_offers", "siberian_hospitality"

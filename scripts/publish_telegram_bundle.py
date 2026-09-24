@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--bundle", required=True, help="Путь к post_bundle_*.json")
     parser.add_argument("--variant", type=int, choices=[1, 2, 3], required=True, help="Номер варианта текста")
     args = parser.parse_args()
+    from tg_legacy_guard import refuse_legacy
+    refuse_legacy()
 
     bundle_path = Path(args.bundle)
     if not bundle_path.exists():

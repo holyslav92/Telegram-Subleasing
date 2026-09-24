@@ -333,6 +333,8 @@ if __name__ == "__main__":
     parser.add_argument("--bundle", default="", help="Путь к post_bundle_*.json для --publish")
     parser.add_argument("--variant", type=int, default=0, choices=[0, 1, 2, 3])
     args = parser.parse_args()
+    from tg_legacy_guard import refuse_legacy
+    refuse_legacy()
 
     run_daily_pipeline(
         category=args.category,

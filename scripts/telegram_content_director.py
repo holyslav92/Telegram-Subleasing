@@ -67,6 +67,10 @@ def main():
         print(f"\nreport_file: {path}")
         return
 
+    if args.prepare or args.publish:
+        from tg_legacy_guard import refuse_legacy
+        refuse_legacy()
+
     if args.prepare:
         cat = args.category
         if not cat:
