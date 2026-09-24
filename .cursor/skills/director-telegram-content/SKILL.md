@@ -1,68 +1,43 @@
-# Telegram Content Director — skill
+---
+name: director-telegram-content
+description: Ежедневный пост Telegram «Добрый дом Тюмень» через редакционную систему tg_editorial (plan → исследование → validate → publish). Использовать для любой публикации, жалоб на повторы и вопросов «что выходило».
+---
 
-## Когда использовать
+# Telegram — редакционная система
 
-- Ежедневная подготовка/публикация поста «Добрый дом Тюмень».
-- Жалоба на повторы, шаблонные заходы, «одно и то же каждую неделю».
-- Нужен отчёт: что опубликовано, что запомнено, риски повторов.
-
-## Перед любым прогоном
+Полный порядок работы: `TELEGRAM-AGENTS.md`. Кратко:
 
 ```bash
 python3 scripts/telegram_doctor.py
-python3 scripts/telegram_ledger_sync.py
-python3 scripts/telegram_content_learner.py --report
+python3 scripts/tg_editorial.py plan                      # бриф: рубрика, форматы, паузы, запросы
+python3 scripts/tg_editorial.py fetch "<url>" --find "<фраза>"   # проверка каждого источника
+# черновик → memory/telegram_posts/drafts/<дата>.json по draft_template
+python3 scripts/tg_editorial.py validate memory/telegram_posts/drafts/<дата>.json   # до PASS
+python3 scripts/tg_editorial.py publish  memory/telegram_posts/drafts/<дата>.json
 ```
 
-## Подготовка (1 фото + 3 текста)
+## Как писать, чтобы проходило с первого раза
 
-```bash
-python3 scripts/telegram_content_director.py --prepare --category <category_id>
-```
+1. Сначала факты, потом текст: 3–6 свежих источников, выписать даты, площадки, цены.
+2. Тема — одна конкретная вещь (событие, место, новость), не «уют» и не «сервис».
+3. Заголовок — конкретика и выгода для читателя, первое слово не как в `avoid_title_first_words`.
+4. Первый абзац — самый интересный факт. Каждый следующий абзац — новый факт или практический вывод.
+5. «Добрый дом» — не больше одной фразы по делу; строку бронирования рендер добавит сам.
+6. `must_contain` — короткие точные фразы, скопированные со страницы (название, дата), а не пересказ.
+7. `image.reference_url` — `og_image` источника с реальным фото места; `scene` — что на этом фото.
 
-Gate автоматически:
-- cooldown topic_id (60 д) и entities (45 д);
-- forbidden phrases (`shared/telegram-content-rules.json`);
-- **similarity** против `ledger.json` (opening hook, n-grams);
-- три варианта должны **различаться структурой** (`variants_too_similar`).
+## Разбор ошибок validate
 
-## Публикация
+| Ошибка | Что делать |
+|--------|-----------|
+| тема на паузе / «X» уже было | сменить тему (не переформулировать) |
+| формат был в последних постах | взять другой формат из `allowed_formats` |
+| источник не подтвердил факты | взять страницу, где факт виден в HTML (не JS-афишу) |
+| новость старше 7 дней | найти более свежую новость |
+| текст N симв. | сократить до 720; убирать воду, не факты |
+| запрещено (…) | заменить штамп конкретной деталью |
 
-Менеджер выбирает вариант 1–3:
+## Отчёт после публикации
 
-```bash
-python3 scripts/publish_telegram_bundle.py --bundle <path> --variant N
-```
-
-После publish автоматически:
-- запись в `ledger.json` (text_html, opening_hook, fingerprint);
-- урок в `memory/telegram_posts/lessons.json`;
-- отчёт в `memory/telegram_posts/reports/`.
-
-## Отчёт директора
-
-```bash
-python3 scripts/telegram_content_director.py --report-only
-# или
-python3 scripts/telegram_content_learner.py --report
-```
-
-## Файлы памяти
-
-| Файл | Назначение |
-|------|------------|
-| `memory/telegram_posts/ledger.json` | Все публикации: id, entities, text, hook |
-| `memory/telegram_posts/lessons.json` | Уроки learner: hooks, angles по рубрикам |
-| `memory/telegram_posts/reports/` | JSON-отчёты директора |
-
-## Ошибки (NEEDS_ATTENTION)
-
-- similarity FAIL → другая тема из банка (до 3 попыток pipeline).
-- variants слишком похожи → перегенерация bundle.
-- topic в cooldown → `get_next_topic` выберет другую.
-
-## Не делать
-
-- Не публиковать scout-мусор без валидации.
-- Не использовать тему `care_tea` (заблокирована).
-- Не обходить gate «вручную» через `sendMessage`.
+Заголовок, рубрика, формат, `message_id`, источники, способ картинки (`generated` /
+`reference_photo`). История и паузы: `python3 scripts/tg_editorial.py history`.

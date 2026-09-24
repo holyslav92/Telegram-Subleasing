@@ -79,3 +79,11 @@ Setup: `.cursor/agents/excalibur-blog-setup.md` (не Task).
   `model: gemini-3.7-flash-high` (Gemini 3.7 Flash).
 - Research, scout, cover/картинки, schema, publish и оркестратор:
   `model: inherit` (модель automation, которую выбрал человек).
+
+## Telegram «Добрый дом» (ежедневный пост)
+
+Отдельный от блога процесс, Setup-gate на него не распространяется. Единственный порядок —
+`TELEGRAM-AGENTS.md`: `tg_editorial.py plan → fetch → черновик → validate до PASS → publish`.
+Старый пайплайн (банк тем, `daily_telegram_pipeline.py`, `--prepare`) отключён.
+Память публикаций пишется прямо в `main` (`publish` / `sync-memory`), иначе следующий
+запуск повторит темы.

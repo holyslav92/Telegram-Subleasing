@@ -1,89 +1,111 @@
-# Telegram Agents — «Добрый дом Тюмень»
+# Telegram «Добрый дом» — ежедневный пост (редакционная система)
 
-Язык: **русский**. Канал бренда — см. `docs/TELEGRAM_CONTENT_SYSTEM.md`.
+Один пост в день в группу бренда. Каждый пост — **свежий факт из интернета** в рамках
+рубрики дня, **реальное фото** места как основа картинки, **ни одного повтора** темы,
+формата, заголовка или фразы. Правила проверяет код (`scripts/tg_editorial.py`), а не
+память модели, поэтому процесс одинаково работает на любой модели.
 
-## Директор
+Старый пайплайн (`daily_telegram_pipeline.py`, `telegram_content_director.py --prepare`,
+`publish_telegram_bundle.py`, банк тем) **отключён**: он брал темы из фиксированного
+банка и повторял их.
 
-**Агент:** `telegram-content-director`  
-**Skill:** `.cursor/skills/director-telegram-content/SKILL.md`  
-**Скрипт:** `scripts/telegram_content_director.py`
-
-Отвечает за:
-- синхронизацию памяти (`ledger.json`);
-- gate + anti-repeat (similarity);
-- подготовку bundle (1 фото + 3 **разных** текста);
-- отчёт после публикации.
-
-## Learner
-
-**Скрипт:** `scripts/telegram_content_learner.py`
-
-После каждой публикации:
-- запоминает opening hook и topic_id;
-- фиксирует урок в `memory/telegram_posts/lessons.json`;
-- анализирует риски повторов;
-- формирует отчёт для директора.
-
-## Быстрый старт
+## Порядок работы (строго по шагам)
 
 ```bash
-# 1. Синхронизировать все известные посты
-python3 scripts/telegram_ledger_sync.py
+# 0. секреты
+python3 scripts/telegram_doctor.py
 
-# 2. Отчёт (что уже было, риски повторов)
-python3 scripts/telegram_content_director.py --report-only
-
-# 3. Подготовить пост на сегодня (или --category host_story)
-python3 scripts/telegram_content_director.py --prepare
-
-# 4. Опубликовать выбранный вариант
-python3 scripts/publish_telegram_bundle.py --bundle memory/telegram_posts/post_bundle_....json --variant 2
+# 1. бриф на сегодня
+python3 scripts/tg_editorial.py plan
 ```
 
-## Расписание
+Бриф (JSON, копия в `memory/telegram_posts/drafts/<дата>.brief.json`) содержит:
+рубрику дня и её цель, допустимые форматы, **темы на паузе** (`blocked_clusters`),
+занятые названия (`blocked_entities`), последние заголовки, первые слова заголовков,
+которые нельзя повторять, готовые поисковые запросы с датами и шаблон черновика.
 
-| День | Рубрика | category_id |
-|------|---------|-------------|
-| Пн | Афиша | afisha |
-| Вт | Гид по районам | district_guide |
-| Ср | Заметки радушного «хозяина» | host_story |
-| Чт | Сервис и стандарты | service_standards |
-| Пт | Выходные и термы | weekend_thermal |
-| Сб | Спецпредложения | special_offers |
-| Вс | Сибирское гостеприимство | siberian_hospitality |
+**2. Исследование.** По `search_queries` найди в интернете (WebSearch) 3–6 свежих
+источников. Каждый проверь:
 
-## Память
+```bash
+python3 scripts/tg_editorial.py fetch "<url>" --find "<название события>" "<дата>"
+```
 
-- `memory/telegram_posts/ledger.json` — **единственный источник** опубликованного.
-- Cooldown: topic_id 60 дней, entities 45 дней, **рубрика (category) 21 день**.
-- Similarity: opening hook + n-grams против всего ledger.
+Бери только то, что видно в тексте страницы: даты, площадки, цены, адреса. `og_image`
+из вывода — реальное фото для картинки (`image.reference_url`), если `og_image_ok: true`.
+Выбери тему, которая не попадает в паузы из брифа.
 
-## Craft-композитор (anti-robot)
+**3. Черновик** → `memory/telegram_posts/drafts/<ГГГГ-ММ-ДД>.json` строго по
+`draft_template` из брифа. Только чистый текст: без ссылок, эмодзи и HTML. Заголовок,
+кнопки, нумерацию списка и строку бронирования (сайт / Авито / MAX / менеджер, по
+ротации) добавляет рендер.
 
-Файлы:
-- `shared/telegram-content-craft.json` — сцены, CTA, proof, save-worthy, аудитория
-- `shared/telegram-topic-craft.json` — метаданные по topic_id
-- `scripts/telegram_post_composer.py` — сборка текста
+**4. Проверка — до PASS:**
 
-Принципы:
-1. **Сцена** — разные стили захода, не «Планируете поездку…»
-2. **Срочность** — когда уместно (событие, сезон, выходные)
-3. **Micro-proof** — короткая цитата из отзыва, не «читайте Авито»
-4. **Аудитория** — business/family/couple, не в каждом посте
-5. **Контраст** — только если `contrast_ok` и в тему
-6. **Save-worthy** — чек-лист ~1 раз в неделю или по флагу темы
-7. **CTA** — ротация 9 типов, learner запоминает `used_cta_ids`
+```bash
+python3 scripts/tg_editorial.py validate memory/telegram_posts/drafts/<дата>.json
+```
 
-Три варианта: **История** | **Чек-лист** | **Диалог**
+Исправляй каждую ошибку `✗` и запускай снова. Если тема упёрлась в паузу, повтор
+или неподтверждённый источник — **смени тему**, а не формулировку.
 
-## Документация
+**5. Публикация:**
 
-- `docs/TELEGRAM_CONTENT_SYSTEM.md` — пайплайн, бренд, API.
-- `CLOUD-AUTOMATION.md` — prompt для Cloud Automation.
-- `shared/telegram-content-rules.json` — запреты (в т.ч. `care_tea`).
+```bash
+python3 scripts/tg_editorial.py publish memory/telegram_posts/drafts/<дата>.json
+```
 
-## Связь с Excalibur Blog
+Публикация делает четыре шага: повторную проверку, картинку GPT Image 2 (логотип +
+реальное фото), отправку в группу и запись в память `published.json`/`ledger.json` прямо
+в `origin/main`. Если память не записалась (выход 4):
+`python3 scripts/tg_editorial.py sync-memory`.
 
-Этот репозиторий также содержит Excalibur Blog (`AGENTS.md`).  
-Telegram-пайплайн **не смешивать** с blog Scout→Publish.  
-Для Telegram всегда используй **telegram-content-director**.
+Пост без картинки — только если заказчик прямо попросил: `publish … --no-image`.
+
+## Рубрики по дням (время Тюмени)
+
+| День | Рубрика | Суть |
+|------|---------|------|
+| Пн | `week_afisha` | 3–5 событий недели с датой и площадкой |
+| Вт | `city_place` | одно конкретное место в Тюмени |
+| Ср | `guest_life` | практичная задача приезжего (чек-лист, миф/факт, вопрос-ответ) |
+| Чт | `city_news` | новость не старше 7 дней, которая меняет планы гостя |
+| Пт | `weekend` | 2–4 события на субботу и воскресенье |
+| Сб | `trip` | поездка на день или крупный концерт в ближайшие 45 дней |
+| Вс | `community` | факт о Тюмени + вопрос подписчикам, опрос |
+
+Другая рубрика допустима только с `pillar_override_reason` (например, срочное большое событие).
+
+## Что проверяет `validate`
+
+- **Свежесть:** дата черновика = сегодня; событие не в прошлом и в окне рубрики;
+  новость (`city_news`) не старше 7 дней; дата публикации сверяется со страницей.
+- **Источники:** хотя бы один внешний; фразы `must_contain` реально есть в HTML.
+- **Новизна:** тематические кластеры на паузе (термы 21 день, бельё 45, Тобольск 45,
+  концерты 7 и т. д., см. `shared/telegram-editorial.json`); `topic_id` за 120 дней;
+  названия за 30 дней; формат не как в двух последних постах; первое слово заголовка
+  не как в пяти последних; похожесть на последние 60 постов; похожие заголовки.
+  История = `published.json` + `ledger.json` + публичный канал @Dobriy_dom_72.
+- **Качество:** длина (текст 220–720 символов, до 3 абзацев, до 5 пунктов), нет
+  повторов предложений и фраз из 5+ слов, заголовок не дублируется, нет штампов и
+  пафоса (`banned_phrases`: «идеальный», «уютный», «атмосфера», белое бельё, конфеты,
+  «4-5 звёзд», «заметки хозяина»…), нет ссылок и эмодзи в тексте, подпись ≤ 1000 символов.
+
+## Файлы
+
+| Файл | Назначение |
+|------|------------|
+| `shared/telegram-editorial.json` | рубрики, форматы, кластеры и паузы, штампы, CTA, кнопки, примеры |
+| `scripts/tg_editorial.py` | plan / fetch / validate / render / publish / history / sync-memory |
+| `memory/telegram_posts/published.json` | полная память публикаций (рубрика, формат, кластеры, CTA) |
+| `memory/telegram_posts/drafts/` | брифы и черновики по датам |
+| `tests/test_tg_editorial.py` | тесты правил (`python3 -m unittest tests.test_tg_editorial`) |
+
+Смотреть историю и паузы: `python3 scripts/tg_editorial.py history`.
+
+## Запрещено
+
+- Запускать старый пайплайн или выставлять `TG_ALLOW_LEGACY`.
+- Публиковать в обход `validate` / `publish` (curl, MCP `telegram_send_*`, ручной sendPhoto).
+- Выдумывать факты, цены, даты и услуги «Доброго дома».
+- Заканчивать прогон, если память не попала в `main`.
