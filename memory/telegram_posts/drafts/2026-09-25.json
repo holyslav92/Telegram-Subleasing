@@ -1,83 +1,48 @@
 {
   "date": "2026-09-25",
-  "pillar": "weekend",
-  "format": "route",
-  "topic_id": "weekend_museums_africa_maranka_20260926",
-  "clusters": [
-    "exhibition",
-    "history",
-    "day_trip"
-  ],
+  "pillar": "guest_stories",
+  "format": "story",
   "hook_type": "number",
-  "audience": "couples",
-  "stay_reason": "два насыщенных дня в городе и выезд в Маранку — логичнее приехать в пятницу и остаться на две ночи",
-  "title": "26–27 сентября: «Чёрная Африка», нефть и поездка в Маранку",
+  "audience": "guests",
+  "topic_seed": "blog",
+  "topic_id": "blog_bez_komissii_plus_1187",
+  "clusters": [],
+  "title": "«Без комиссии» в фильтре — и +1 187 ₽ на экране оплаты",
   "paragraphs": [
-    "200 экспонатов из Новосибирска и интерактив «Просто о нефти» — в воскресенье, 27 сентября, «Чёрная Африка» закрывается. Ниже план на двое суток, который удобно переслать попутчику.",
-    "Из Сургута или Нового Уренгоя проще выехать в пятницу вечером: суббота — музей на Советской, воскресенье — Маранка или финал выставки."
-  ],
-  "list_items": [
-    "Сб 26, днём — «Просто о нефти» и «Ван Дейк» на Советской, 63 (42 работы до 6 декабря)",
-    "Сб 26, 17:00 — экскурсия «Чёрная Африка», до 550 ₽",
-    "Вс 27 — последний день «Чёрная Африка», вход до 300 ₽",
-    "Вс 27 — «Сельские просторы — в гости в Маранку!», от 2500 ₽, 9–10 ч., отель «Восток»"
+    "Гость нашёл квартиру за 4 200 ₽ за ночь, поставил фильтр «без комиссии» и посчитал две ночи: 8 400 ₽. На последнем экране появилась строка «Комиссия сервиса» — ещё 1 187 ₽. Итог — 9 587 ₽.",
+    "Хозяин ответил честно: «Это комиссия площадки, не моя». Только гость спрашивал о другом. Ему было важно не кому уходят деньги, а сколько платить за поездку.",
+    "Поэтому бюджет стоит считать по итогу за весь срок, а не по цене ночи в поиске. У нас условия и оплата известны заранее, без скрытых доплат. А бронь на сайте — напрямую, без площадки посередине."
   ],
   "question": "",
-  "entities": [
-    "Чёрная Африка",
-    "Просто о нефти",
-    "Антонис Ван Дейк. Первый после Рубенса",
-    "Музейный комплекс им. И.Я. Словцова",
-    "Сельские просторы — в гости в Маранку!"
-  ],
-  "event_date": "2026-09-26",
+  "entities": [],
+  "event_date": "",
   "sources": [
     {
-      "url": "https://museum72.ru/afisha/glavnyy-kompleks-imeni-i-ya-slovtsova/muzeynyy-kompleks-imeni-i-ya-slovtsova/chyernaya-afrika/",
+      "url": "https://добрыйдом-72.рф/blog/kvartira-posutochno-tyumen-bez-komissii-na-ekrane-oplaty/",
       "must_contain": [
-        "27 сентября 2026 года",
-        "до 300 рублей"
+        "1 187",
+        "9 587",
+        "Это комиссия площадки, не моя"
       ]
     },
     {
-      "url": "https://museum72.ru/afisha/glavnyy-kompleks-imeni-i-ya-slovtsova/muzeynyy-kompleks-imeni-i-ya-slovtsova/chyernaya-afrika-ekskursiya-/",
+      "url": "https://добрыйдом-72.рф/",
       "must_contain": [
-        "по субботам и воскресеньям в 17:00",
-        "до 550 рублей"
-      ]
-    },
-    {
-      "url": "https://museum72.ru/",
-      "must_contain": [
-        "выставка «Просто о нефти»",
-        "42 произведения"
-      ]
-    },
-    {
-      "url": "https://visittyumen.ru/events/vystavka-chernaya-afrika-/",
-      "must_contain": [
-        "ул. Советская, 63",
-        "27 сентября"
-      ]
-    },
-    {
-      "url": "https://afisha.events/tyumen/selskie-prostory-v-gosti-v-maranku-tyumen-27-09-2026/",
-      "must_contain": [
-        "27 сентября 2026",
-        "9-10 часов"
+        "Без скрытых доплат"
       ]
     }
   ],
-  "image_headline": "План на 26–27 сентября",
+  "apartment_code": "380199",
+  "image_headline": "Считайте итог, а не ночь",
   "image": {
-    "kind": "city",
-    "reference_url": "https://visittyumen.ru/upload/dev2fun.imagecompress/webp/dev2fun_opengraph/3f2/o1b7md2gvfssapxoxqgjz4at8w0shbnt.webp",
-    "scene": "Tyumen museum building on a clear autumn day, wide street view, Soviet-era architecture, warm light, no readable signs, no close-up faces"
+    "kind": "apartment",
+    "reference_url": "https://secure.travelline.ru/resource/images/rt/380199/639051457988477012-5f887dec-4534-4421-b32b-2c73e26fae35",
+    "scene": "bright living room of our real apartment on Sverdlova 22 in Tyumen: beige sofa with a soft blanket, floor lamp, round coffee table, calm daylight"
   },
   "_published": {
-    "message_id": 577,
-    "image_url": "https://file3.aitohumanize.com/file/0d83c1516c054d8a8648696f64dfba1e.png",
-    "image_mode": "generated",
-    "reference": "https://visittyumen.ru/upload/dev2fun.imagecompress/webp/dev2fun_opengraph/3f2/o1b7md2gvfssapxoxqgjz4at8w0shbnt.webp"
+    "message_id": 578,
+    "image_url": "https://file8.aitohumanize.com/file/0ec93ac905024350adab598bd263ce31.png",
+    "image_mode": "preapproved",
+    "reference": ""
   }
 }
