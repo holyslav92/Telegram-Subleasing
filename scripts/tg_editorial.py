@@ -396,7 +396,7 @@ def used_source_urls(history: list[dict]) -> set[str]:
 def seed_candidates(pillar_id: str, cfg: dict, history: list[dict], today: date, n: int = 5) -> list[dict]:
     seeds = cfg["pillars"][pillar_id].get("seeds") or []
     used = used_seed_ids(history)
-    free = [s for s in seeds if s["id"] not in used]
+    free = [s for s in seeds if s["id"] not in used and (not s.get("months") or today.month in s["months"])]
     if not free:
         return []
     # детерминированный сдвиг по дате — разные модели получают одинаковый список
@@ -404,48 +404,67 @@ def seed_candidates(pillar_id: str, cfg: dict, history: list[dict], today: date,
     return (free[shift:] + free[:shift])[:n]
 
 
-def load_blog_index() -> list[str]:
-    return load_json_list(BLOG_INDEX_PATH)
+BLOG_GUIDE_RE = r"гид|\bгде\b|как выбрать|как снять|районы|\bтоп\b|лучш|\bчто\b|\bкак\b|советы|почему|сравнен|\bили\b|обзор|цены на|стоимость|критери|шаг"
+BLOG_STORY_RE = r"у двери|у подъезда|оплатил|перевел|сняли|снял |приехали|приехал|попросили|написали|в фильтре|в карточке|в чате|в объявлении|на фото"
 
 
-def refresh_blog_index(pages: int = 3) -> list[str]:
+def blog_kind(title: str) -> str:
+    """story — живая история гостя (сцена, деньги, что сломалось); guide — справочная статья."""
+    tl = title.lower().replace("ё", "е")
+    if re.search(BLOG_STORY_RE, tl) and "." in title.rstrip("."):
+        return "story"
+    storyish = "." in title.rstrip(".") or "₽" in title
+    return "story" if storyish and not re.search(BLOG_GUIDE_RE, tl) else "guide"
+
+
+def load_blog_index() -> list[dict]:
+    out = []
+    for e in load_json_list(BLOG_INDEX_PATH):
+        out.append(e if isinstance(e, dict) else {"url": e, "title": "", "kind": ""})
+    return out
+
+
+def refresh_blog_index(pages: int = 3) -> list[dict]:
     """Добавляет новые статьи с первых страниц блога (новые идут первыми)."""
-    urls = load_blog_index()
-    fresh: list[str] = []
+    index = load_blog_index()
+    known = {e["url"] for e in index}
+    fresh: list[dict] = []
     for n in range(1, pages + 1):
         u = "https://добрыйдом-72.рф/blog/" + (f"page/{n}/" if n > 1 else "")
         st, _, ct, body = http_get(u, timeout=20)
         if st != 200 or not body:
             break
         for f in re.findall(r'href="(https://xn---72-9cdob8azaodt6k\.xn--p1ai/blog/[a-z0-9\-]+/)"', decode_body(body, ct)):
-            if f not in urls and f not in fresh:
-                fresh.append(f)
+            if f not in known:
+                known.add(f)
+                title = fetch_page(f).get("title", "").split(" - Добрый дом")[0].strip()
+                fresh.append({"url": f, "title": title, "kind": blog_kind(title)})
     if fresh:
-        urls = fresh + urls
-        BLOG_INDEX_PATH.write_text(json.dumps(urls, ensure_ascii=False, indent=1), encoding="utf-8")
-    return urls
+        index = fresh + index
+        BLOG_INDEX_PATH.write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
+    return index
 
 
-def blog_candidates(history: list[dict], today: date, n: int = 5, fetch_titles: bool = True) -> list[dict]:
-    urls = load_blog_index()
+def blog_candidates(history: list[dict], today: date, n: int = 5, kind: str = "story") -> list[dict]:
+    index = load_blog_index()
     if os.environ.get("TG_OFFLINE") != "1":
         try:
-            urls = refresh_blog_index()
+            index = refresh_blog_index()
         except Exception:
             pass
     used = used_source_urls(history)
-    free = [u for u in urls if u.rstrip("/") not in used]
+    free = [e for e in index if e["url"].rstrip("/") not in used and (not kind or e.get("kind") == kind)]
+    if not free:
+        free = [e for e in index if e["url"].rstrip("/") not in used]
     if not free:
         return []
-    shift = (today.toordinal() * 7) % len(free)
-    picked = (free[shift:] + free[:shift])[:n]
-    out = []
-    for u in picked:
-        title = ""
-        if fetch_titles and os.environ.get("TG_OFFLINE") != "1":
-            title = fetch_page(u).get("title", "").split(" - Добрый дом")[0]
-        out.append({"url": u, "title": title})
-    return out
+    # свежие статьи блога — первыми, остальные по кругу
+    head = free[:2]
+    rest = free[2:]
+    if rest:
+        shift = (today.toordinal() * 7) % len(rest)
+        rest = rest[shift:] + rest[:shift]
+    return (head + rest)[:n]
 
 
 def published_today(history: list[dict], today: date) -> list[dict]:
@@ -464,7 +483,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
     tokens = _date_tokens(today)
     topic_source = pillar.get("topic_source", "live")
     seeds_free = seed_candidates(pillar_id, cfg, history, today) if topic_source == "seeds" else []
-    blog_free = blog_candidates(history, today) if topic_source == "blog" else []
+    blog_free = blog_candidates(history, today, kind=pillar.get("blog_kind", "story")) if topic_source == "blog" else []
     tokens["seed"] = seeds_free[0]["topic"] if seeds_free else ""
     tokens["place"] = tokens["seed"]
     blocked = blocked_clusters(history, cfg, today)
@@ -516,7 +535,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "fresh_source_required": pillar.get("fresh_source_required", False),
         "event_window_days": pillar.get("event_window_days", 0),
         "news_max_age_days": pillar.get("news_max_age_days"),
-        "search_queries": [q.format_map(tokens) for q in pillar.get("queries", [])],
+        "search_queries": [re.sub(r"(Тюмен\w*.*?)\s+Тюмень\b", r"\1", q.format_map(tokens)) for q in pillar.get("queries", [])],
         "source_hints": pillar.get("source_hints", []),
         "blocked_clusters": blocked,
         "free_clusters": fresh_clusters,
@@ -638,7 +657,7 @@ def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: st
     return errors
 
 
-def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str) -> list[str]:
+def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str, today: date | None = None) -> list[str]:
     """Темы внутри рубрики не повторяются никогда: каждая тема из запаса — один раз."""
     pillar = cfg["pillars"][pillar_id]
     src = pillar.get("topic_source", "live")
@@ -648,7 +667,7 @@ def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str) ->
         ids = {s["id"] for s in pillar.get("seeds") or []}
         used = used_seed_ids(history)
         if seed == "new":
-            if ids - used:
+            if seed_candidates(pillar_id, cfg, history, today or today_local(cfg)):
                 errors.append("topic_seed=new разрешён только когда запас тем рубрики закончился — возьми тему из seed_candidates")
             if len((d.get("new_topic_reason") or "")) < 20:
                 errors.append("для новой темы нужен new_topic_reason")
@@ -823,7 +842,7 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
 
     errors += check_brand_value(d, cfg, title, paras, body, history, pillar)
     errors += check_style(body, cfg)
-    errors += check_topic_seed(d, cfg, history, pillar_id)
+    errors += check_topic_seed(d, cfg, history, pillar_id, today)
     if published_today(history, today) and not d.get("_published"):
         errors.append("сегодня пост уже опубликован — второй пост в день не выпускаем")
 
