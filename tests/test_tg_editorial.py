@@ -297,7 +297,8 @@ class PlanAndMemoryTests(unittest.TestCase):
 
     def test_apartment_cta_links_to_that_apartment(self):
         apt = ed.load_apartments()[0]
-        cap = ed.render_caption(seed_draft(apartment_code=apt["code"]), self.cfg, [])
+        cap = ed.render_caption(seed_draft(apartment_code=apt["code"], topic_seed="apartment"), self.cfg, [])
+        self.assertNotIn("room-type", ed.render_caption(seed_draft(), self.cfg, []))
         self.assertIn(f"room-type={apt['code']}", cap)
 
     def test_merge_lists_local_wins(self):

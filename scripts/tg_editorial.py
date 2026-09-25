@@ -704,7 +704,7 @@ def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: st
     if d.get("hook_type") not in hooks:
         errors.append(f"hook_type обязателен, один из {list(hooks)}")
     else:
-        last_hooks = [h.get("hook_type") for h in history if h.get("hook_type")][-2:]
+        last_hooks = [h.get("hook_type") for h in history if h.get("hook_type") and not h.get("deleted")][-2:]
         if d["hook_type"] in last_hooks:
             errors.append(f"крючок {d['hook_type']} был в последних 2 постах — зайди по-другому")
     if d.get("audience") not in auds:
@@ -1001,13 +1001,13 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
                 errors.append(f"«{ent}» уже было {h.get('date')} («{h.get('title', '')[:50]}») — пауза {nov['entity_cooldown_days']} дн.")
                 break
 
-    last = history[-12:]
+    last = [h for h in history if not h.get("deleted")][-12:]
     last_formats = [h.get("format") for h in last if h.get("format")][-nov["format_not_in_last_posts"]:]
     if fmt_id in last_formats and any(f not in last_formats for f in pillar["formats"]):
         errors.append(f"формат {fmt_id} был в последних {nov['format_not_in_last_posts']} постах — выбери другой из рубрики")
     last_pillars = [h.get("pillar") for h in last if h.get("pillar")][-nov["pillar_not_in_last_posts"]:]
     fw = first_word(title)
-    recent_titles = [h.get("title", "") for h in history if h.get("title")]
+    recent_titles = [h.get("title", "") for h in history if h.get("title") and not h.get("deleted")]
     if fw and fw in {first_word(t) for t in recent_titles[-nov["title_first_word_not_in_last_posts"]:]}:
         errors.append(f"заголовок начинается с «{fw}», как один из последних {nov['title_first_word_not_in_last_posts']} — начни иначе")
     ow = opening_words(paras[0] if paras else "")
@@ -1038,8 +1038,6 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
         errors.append("image.kind: city | event | apartment")
     if not (img.get("scene") or "").strip():
         errors.append("image.scene: опиши сцену (по-английски)")
-    if img.get("kind") == "apartment" and pillar_id not in ("guest_life",):
-        warnings.append("картинка-квартира в городской рубрике — лучше реальное фото места из источника")
 
     caption = render_caption(d, cfg, history)
     visible = len(html_to_text(caption))
@@ -1092,7 +1090,8 @@ def render_caption(d: dict, cfg: dict, history: list[dict] | None = None) -> str
         parts.append(f"<i>{esc(d['question'])}</i>")
     cta = pick_cta(cfg, history, d.get("cta", ""), cfg["pillars"].get(d.get("pillar", ""), {}).get("cta", "guest"))
     apt = apartment_by_code(d["apartment_code"]) if d.get("apartment_code") else None
-    if apt:
+    # ссылка на конкретную квартиру — только если пост про неё, а не фото фоном
+    if apt and (d.get("topic_seed") == "apartment" or d.get("cta") == "apartment"):
         parts.append(f"Эта квартира, фото и свободные даты — <a href=\"{apt['url']}\">на сайте</a>. "
                      f"Все наши квартиры в Тюмени — <a href=\"{cfg['links']['catalog']}\">здесь</a>.")
     else:
