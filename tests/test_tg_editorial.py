@@ -19,6 +19,7 @@ def good_draft(**over) -> dict:
         "format": "big_event",
         "hook_type": "countdown",
         "audience": "fans",
+        "topic_seed": "live",
         "stay_reason": "концерт заканчивается поздно, ехать ночью в Сургут или Тобольск неудобно",
         "topic_id": "concert_orchestra_tyumen_20261010",
         "clusters": ["concert"],
@@ -33,6 +34,25 @@ def good_draft(**over) -> dict:
         "sources": [{"url": "https://example.org/concert", "must_contain": ["Русская филармония"]}],
         "image_headline": "10 октября — оркестр",
         "image": {"kind": "event", "reference_url": "", "scene": "symphony orchestra on stage in a concert hall"},
+    }
+    d.update(over)
+    return d
+
+
+def seed_draft(**over) -> dict:
+    d = {
+        "date": "2026-09-21", "pillar": "how_we_work", "format": "story", "hook_type": "insider", "audience": "guests",
+        "topic_seed": "hww_02", "topic_id": "how_we_answer_in_5_minutes", "clusters": [],
+        "title": "23:40, гость пишет «не могу найти подъезд» — что дальше",
+        "paragraphs": [
+            "Такие сообщения приходят чаще, чем кажется. Поздний рейс, новый район, одинаковые дома во дворе.",
+            "Поэтому мы отвечаем в мессенджере до 5 минут, в любое время. В инструкции есть фото подъезда и этаж.",
+            "Заселение у нас без встреч. Но живой человек на связи всё равно важнее любой инструкции.",
+        ],
+        "entities": [], "event_date": "",
+        "sources": [{"url": "https://добрыйдом-72.рф/", "must_contain": ["ответ до 5 минут"]}],
+        "image_headline": "Ответим за 5 минут",
+        "image": {"kind": "apartment", "reference_url": "", "scene": "apartment entrance at night"},
     }
     d.update(over)
     return d
@@ -72,10 +92,14 @@ class ValidateTests(unittest.TestCase):
         self.assertTrue(any("на паузе" in e for e in res["errors"]))
 
     def test_same_format_as_last_posts_blocks(self):
-        history = [{"date": "2026-09-23", "title": "Другое", "text": "про другое", "clusters": [],
-                    "format": "big_event", "pillar": "trip"}]
+        history = [{"date": "2026-09-20", "title": "Другое", "text": "про другое", "clusters": [],
+                    "format": "story", "pillar": "community"}]
+        res = ed.validate_draft(seed_draft(), self.cfg, date(2026, 9, 21), history=history, offline=True)
+        self.assertTrue(any("формат story" in e for e in res["errors"]))
+        # у рубрики с единственным форматом ротация не блокирует
+        history = [{"date": "2026-09-23", "title": "Другое", "text": "про другое", "clusters": [], "format": "big_event"}]
         res = self.run_v(good_draft(), history)
-        self.assertTrue(any("формат big_event" in e for e in res["errors"]))
+        self.assertFalse(any("формат big_event" in e for e in res["errors"]))
 
     def test_entity_cooldown_blocks(self):
         history = [{"date": "2026-09-10", "title": "Что нового", "text": "текст", "clusters": [],
@@ -85,7 +109,7 @@ class ValidateTests(unittest.TestCase):
 
     def test_event_too_soon_fails(self):
         res = self.run_v(good_draft(event_date="2026-09-25"))
-        self.assertTrue(any("меньше 3 дн" in e for e in res["errors"]))
+        self.assertTrue(any("меньше 5 дн" in e for e in res["errors"]))
 
     def test_weather_post_rejected_as_local(self):
         d = good_draft(title="Ночью до −5, днём до +17 в Тюмени", clusters=["weather"],
@@ -117,7 +141,7 @@ class ValidateTests(unittest.TestCase):
         self.assertTrue(any("без конкретики" in e for e in res["errors"]))
 
     def test_wrong_pillar_without_reason_fails(self):
-        res = self.run_v(good_draft(pillar="weekend", format="event_list"))
+        res = self.run_v(good_draft(pillar="weekend_idea", format="story"))
         self.assertTrue(any("сегодня рубрика reason_to_come" in e for e in res["errors"]))
 
     def test_links_and_emoji_in_text_fail(self):
@@ -143,12 +167,18 @@ class RenderTests(unittest.TestCase):
         self.cfg = ed.load_config()
 
     def test_caption_structure(self):
-        d = good_draft(format="event_list", list_items=["25 сентября — концерт", "26 сентября — выставка"])
-        cap = ed.render_caption(d, self.cfg, [])
+        cap = ed.render_caption(good_draft(), self.cfg, [])
         self.assertTrue(cap.startswith("<b>"))
-        self.assertIn("1️⃣ 25 сентября", cap)
+        self.assertNotIn("1️⃣", cap)
         self.assertIn("добрыйдом-72.рф/booking", cap)
         self.assertLess(len(ed.html_to_text(cap)), 1000)
+
+    def test_lists_forbidden(self):
+        res = ed.validate_draft(good_draft(list_items=["10 октября — концерт", "11 октября — выставка"]), self.cfg, TODAY, history=[], offline=True)
+        self.assertTrue(any("списки" in e for e in res["errors"]))
+
+    def test_owner_cta_for_owner_rubric(self):
+        self.assertEqual(ed.pick_cta(self.cfg, [], kind="owner")["kind"], "owner")
 
     def test_cta_rotates(self):
         first = ed.pick_cta(self.cfg, [])["id"]
@@ -169,12 +199,54 @@ class PlanAndMemoryTests(unittest.TestCase):
         history = [{"date": "2026-09-22", "title": "Термы Верхнего Бора", "text": "термы термальные", "clusters": ["thermal"], "format": "route"}]
         plan = ed.build_plan(self.cfg, TODAY, history)
         self.assertEqual(plan["pillar"], "reason_to_come")
+        self.assertEqual(plan["topic_source"], "live")
         self.assertIn("thermal", plan["blocked_clusters"])
         self.assertTrue(all("{" not in q for q in plan["search_queries"]))
 
-    def test_every_weekday_has_pillar(self):
-        for i in range(7):
-            self.assertIn(self.cfg["weekday_pillars"][str(i)], self.cfg["pillars"])
+    def test_cycle_has_14_unique_rubrics(self):
+        days = self.cfg["cycle"]["days"]
+        self.assertEqual(len(days), 14)
+        self.assertEqual(len(set(days)), 14)
+        for p in days:
+            self.assertIn(p, self.cfg["pillars"])
+
+    def test_seed_rubrics_have_year_of_topics(self):
+        for pid, p in self.cfg["pillars"].items():
+            if p.get("topic_source") == "seeds":
+                self.assertGreaterEqual(len(p["seeds"]), 26, pid)
+                self.assertEqual(len({s["topic"] for s in p["seeds"]}), len(p["seeds"]), pid)
+
+    def test_schedule_two_weeks(self):
+        self.assertEqual(ed.pillar_for(date(2026, 9, 21), self.cfg), "how_we_work")
+        self.assertEqual(ed.pillar_for(date(2026, 9, 28), self.cfg), "market_news")
+        self.assertEqual(ed.pillar_for(date(2026, 10, 5), self.cfg), "how_we_work")
+
+    def test_seed_used_once(self):
+        d = seed_draft()
+        res = ed.validate_draft(d, self.cfg, date(2026, 9, 21), history=[], offline=True)
+        self.assertTrue(res["ok"], res["errors"])
+        history = [{"date": "2026-09-07", "title": "Иное", "text": "иное", "pillar": "how_we_work", "topic_seed": d["topic_seed"], "clusters": []}]
+        res = ed.validate_draft(d, self.cfg, date(2026, 9, 21), history=history, offline=True)
+        self.assertTrue(any("уже была в этой рубрике" in e for e in res["errors"]))
+
+    def test_blog_story_used_once(self):
+        d = seed_draft(pillar="guest_stories", format="story", topic_seed="blog", date="2026-09-25",
+                       topic_id="blog_one_night_min_two", sources=[{"url": "https://добрыйдом-72.рф/blog/oplachena-odna-noch-minimum-dvoe-sutok/", "must_contain": ["4 800"]}])
+        history = [{"date": "2026-09-11", "title": "Иное", "text": "иное", "pillar": "guest_stories", "clusters": [],
+                    "sources": ["https://xn---72-9cdob8azaodt6k.xn--p1ai/blog/oplachena-odna-noch-minimum-dvoe-sutok/"]}]
+        res = ed.validate_draft(d, self.cfg, date(2026, 9, 25), history=history, offline=True)
+        self.assertTrue(any("уже была пересказана" in e for e in res["errors"]))
+
+    def test_long_sentence_fails(self):
+        long = "Мы " + " ".join(["очень"] * 40) + " стараемся."
+        d = seed_draft(paragraphs=[long, seed_draft()["paragraphs"][1]])
+        res = ed.validate_draft(d, self.cfg, date(2026, 9, 21), history=[], offline=True)
+        self.assertTrue(any("длинное предложение" in e for e in res["errors"]))
+
+    def test_second_post_same_day_blocked(self):
+        history = [{"source": "published", "date": "2026-09-21", "title": "Уже вышло", "text": "x", "clusters": []}]
+        res = ed.validate_draft(seed_draft(), self.cfg, date(2026, 9, 21), history=history, offline=True)
+        self.assertTrue(any("уже опубликован" in e for e in res["errors"]))
 
     def test_merge_lists_dedupes(self):
         a = [{"message_id": 1, "date": "2026-09-01"}]

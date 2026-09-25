@@ -282,6 +282,9 @@ def load_history(cfg: dict, include_channel: bool = True) -> list[dict]:
             "cta_id": e.get("cta_id", ""),
             "hook_type": e.get("hook_type", ""),
             "audience": e.get("audience", ""),
+            "topic_seed": e.get("topic_seed", ""),
+            "sources": e.get("sources") or [],
+            "deleted": e.get("deleted", False),
         })
     for e in load_json_list(LEDGER_PATH):
         if not isinstance(e, dict):
@@ -369,7 +372,84 @@ def _date_tokens(today: date) -> dict:
 
 
 def pillar_for(today: date, cfg: dict) -> str:
-    return cfg["weekday_pillars"][str(today.weekday())]
+    """14-дневный цикл рубрик: неделя A с anchor_monday, затем неделя B."""
+    cyc = cfg["cycle"]
+    anchor = date.fromisoformat(cyc["anchor_monday"])
+    return cyc["days"][(today - anchor).days % len(cyc["days"])]
+
+
+BLOG_INDEX_PATH = ROOT / "shared" / "tg-blog-index.json"
+
+
+def used_seed_ids(history: list[dict]) -> set[str]:
+    return {h.get("topic_seed") for h in history if h.get("topic_seed")}
+
+
+def used_source_urls(history: list[dict]) -> set[str]:
+    out = set()
+    for h in history:
+        for u in h.get("sources") or []:
+            out.add(to_ascii_url(u).rstrip("/"))
+    return out
+
+
+def seed_candidates(pillar_id: str, cfg: dict, history: list[dict], today: date, n: int = 5) -> list[dict]:
+    seeds = cfg["pillars"][pillar_id].get("seeds") or []
+    used = used_seed_ids(history)
+    free = [s for s in seeds if s["id"] not in used]
+    if not free:
+        return []
+    # детерминированный сдвиг по дате — разные модели получают одинаковый список
+    shift = today.toordinal() % len(free)
+    return (free[shift:] + free[:shift])[:n]
+
+
+def load_blog_index() -> list[str]:
+    return load_json_list(BLOG_INDEX_PATH)
+
+
+def refresh_blog_index(pages: int = 3) -> list[str]:
+    """Добавляет новые статьи с первых страниц блога (новые идут первыми)."""
+    urls = load_blog_index()
+    fresh: list[str] = []
+    for n in range(1, pages + 1):
+        u = "https://добрыйдом-72.рф/blog/" + (f"page/{n}/" if n > 1 else "")
+        st, _, ct, body = http_get(u, timeout=20)
+        if st != 200 or not body:
+            break
+        for f in re.findall(r'href="(https://xn---72-9cdob8azaodt6k\.xn--p1ai/blog/[a-z0-9\-]+/)"', decode_body(body, ct)):
+            if f not in urls and f not in fresh:
+                fresh.append(f)
+    if fresh:
+        urls = fresh + urls
+        BLOG_INDEX_PATH.write_text(json.dumps(urls, ensure_ascii=False, indent=1), encoding="utf-8")
+    return urls
+
+
+def blog_candidates(history: list[dict], today: date, n: int = 5, fetch_titles: bool = True) -> list[dict]:
+    urls = load_blog_index()
+    if os.environ.get("TG_OFFLINE") != "1":
+        try:
+            urls = refresh_blog_index()
+        except Exception:
+            pass
+    used = used_source_urls(history)
+    free = [u for u in urls if u.rstrip("/") not in used]
+    if not free:
+        return []
+    shift = (today.toordinal() * 7) % len(free)
+    picked = (free[shift:] + free[:shift])[:n]
+    out = []
+    for u in picked:
+        title = ""
+        if fetch_titles and os.environ.get("TG_OFFLINE") != "1":
+            title = fetch_page(u).get("title", "").split(" - Добрый дом")[0]
+        out.append({"url": u, "title": title})
+    return out
+
+
+def published_today(history: list[dict], today: date) -> list[dict]:
+    return [h for h in history if h.get("source") == "published" and h.get("date") == today.isoformat() and not h.get("deleted")]
 
 
 def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dict:
@@ -382,6 +462,11 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
     avoid_formats = set(recent_formats[-nov["format_not_in_last_posts"]:])
     formats = [f for f in pillar["formats"] if f not in avoid_formats] or pillar["formats"][:]
     tokens = _date_tokens(today)
+    topic_source = pillar.get("topic_source", "live")
+    seeds_free = seed_candidates(pillar_id, cfg, history, today) if topic_source == "seeds" else []
+    blog_free = blog_candidates(history, today) if topic_source == "blog" else []
+    tokens["seed"] = seeds_free[0]["topic"] if seeds_free else ""
+    tokens["place"] = tokens["seed"]
     blocked = blocked_clusters(history, cfg, today)
     entity_window = recent(history, today, nov["entity_cooldown_days"])
     blocked_entities = sorted({e for h in entity_window for e in (h.get("entities") or []) if e})
@@ -394,15 +479,15 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "date": today.isoformat(),
         "pillar": pillar_id,
         "format": formats[0],
+        "topic_seed": "id темы из seed_candidates (seeds) | \"live\" (живые рубрики) | \"blog\" (истории из блога)",
         "topic_id": "латиница_через_подчёркивание_уникально",
         "clusters": ["1–3 id из free_clusters, о чём пост на самом деле"],
         "hook_type": "один из hook_types (не как в прошлом посте)",
         "audience": "один из audiences — для кого пост",
         "stay_reason": "одной фразой: почему этот человек приедет/останется в Тюмени (для проверки, в текст не выводится)",
         "title": "Заголовок 18–80 символов: имя, число или «название» — конкретика, не общие слова",
-        "paragraphs": ["1–3 абзаца по 40–320 символов, каждый с новым фактом"],
-        "list_items": ["только если формат требует список: 2–5 пунктов с датой/цифрой"],
-        "question": "вопрос подписчикам (обязателен для fact_question/poll_question, иначе можно пусто)",
+        "paragraphs": ["2–3 абзаца прозой по 40–320 символов, каждый с новым; списков нет"],
+        "question": "вопрос подписчикам (обязателен для fact_question, иначе пусто)",
         "entities": ["ключевые имена собственные: площадка, событие, артист, место"],
         "event_date": "YYYY-MM-DD ближайшего события или пусто",
         "sources": [{"url": "https://…", "published": "YYYY-MM-DD если это новость", "must_contain": ["точная фраза/название со страницы"]}],
@@ -416,14 +501,22 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "weekday": WEEKDAYS[today.weekday()],
         "hook_types": {k: v for k, v in cfg.get("hook_types", {}).items() if k not in last_hooks},
         "audiences": cfg.get("audiences", {}),
+        "already_published_today": [h.get("title") for h in published_today(history, today)],
         "pillar": pillar_id,
         "pillar_name": pillar["name"],
         "goal": pillar["goal"],
+        "how_to_write": pillar.get("how_to_write", ""),
+        "topic_source": topic_source,
+        "seed_candidates": seeds_free,
+        "blog_candidates": blog_free,
+        "fact_policy": pillar.get("fact_policy", "web"),
+        "brand_facts": cfg.get("brand_facts", {}),
+        "rubric_past_titles": [h.get("title") for h in history if h.get("pillar") == pillar_id][-30:],
         "allowed_formats": {f: cfg["formats"][f] for f in formats},
         "fresh_source_required": pillar.get("fresh_source_required", False),
         "event_window_days": pillar.get("event_window_days", 0),
         "news_max_age_days": pillar.get("news_max_age_days"),
-        "search_queries": [q.format(**tokens) for q in pillar["queries"]],
+        "search_queries": [q.format_map(tokens) for q in pillar.get("queries", [])],
         "source_hints": pillar.get("source_hints", []),
         "blocked_clusters": blocked,
         "free_clusters": fresh_clusters,
@@ -436,11 +529,12 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "draft_path": str(draft_path.relative_to(ROOT)),
         "draft_template": template,
         "next_steps": [
-            "1. Найди 3–6 свежих источников по search_queries (WebSearch). Бери конкретику: даты, площадки, цены, адреса.",
-            "2. Для каждого источника: python3 scripts/tg_editorial.py fetch <url> — проверь, что факт виден на странице; возьми og_image как reference_url.",
-            "3. Выбери тему, которая НЕ попадает в blocked_clusters / blocked_entities / recent_titles.",
+            "0. Если already_published_today не пуст — сегодня пост уже вышел: ничего не публикуй, заверши работу.",
+            "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
+            "2. Факты: о «Добром доме» — только brand_facts (источник — сайт); о городе и рынке — WebSearch + python3 scripts/tg_editorial.py fetch <url> --find \"<фраза>\".",
+            "3. Пиши по how_to_write и writing_rules: 2–3 абзаца прозой, без списков, короткими живыми предложениями. Не повторяй rubric_past_titles.",
             f"4. Запиши черновик в {draft_path.relative_to(ROOT)} строго по draft_template.",
-            f"5. python3 scripts/tg_editorial.py validate {draft_path.relative_to(ROOT)} — чини ошибки, пока не будет PASS (до 5 попыток, при тупике — смени тему).",
+            f"5. python3 scripts/tg_editorial.py validate {draft_path.relative_to(ROOT)} — чини ошибки, пока не будет PASS (при тупике — следующая тема из кандидатов).",
             f"6. python3 scripts/tg_editorial.py publish {draft_path.relative_to(ROOT)} — картинка, публикация, память в main.",
         ],
     }
@@ -491,8 +585,27 @@ def check_internal_repeats(d: dict) -> list[str]:
     return errors
 
 
-def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: str, history: list[dict]) -> list[str]:
-    """Пост должен цеплять приезжего и вести к поездке, а не быть городской сводкой для местных."""
+def check_style(body: str, cfg: dict) -> list[str]:
+    """Живой язык: короткие предложения, без простыней."""
+    lim = cfg["limits"]
+    errors = []
+    sents = [s for s in re.split(r"(?<=[.!?…])\s+|\n+", body) if len(words(s)) >= 3]
+    if not sents:
+        return errors
+    lens = [len(words(s)) for s in sents]
+    long = [s for s, n in zip(sents, lens) if n > lim.get("sentence_words_max", 32)]
+    if long:
+        errors.append(f"слишком длинное предложение ({len(words(long[0]))} слов): «{long[0][:70]}…» — разбей")
+    avg = sum(lens) / len(lens)
+    if avg > lim.get("avg_sentence_words_max", 20):
+        errors.append(f"в среднем {avg:.0f} слов в предложении — пиши короче, как говорят люди")
+    return errors
+
+
+def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: str, history: list[dict],
+                      pillar: dict | None = None) -> list[str]:
+    """Пост должен цеплять и работать на бренд, а не быть городской сводкой для местных."""
+    pillar = pillar or {}
     errors = []
     lim = cfg["limits"]
     hooks = cfg.get("hook_types", {})
@@ -505,11 +618,12 @@ def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: st
             errors.append(f"крючок {d['hook_type']} был в последних 2 постах — зайди по-другому")
     if d.get("audience") not in auds:
         errors.append(f"audience обязателен, один из {list(auds)}")
-    if len((d.get("stay_reason") or "").strip()) < lim.get("stay_reason_min", 25):
-        errors.append("stay_reason: одной фразой — почему человек приедет или останется в Тюмени")
-    plain = norm(body)
-    if not any(norm(k) in plain for k in cfg.get("stay_link_keywords", [])):
-        errors.append("в тексте нет связи с приездом/проживанием: одна живая фраза, зачем приехать или остаться на ночь")
+    if pillar.get("stay_link_required"):
+        if len((d.get("stay_reason") or "").strip()) < lim.get("stay_reason_min", 25):
+            errors.append("stay_reason: одной фразой — почему человек приедет или останется в Тюмени")
+        plain = norm(body)
+        if not any(norm(k) in plain for k in cfg.get("stay_link_keywords", [])):
+            errors.append("в тексте нет связи с приездом/проживанием: одна живая фраза, зачем приехать или остаться на ночь")
     local = set(cfg.get("local_only_clusters", []))
     hit_local = [c for c in strong_clusters(title, body, cfg) if c in local] + [c for c in d.get("clusters") or [] if c in local]
     if hit_local:
@@ -521,6 +635,47 @@ def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: st
     concrete = bool(re.search(r"\d", title)) or "«" in title or any(w[:1].isupper() for w in t_words[1:])
     if not concrete:
         errors.append("заголовок без конкретики: добавь число, имя или «название»")
+    return errors
+
+
+def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str) -> list[str]:
+    """Темы внутри рубрики не повторяются никогда: каждая тема из запаса — один раз."""
+    pillar = cfg["pillars"][pillar_id]
+    src = pillar.get("topic_source", "live")
+    seed = d.get("topic_seed", "")
+    errors = []
+    if src == "seeds":
+        ids = {s["id"] for s in pillar.get("seeds") or []}
+        used = used_seed_ids(history)
+        if seed == "new":
+            if ids - used:
+                errors.append("topic_seed=new разрешён только когда запас тем рубрики закончился — возьми тему из seed_candidates")
+            if len((d.get("new_topic_reason") or "")) < 20:
+                errors.append("для новой темы нужен new_topic_reason")
+        elif seed not in ids:
+            errors.append(f"topic_seed {seed!r} не из запаса рубрики {pillar_id}")
+        elif seed in used:
+            errors.append(f"тема {seed} уже была в этой рубрике — возьми другую из seed_candidates")
+    elif src == "blog":
+        if seed != "blog":
+            errors.append("для историй из блога topic_seed = \"blog\"")
+        used_urls = used_source_urls(history)
+        for s in d.get("sources") or []:
+            if isinstance(s, dict) and "/blog/" in to_ascii_url(s.get("url", "")) and to_ascii_url(s["url"]).rstrip("/") in used_urls:
+                errors.append(f"статья {s['url']} уже была пересказана — возьми другую из blog_candidates")
+    elif seed != "live":
+        errors.append("для живой рубрики topic_seed = \"live\"")
+    rubric_hist = [h for h in history if h.get("pillar") == pillar_id and h.get("text")]
+    try:
+        from telegram_similarity import similarity_score
+        full = d.get("title", "") + ". " + draft_body_text(d)
+        thr = cfg["novelty"].get("rubric_similarity_threshold", 0.33)
+        for h in rubric_hist:
+            sc = similarity_score(full, f"{h.get('title', '')}. {h.get('text', '')}")
+            if sc >= thr:
+                errors.append(f"в рубрике уже был похожий пост {h.get('date')} «{h.get('title', '')[:50]}» (score={sc:.2f})")
+    except Exception:
+        pass
     return errors
 
 
@@ -539,9 +694,14 @@ def check_banned(d: dict, cfg: dict) -> list[str]:
 def verify_sources(d: dict, today: date, pillar: dict, offline: bool) -> tuple[list[str], list[str], list[dict]]:
     errors, warnings, pages = [], [], []
     sources = d.get("sources") or []
+    policy = pillar.get("fact_policy", "web")
+    if policy == "none" and not sources:
+        return errors, warnings, pages
     external = [s for s in sources if isinstance(s, dict) and s.get("url") and not any(m in to_ascii_url(s["url"]) for m in OWN_SITE_MARKERS)]
-    if pillar.get("fresh_source_required") and not external:
+    if policy in ("web",) and pillar.get("fresh_source_required") and not external:
         errors.append("нужен хотя бы один внешний источник (не сайт «Доброго дома»)")
+    if policy == "blog" and not any("/blog/" in to_ascii_url(s.get("url", "")) for s in sources if isinstance(s, dict)):
+        errors.append("история должна опираться на статью блога: sources[].url = https://добрыйдом-72.рф/blog/…")
     for s in sources:
         if not isinstance(s, dict) or not s.get("url", "").startswith("http"):
             errors.append(f"источник без корректного url: {s}")
@@ -590,7 +750,11 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
     nov = cfg["novelty"]
     history = history if history is not None else load_history(cfg, include_channel=not offline)
 
-    for key in ("date", "pillar", "format", "topic_id", "title", "paragraphs", "sources", "image_headline", "image"):
+    policy = cfg["pillars"].get(d.get("pillar", ""), {}).get("fact_policy", "web")
+    required = ["date", "pillar", "format", "topic_id", "topic_seed", "title", "paragraphs", "image_headline", "image"]
+    if policy != "none":
+        required.append("sources")
+    for key in required:
         if not d.get(key):
             errors.append(f"нет поля {key}")
     if errors:
@@ -631,7 +795,7 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
         if not lim["paragraph_min"] <= len(p) <= lim["paragraph_max"]:
             errors.append(f"абзац {i}: {len(p)} симв., нужно {lim['paragraph_min']}–{lim['paragraph_max']}")
     if len(items) > lim["list_items_max"]:
-        errors.append(f"пунктов {len(items)}, максимум {lim['list_items_max']}")
+        errors.append("списки и пункты запрещены — пиши прозой" if lim["list_items_max"] == 0 else f"пунктов {len(items)}, максимум {lim['list_items_max']}")
     for i, it in enumerate(items, 1):
         if len(it) > lim["list_item_max"]:
             errors.append(f"пункт {i}: {len(it)} симв., максимум {lim['list_item_max']}")
@@ -641,10 +805,6 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
         warnings.append(f"формат {fmt_id} обычно без списка")
     if fmt.get("needs_question") and not question.endswith("?"):
         errors.append(f"формат {fmt_id} требует question с «?» в конце")
-    if pillar_id in ("week_afisha", "weekend") and items:
-        no_date = [it for it in items if not re.search(r"\d", it)]
-        if no_date:
-            errors.append(f"в афише у каждого пункта нужна дата/время: «{no_date[0][:50]}»")
     body = draft_body_text({"paragraphs": paras, "list_items": items, "question": question})
     if not lim["body_min"] <= len(body) <= lim["body_max"]:
         errors.append(f"текст {len(body)} симв., нужно {lim['body_min']}–{lim['body_max']} (SMM: коротко)")
@@ -661,7 +821,11 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
     errors += check_internal_repeats({"title": title, "paragraphs": paras, "list_items": items, "question": question})
     errors += check_banned(d, cfg)
 
-    errors += check_brand_value(d, cfg, title, paras, body, history)
+    errors += check_brand_value(d, cfg, title, paras, body, history, pillar)
+    errors += check_style(body, cfg)
+    errors += check_topic_seed(d, cfg, history, pillar_id)
+    if published_today(history, today) and not d.get("_published"):
+        errors.append("сегодня пост уже опубликован — второй пост в день не выпускаем")
 
     # Свежесть событий
     ev = parse_day(d.get("event_date", ""))
@@ -675,8 +839,8 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
             errors.append(f"event_date {ev} дальше окна рубрики ({window} дн.)")
         elif pillar.get("min_event_lead_days") and ev < today + timedelta(days=pillar["min_event_lead_days"]):
             errors.append(f"до события меньше {pillar['min_event_lead_days']} дн. — приезжий не успеет спланировать поездку, возьми событие позже")
-    elif pillar_id in ("week_afisha", "weekend") or fmt_id == "big_event":
-        errors.append("для афиши/события нужен event_date ближайшего события")
+    elif fmt_id == "big_event" or (pillar.get("event_window_days") and pillar.get("topic_source") == "live" and not pillar.get("event_optional") and pillar.get("fact_policy") == "web" and not pillar.get("news_max_age_days")):
+        errors.append("для события нужен event_date")
 
     # Новизна
     declared = [c for c in d.get("clusters") or [] if c]
@@ -710,11 +874,9 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
 
     last = history[-12:]
     last_formats = [h.get("format") for h in last if h.get("format")][-nov["format_not_in_last_posts"]:]
-    if fmt_id in last_formats:
+    if fmt_id in last_formats and any(f not in last_formats for f in pillar["formats"]):
         errors.append(f"формат {fmt_id} был в последних {nov['format_not_in_last_posts']} постах — выбери другой из рубрики")
     last_pillars = [h.get("pillar") for h in last if h.get("pillar")][-nov["pillar_not_in_last_posts"]:]
-    if pillar_id in last_pillars and pillar_id == expected_pillar and last and last[-1].get("date") == today.isoformat():
-        errors.append("сегодня уже был пост этой рубрики")
     fw = first_word(title)
     recent_titles = [h.get("title", "") for h in history if h.get("title")]
     if fw and fw in {first_word(t) for t in recent_titles[-nov["title_first_word_not_in_last_posts"]:]}:
@@ -766,8 +928,13 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
 KEYCAPS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
 
 
-def pick_cta(cfg: dict, history: list[dict], forced: str = "") -> dict:
-    variants = cfg["cta_variants"]
+def pick_cta(cfg: dict, history: list[dict], forced: str = "", kind: str = "guest") -> dict:
+    all_variants = cfg["cta_variants"]
+    if forced:
+        for v in all_variants:
+            if v["id"] == forced:
+                return v
+    variants = [v for v in all_variants if kind == "any" or v.get("kind", "guest") == kind] or all_variants
     if forced:
         for v in variants:
             if v["id"] == forced:
@@ -793,7 +960,7 @@ def render_caption(d: dict, cfg: dict, history: list[dict] | None = None) -> str
     parts += paras[1:]
     if (d.get("question") or "").strip():
         parts.append(f"<i>{esc(d['question'])}</i>")
-    cta = pick_cta(cfg, history, d.get("cta", ""))
+    cta = pick_cta(cfg, history, d.get("cta", ""), cfg["pillars"].get(d.get("pillar", ""), {}).get("cta", "guest"))
     parts.append(cta["html"].format(**cfg["links"]))
     return "\n\n".join(parts)
 
@@ -894,6 +1061,7 @@ def record_published(d: dict, cfg: dict, caption: str, message_id, image_url: st
         "cta_id": cta_id,
         "hook_type": d.get("hook_type", ""),
         "audience": d.get("audience", ""),
+        "topic_seed": d.get("topic_seed", ""),
         "image_url": image_url,
         "text": html_to_text(caption),
     }
@@ -1069,7 +1237,7 @@ def cmd_publish(args) -> int:
     pillar = cfg["pillars"][d["pillar"]]
     _, _, pages = verify_sources(d, today, pillar, offline=False)
     caption = render_caption(d, cfg, history)
-    cta = pick_cta(cfg, history, d.get("cta", ""))
+    cta = pick_cta(cfg, history, d.get("cta", ""), cfg["pillars"].get(d.get("pillar", ""), {}).get("cta", "guest"))
     image_url, ref, how = "", "", "text_only"
     if args.image_url:
         if not is_image_url(args.image_url):
