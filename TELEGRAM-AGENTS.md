@@ -74,7 +74,7 @@ python3 scripts/tg_editorial.py publish memory/telegram_posts/drafts/<дата>.
 | День | Неделя A | Неделя B |
 |------|----------|----------|
 | Пн | Как мы работаем (`how_we_work`) — закулисье | Посуточная аренда: что нового (`market_news`) |
-| Вт | Квартира недели (`apartment_week`) | Как не попасть впросак (`guest_guide`) |
+| Вт | Квартира недели (`apartment_week`) — одна из ~50 квартир каталога, каждая по очереди | Как не попасть впросак (`guest_guide`) |
 | Ср | Собственнику (`owners`) — субаренда и управление | Вопрос — ответ (`faq`) |
 | Чт | Повод приехать (`reason_to_come`) — одно событие | В дорогу (`travel_tips`) |
 | Пт | Истории гостей (`guest_stories`) — из блога | Выходные: одна идея (`weekend_idea`) |
@@ -84,6 +84,24 @@ python3 scripts/tg_editorial.py publish memory/telegram_posts/drafts/<дата>.
 Цель, указания «как писать», источник фактов, тип CTA и запас тем каждой рубрики — в
 `shared/telegram-editorial.json` → `pillars`. Факты о компании — только `brand_facts`.
 Если сегодня пост уже вышел (`already_published_today` в брифе) — ничего не публикуем.
+
+## Наши квартиры и фото
+
+Каталог всех квартир (~50, с описаниями и реальными фото) — `shared/tg-apartments.json`,
+источник — TravelLine объекта «Добрый дом» (тот же, что на https://добрыйдомтюмень.рф/),
+обновляется автоматически раз в неделю или командой:
+
+```bash
+python3 scripts/tg_editorial.py apartments --refresh     # список квартир
+python3 scripts/tg_editorial.py apartment <code> --download 8   # описание + скачать фото, посмотреть
+```
+
+Если пост про нашу квартиру (в любой рубрике): `apartment_code` + `image.kind: apartment` +
+`image.reference_url` — самое светлое и красивое фото **этой** квартиры из каталога (скачай 6–8,
+посмотри, выбери). Каждое фото используется один раз. Картинку делает GRSAI GPT Image 2.5 Flare (запасная — GPT Image 2;
+переопределить: `TG_IMAGE_MODEL`): та же комната без добавлений, только свет и
+ретушь, плюс логотип и надпись. Строка в конце поста ведёт на страницу этой квартиры.
+Заменить сегодняшний пост: `publish <черновик> --replace <message_id>`.
 
 ## Что проверяет `validate`
 

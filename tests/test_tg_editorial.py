@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import tg_editorial as ed  # noqa: E402
 
+APT = ed.load_apartments()[0]
 TODAY = date(2026, 9, 24)  # четверг → reason_to_come
 
 
@@ -52,7 +53,8 @@ def seed_draft(**over) -> dict:
         "entities": [], "event_date": "",
         "sources": [{"url": "https://добрыйдом-72.рф/", "must_contain": ["ответ до 5 минут"]}],
         "image_headline": "Ответим за 5 минут",
-        "image": {"kind": "apartment", "reference_url": "", "scene": "apartment entrance at night"},
+        "apartment_code": APT["code"],
+        "image": {"kind": "apartment", "reference_url": APT["images"][1], "scene": "apartment entrance at night"},
     }
     d.update(over)
     return d
@@ -270,10 +272,33 @@ class PlanAndMemoryTests(unittest.TestCase):
                 c = ed.blog_candidates(hist, x)
                 self.assertTrue(c, f"нет истории на {x}")
                 hist.append({"date": x.isoformat(), "pillar": pid, "sources": [c[0]["url"]]})
+            elif src == "apartments":
+                c = ed.apartment_candidates(pid, hist, x)
+                self.assertTrue(c, f"нет квартиры на {x}")
+                hist.append({"date": x.isoformat(), "pillar": pid, "apartment_code": c[0]["code"]})
+        apts = [h["apartment_code"] for h in hist if h.get("apartment_code")]
+        self.assertEqual(len(apts), len(set(apts)))
         seeds = [h["topic_seed"] for h in hist if h.get("topic_seed")]
         self.assertEqual(len(seeds), len(set(seeds)))
         blog = [h["sources"][0] for h in hist if h.get("sources")]
         self.assertEqual(len(blog), len(set(blog)))
+
+    def test_apartment_post_requires_real_photo(self):
+        apt = ed.load_apartments()[0]
+        d = seed_draft(pillar="apartment_week", format="portrait", topic_seed="apartment", date="2026-09-22",
+                       apartment_code=apt["code"], topic_id="apt_week_first",
+                       image={"kind": "apartment", "reference_url": "https://images.pexels.com/x.jpg", "scene": "room"})
+        res = ed.validate_draft(d, self.cfg, date(2026, 9, 22), history=[], offline=True)
+        self.assertTrue(any("реальным фото квартиры" in e for e in res["errors"]))
+        d["image"]["reference_url"] = apt["images"][0]
+        hist = [{"date": "2026-09-01", "title": "x", "text": "x", "clusters": [], "image_reference": apt["images"][0]}]
+        res = ed.validate_draft(d, self.cfg, date(2026, 9, 22), history=hist, offline=True)
+        self.assertTrue(any("фото уже было" in e for e in res["errors"]))
+
+    def test_apartment_cta_links_to_that_apartment(self):
+        apt = ed.load_apartments()[0]
+        cap = ed.render_caption(seed_draft(apartment_code=apt["code"]), self.cfg, [])
+        self.assertIn(f"room-type={apt['code']}", cap)
 
     def test_merge_lists_local_wins(self):
         remote = [{"message_id": 5, "date": "2026-09-01", "title": "a"}]

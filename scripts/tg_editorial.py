@@ -283,6 +283,9 @@ def load_history(cfg: dict, include_channel: bool = True) -> list[dict]:
             "hook_type": e.get("hook_type", ""),
             "audience": e.get("audience", ""),
             "topic_seed": e.get("topic_seed", ""),
+            "apartment_code": e.get("apartment_code", ""),
+            "image_reference": e.get("image_reference", ""),
+            "message_id": e.get("message_id"),
             "sources": e.get("sources") or [],
             "deleted": e.get("deleted", False),
         })
@@ -379,6 +382,70 @@ def pillar_for(today: date, cfg: dict) -> str:
 
 
 BLOG_INDEX_PATH = ROOT / "shared" / "tg-blog-index.json"
+APARTMENTS_PATH = ROOT / "shared" / "tg-apartments.json"
+TL_HOTEL_CODE = "25160"
+TL_API = "https://ru-ibe.tlintegration.ru/ApiWebDistribution/BookingForm/hotel_info?hotels[0].code={code}&language=ru-ru"
+APARTMENT_SITE = "https://добрыйдомтюмень.рф/booking/?room-type={code}"
+
+
+def refresh_apartments() -> list[dict]:
+    """Каталог всех квартир с реальными фото из TravelLine (то же, что на добрыйдомтюмень.рф)."""
+    st, _, _, body = http_get(TL_API.format(code=TL_HOTEL_CODE), timeout=40, max_bytes=30_000_000)
+    if st != 200 or not body:
+        raise RuntimeError(f"TravelLine не ответил: HTTP {st}")
+    hotel = json.loads(body)["hotels"][0]
+    out = []
+    for rt in hotel.get("room_types", []):
+        name = re.sub(r"\s+", " ", rt.get("name", "")).strip()
+        m = re.search(r"\(([^)]+)\)\s*$", name)
+        desc = re.sub(r"[✅❗️🔹🔸⭐️]+", "", rt.get("description", "") or "")
+        desc = re.sub(r"\n{2,}", "\n", desc).strip()
+        out.append({
+            "code": str(rt.get("code")),
+            "name": name,
+            "address": m.group(1).strip() if m else "",
+            "size_m2": (rt.get("size") or {}).get("value"),
+            "max_occupancy": rt.get("max_occupancy"),
+            "amenities": [a.get("name") for a in rt.get("amenities") or [] if a.get("name")],
+            "pets": next((a.get("description", "") for a in rt.get("amenities") or [] if a.get("kind") == "possible_with_pets"), ""),
+            "description": desc[:1500],
+            "images": [i["url"] for i in rt.get("images") or [] if i.get("url")],
+            "url": APARTMENT_SITE.format(code=rt.get("code")),
+        })
+    APARTMENTS_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    return out
+
+
+def load_apartments() -> list[dict]:
+    return load_json_list(APARTMENTS_PATH)
+
+
+def apartment_by_code(code: str) -> dict | None:
+    return next((a for a in load_apartments() if a["code"] == str(code)), None)
+
+
+def used_image_refs(history: list[dict]) -> set[str]:
+    return {h.get("image_reference") for h in history if h.get("image_reference")}
+
+
+def apartment_candidates(pillar_id: str, history: list[dict], today: date, n: int = 5) -> list[dict]:
+    if os.environ.get("TG_OFFLINE") != "1":
+        try:
+            if not APARTMENTS_PATH.exists() or time.time() - APARTMENTS_PATH.stat().st_mtime > 7 * 86400:
+                refresh_apartments()
+        except Exception:
+            pass
+    apts = load_apartments()
+    used = {h.get("apartment_code") for h in history if h.get("pillar") == pillar_id and h.get("apartment_code")}
+    free = [a for a in apts if a["code"] not in used] or apts
+    if not free:
+        return []
+    shift = (today.toordinal() * 3) % len(free)
+    out = []
+    for a in (free[shift:] + free[:shift])[:n]:
+        out.append({k: a[k] for k in ("code", "name", "address", "size_m2", "max_occupancy", "amenities", "pets", "description", "url")}
+                   | {"photos": a["images"][:8]})
+    return out
 
 
 def used_seed_ids(history: list[dict]) -> set[str]:
@@ -484,6 +551,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
     topic_source = pillar.get("topic_source", "live")
     seeds_free = seed_candidates(pillar_id, cfg, history, today) if topic_source == "seeds" else []
     blog_free = blog_candidates(history, today, kind=pillar.get("blog_kind", "story")) if topic_source == "blog" else []
+    apt_free = apartment_candidates(pillar_id, history, today) if topic_source == "apartments" else []
     tokens["seed"] = seeds_free[0]["topic"] if seeds_free else ""
     tokens["place"] = tokens["seed"]
     blocked = blocked_clusters(history, cfg, today)
@@ -498,7 +566,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "date": today.isoformat(),
         "pillar": pillar_id,
         "format": formats[0],
-        "topic_seed": "id темы из seed_candidates (seeds) | \"live\" (живые рубрики) | \"blog\" (истории из блога)",
+        "topic_seed": "id темы из seed_candidates (seeds) | \"live\" (живые рубрики) | \"blog\" (истории из блога) | \"apartment\" (квартира недели)",
+        "apartment_code": "код квартиры из каталога, если пост про нашу квартиру (иначе пусто)",
         "topic_id": "латиница_через_подчёркивание_уникально",
         "clusters": ["1–3 id из free_clusters, о чём пост на самом деле"],
         "hook_type": "один из hook_types (не как в прошлом посте)",
@@ -528,6 +597,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "topic_source": topic_source,
         "seed_candidates": seeds_free,
         "blog_candidates": blog_free,
+        "apartment_candidates": apt_free,
+        "apartment_photos_rule": "Если пост про нашу квартиру (в любой рубрике): apartment_code из каталога (python3 scripts/tg_editorial.py apartments), image.kind=apartment, image.reference_url — самое красивое фото ЭТОЙ квартиры из каталога (посмотри: python3 scripts/tg_editorial.py apartment <code> --download 8). Одно фото — один раз.",
         "fact_policy": pillar.get("fact_policy", "web"),
         "brand_facts": cfg.get("brand_facts", {}),
         "rubric_past_titles": [h.get("title") for h in history if h.get("pillar") == pillar_id][-30:],
@@ -549,7 +620,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "draft_template": template,
         "next_steps": [
             "0. Если already_published_today не пуст — сегодня пост уже вышел: ничего не публикуй, заверши работу.",
-            "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
+            "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); apartments → одну квартиру из apartment_candidates (topic_seed = \"apartment\", apartment_code = её code); live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
+            "1.1 Картинка: если пост про нашу квартиру — только реальное фото этой квартиры из каталога (apartment_photos_rule). Скачай 6–8 фото, посмотри и выбери самое светлое и красивое.",
             "2. Факты: о «Добром доме» — только brand_facts (источник — сайт); о городе и рынке — WebSearch + python3 scripts/tg_editorial.py fetch <url> --find \"<фраза>\".",
             "3. Пиши по how_to_write и writing_rules: 2–3 абзаца прозой, без списков, короткими живыми предложениями. Не повторяй rubric_past_titles.",
             f"4. Запиши черновик в {draft_path.relative_to(ROOT)} строго по draft_template.",
@@ -682,6 +754,15 @@ def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str, to
         for s in d.get("sources") or []:
             if isinstance(s, dict) and "/blog/" in to_ascii_url(s.get("url", "")) and to_ascii_url(s["url"]).rstrip("/") in used_urls:
                 errors.append(f"статья {s['url']} уже была пересказана — возьми другую из blog_candidates")
+    elif src == "apartments":
+        if seed != "apartment":
+            errors.append("для «Квартиры недели» topic_seed = \"apartment\"")
+        code = str(d.get("apartment_code") or "")
+        if not apartment_by_code(code):
+            errors.append("apartment_code не найден в каталоге — возьми из apartment_candidates")
+        elif any(h.get("pillar") == pillar_id and str(h.get("apartment_code")) == code for h in history) and \
+                len({h.get("apartment_code") for h in history if h.get("pillar") == pillar_id}) < len(load_apartments()):
+            errors.append(f"квартира {code} уже была в этой рубрике — возьми другую из apartment_candidates")
     elif seed != "live":
         errors.append("для живой рубрики topic_seed = \"live\"")
     rubric_hist = [h for h in history if h.get("pillar") == pillar_id and h.get("text")]
@@ -695,6 +776,26 @@ def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str, to
                 errors.append(f"в рубрике уже был похожий пост {h.get('date')} «{h.get('title', '')[:50]}» (score={sc:.2f})")
     except Exception:
         pass
+    return errors
+
+
+def check_apartment_image(d: dict, history: list[dict]) -> list[str]:
+    """Про нашу квартиру — только её реальные фото из каталога, каждое фото один раз."""
+    errors = []
+    img = d.get("image") or {}
+    code = str(d.get("apartment_code") or "")
+    if img.get("kind") == "apartment" or code:
+        apt = apartment_by_code(code) if code else None
+        if not apt:
+            errors.append("пост про нашу квартиру: укажи apartment_code из каталога (python3 scripts/tg_editorial.py apartments)")
+            return errors
+        ref = img.get("reference_url", "")
+        if img.get("kind") != "apartment":
+            errors.append("пост про квартиру: image.kind = apartment")
+        if ref not in apt["images"]:
+            errors.append(f"image.reference_url должен быть реальным фото квартиры {code} из каталога (apartment {code} --download 8)")
+        elif ref in used_image_refs(history):
+            errors.append("это фото уже было в прошлых постах — выбери другое фото этой квартиры")
     return errors
 
 
@@ -741,6 +842,15 @@ def verify_sources(d: dict, today: date, pillar: dict, offline: bool) -> tuple[l
         return errors, warnings, pages
     verified = 0
     for s in sources:
+        rt = re.search(r"room-type=(\d+)", s["url"])
+        if rt:
+            apt = apartment_by_code(rt.group(1))
+            blob = norm(json.dumps(apt, ensure_ascii=False)) if apt else ""
+            if apt and any(norm(m) in blob for m in s.get("must_contain", [])):
+                verified += 1
+            else:
+                warnings.append(f"в каталоге квартиры {rt.group(1)} не нашлось фраз {s.get('must_contain')}")
+            continue
         page = fetch_page(s["url"])
         pages.append(page)
         if not page["ok"]:
@@ -923,6 +1033,7 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
     warnings += src_warnings
 
     img = d.get("image") or {}
+    errors += check_apartment_image(d, history)
     if img.get("kind") not in ("city", "event", "apartment"):
         errors.append("image.kind: city | event | apartment")
     if not (img.get("scene") or "").strip():
@@ -980,7 +1091,12 @@ def render_caption(d: dict, cfg: dict, history: list[dict] | None = None) -> str
     if (d.get("question") or "").strip():
         parts.append(f"<i>{esc(d['question'])}</i>")
     cta = pick_cta(cfg, history, d.get("cta", ""), cfg["pillars"].get(d.get("pillar", ""), {}).get("cta", "guest"))
-    parts.append(cta["html"].format(**cfg["links"]))
+    apt = apartment_by_code(d["apartment_code"]) if d.get("apartment_code") else None
+    if apt:
+        parts.append(f"Эта квартира, фото и свободные даты — <a href=\"{apt['url']}\">на сайте</a>. "
+                     f"Все наши квартиры в Тюмени — <a href=\"{cfg['links']['catalog']}\">здесь</a>.")
+    else:
+        parts.append(cta["html"].format(**cfg["links"]))
     return "\n\n".join(parts)
 
 
@@ -1001,14 +1117,22 @@ def build_image_prompt(d: dict, has_reference: bool) -> str:
         from image_prompt_builder import LOGO_COMPOSITE_RULE
     except Exception:
         LOGO_COMPOSITE_RULE = "Reference image 1 is the brand logo: paste it unchanged in the upper-right corner."
-    ref_rule = (
-        "Reference image 2 is a REAL photo of the actual place. Keep the real place, architecture, "
-        "layout and key details recognizable; only improve light, color and composition naturally. "
-        "Do not invent landmarks, do not add skyscrapers or luxury elements that are not in the reference. "
-        if has_reference else
-        "Create a realistic documentary photo of a real place in Tyumen, Russia (Siberian city, "
-        "mix of historic brick and modern mid-rise buildings). No fantasy, no luxury exaggeration. "
-    )
+    if img.get("kind") == "apartment" and has_reference:
+        ref_rule = (
+            "Reference image 2 is a REAL photo of our actual rental apartment in Tyumen. Keep this exact room: "
+            "same layout, furniture, textiles, colors, windows, decor and camera angle. Do NOT add, remove or replace "
+            "any objects, do not make it bigger or more luxurious. Only improve light, white balance, sharpness and "
+            "straighten verticals, like a professional real-estate photographer's retouch. "
+        )
+    else:
+        ref_rule = (
+            "Reference image 2 is a REAL photo of the actual place. Keep the real place, architecture, "
+            "layout and key details recognizable; only improve light, color and composition naturally. "
+            "Do not invent landmarks, do not add skyscrapers or luxury elements that are not in the reference. "
+            if has_reference else
+            "Create a realistic documentary photo of a real place in Tyumen, Russia (Siberian city, "
+            "mix of historic brick and modern mid-rise buildings). No fantasy, no luxury exaggeration. "
+        )
     return (
         "Square 1:1 editorial photo for a Telegram post of a Tyumen apartment rental brand. "
         f"{LOGO_COMPOSITE_RULE} "
@@ -1026,11 +1150,13 @@ def choose_reference(d: dict, cfg: dict, pages: list[dict] | None = None) -> str
     candidates = []
     if img.get("reference_url"):
         candidates.append(img["reference_url"])
-    for p in pages or []:
-        if p.get("og_image"):
-            candidates.append(p["og_image"])
     if img.get("kind") == "apartment":
-        candidates += cfg.get("site_photos", [])
+        apt = apartment_by_code(d.get("apartment_code", "")) if d.get("apartment_code") else None
+        candidates += (apt or {}).get("images", [])[:5] or cfg.get("site_photos", [])
+    else:
+        for p in pages or []:
+            if p.get("og_image"):
+                candidates.append(p["og_image"])
     for c in candidates:
         if is_image_url(c):
             return c
@@ -1046,14 +1172,17 @@ def make_image(d: dict, cfg: dict, pages: list[dict] | None = None) -> tuple[str
     prompt = build_image_prompt(d, bool(ref))
     inputs = [u for u in (logo, ref) if u]
     last_err = ""
+    base = "gpt" + "-image-2"
+    models = [os.environ.get("TG_IMAGE_MODEL") or base + ".5-flare", base]
     for attempt in range(3):
+        model = models[min(attempt, len(models) - 1)]
         try:
-            url = generate_image_grsai(prompt, input_urls=inputs)
+            url = generate_image_grsai(prompt, input_urls=inputs, model=model)
             if url:
                 return url, ref, "generated"
         except Exception as e:
             last_err = str(e)
-            print(f"  генерация картинки, попытка {attempt + 1}: {last_err[:200]}")
+            print(f"  генерация картинки ({model}), попытка {attempt + 1}: {last_err[:200]}")
             time.sleep(5 * (attempt + 1))
     if ref:
         return ref, ref, "reference_photo"
@@ -1081,6 +1210,8 @@ def record_published(d: dict, cfg: dict, caption: str, message_id, image_url: st
         "hook_type": d.get("hook_type", ""),
         "audience": d.get("audience", ""),
         "topic_seed": d.get("topic_seed", ""),
+        "apartment_code": d.get("apartment_code", ""),
+        "image_reference": (d.get("image") or {}).get("reference_url", ""),
         "image_url": image_url,
         "text": html_to_text(caption),
     }
@@ -1249,6 +1380,10 @@ def cmd_publish(args) -> int:
     d = load_draft(args.draft)
     today = date.fromisoformat(args.date) if args.date else today_local(cfg)
     history = load_history(cfg)
+    if args.replace:
+        for h in history:
+            if h.get("message_id") == args.replace:
+                h["deleted"] = True
     res = validate_draft(d, cfg, today, history=history)
     print_report(res)
     if not res["ok"]:
@@ -1288,11 +1423,62 @@ def cmd_publish(args) -> int:
     draft_path = Path(args.draft) if Path(args.draft).is_absolute() else ROOT / args.draft
     draft_path.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
     record_published(d, cfg, caption, msg_id, image_url, res["clusters"], cta["id"])
+    if args.replace:
+        delete_message(creds, args.replace)
     if not args.no_sync:
         if not sync_memory_to_main(f"Telegram: память публикации {d['date']} — {d['title'][:60]}"):
             print("ВНИМАНИЕ: память не попала в main. Выполни: python3 scripts/tg_editorial.py sync-memory")
             return 4
     return 0
+
+
+def cmd_apartments(args) -> int:
+    apts = refresh_apartments() if args.refresh or not load_apartments() else load_apartments()
+    for a in apts:
+        print(f"{a['code']:>7}  {len(a['images']):>2} фото  {a.get('size_m2') or '?':>3} м²  до {a.get('max_occupancy') or '?'} гостей  {a['name']}")
+    print(f"\nВсего квартир: {len(apts)}. Подробно и фото: python3 scripts/tg_editorial.py apartment <code> --download 8")
+    return 0
+
+
+def cmd_apartment(args) -> int:
+    apt = apartment_by_code(args.code)
+    if not apt:
+        print("Нет такой квартиры в каталоге (обнови: apartments --refresh)")
+        return 1
+    print(json.dumps({k: v for k, v in apt.items() if k != "images"}, ensure_ascii=False, indent=2))
+    print("\nФото (выбери самое светлое и красивое для image.reference_url):")
+    folder = Path(tempfile.gettempdir()) / "tg-photos" / apt["code"]
+    if args.download:
+        folder.mkdir(parents=True, exist_ok=True)
+    for i, u in enumerate(apt["images"], 1):
+        line = f"  {i:>2}. {u}"
+        if args.download and i <= args.download:
+            st, _, _, body = http_get(u, timeout=30, max_bytes=15_000_000)
+            if st == 200 and body:
+                f = folder / f"{i:02d}.jpg"
+                f.write_bytes(body)
+                line += f"  → {f}"
+        print(line)
+    return 0
+
+
+def delete_message(creds: dict, message_id: int) -> None:
+    req = urllib.request.Request(
+        f"https://api.telegram.org/bot{creds['bot_token']}/deleteMessage",
+        data=json.dumps({"chat_id": creds["chat_id"], "message_id": message_id}).encode(),
+        headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            ok = json.load(resp).get("ok")
+    except Exception as e:
+        ok = False
+        print(f"  не удалось удалить {message_id}: {e}")
+    data = load_json_list(PUBLISHED_PATH)
+    for e in data:
+        if e.get("message_id") == message_id:
+            e["deleted"] = True
+    PUBLISHED_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"  старый пост {message_id} {'удалён' if ok else 'помечен удалённым'}")
 
 
 def cmd_sync(args) -> int:
@@ -1328,7 +1514,15 @@ def main() -> int:
     p.add_argument("--no-image", action="store_true", help="только если заказчик прямо попросил пост без картинки")
     p.add_argument("--no-sync", action="store_true")
     p.add_argument("--image-url", help="готовая картинка из предыдущего --dry-run (не генерировать заново)")
+    p.add_argument("--replace", type=int, help="message_id сегодняшнего поста, который заменить (удалить после публикации)")
     p.set_defaults(fn=cmd_publish)
+    p = sub.add_parser("apartments", help="каталог всех наших квартир (TravelLine)")
+    p.add_argument("--refresh", action="store_true")
+    p.set_defaults(fn=cmd_apartments)
+    p = sub.add_parser("apartment", help="квартира: описание и реальные фото")
+    p.add_argument("code")
+    p.add_argument("--download", type=int, default=0, help="скачать первые N фото, чтобы посмотреть")
+    p.set_defaults(fn=cmd_apartment)
     p = sub.add_parser("sync-memory", help="записать память публикаций в main")
     p.add_argument("--message")
     p.set_defaults(fn=cmd_sync)

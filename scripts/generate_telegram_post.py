@@ -204,7 +204,7 @@ def send_to_telegram(bot_token: str, chat_id: str, text: str, reply_markup: dict
         return json.loads(res_text)
 
 
-def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = None) -> str:
+def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = None, model: str = None) -> str:
     """Генерация изображения через нативный эндпоинт GRSAI /v1/draw/completions по документации провайдера."""
     key = api_key or os.environ.get("GRSAI_API_KEY", "")
     if not key:
@@ -229,7 +229,7 @@ def generate_image_grsai(prompt: str, api_key: str = None, input_urls: list = No
                     b64_str = base64.b64encode(f.read()).decode("utf-8")
                 urls.append(f"data:image/png;base64,{b64_str}")
 
-    model_name = os.environ.get("GRSAI_IMAGE_MODEL", "gpt" + "-image-2")
+    model_name = model or os.environ.get("GRSAI_IMAGE_MODEL", "gpt" + "-image-2")
     payload = {
         "model": model_name,
         "prompt": prompt,
