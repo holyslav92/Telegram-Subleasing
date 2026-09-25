@@ -253,6 +253,28 @@ class PlanAndMemoryTests(unittest.TestCase):
         b = [{"message_id": 1, "date": "2026-09-01"}, {"message_id": 2, "date": "2026-09-02"}]
         self.assertEqual(len(ed.merge_lists(a, b)), 2)
 
+    def test_year_without_repeats(self):
+        from datetime import timedelta
+        import os
+        os.environ["TG_OFFLINE"] = "1"
+        hist, start = [], date(2026, 9, 21)
+        for i in range(365):
+            x = start + timedelta(days=i)
+            pid = ed.pillar_for(x, self.cfg)
+            src = self.cfg["pillars"][pid].get("topic_source")
+            if src == "seeds":
+                c = ed.seed_candidates(pid, self.cfg, hist, x)
+                self.assertTrue(c, f"нет темы {pid} на {x}")
+                hist.append({"date": x.isoformat(), "pillar": pid, "topic_seed": c[0]["id"]})
+            elif src == "blog":
+                c = ed.blog_candidates(hist, x)
+                self.assertTrue(c, f"нет истории на {x}")
+                hist.append({"date": x.isoformat(), "pillar": pid, "sources": [c[0]["url"]]})
+        seeds = [h["topic_seed"] for h in hist if h.get("topic_seed")]
+        self.assertEqual(len(seeds), len(set(seeds)))
+        blog = [h["sources"][0] for h in hist if h.get("sources")]
+        self.assertEqual(len(blog), len(set(blog)))
+
     def test_merge_lists_local_wins(self):
         remote = [{"message_id": 5, "date": "2026-09-01", "title": "a"}]
         local = [{"message_id": 5, "date": "2026-09-01", "title": "a", "deleted": True}]
