@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-27",
+  "pillar": "community",
+  "format": "fact_question",
+  "topic_seed": "talk_10",
+  "apartment_code": "",
+  "topic_id": "community_talk_10_sleep_first_night",
+  "clusters": [
+    "business",
+    "safety"
+  ],
+  "hook_type": "debate",
+  "audience": "north_weekenders",
+  "stay_reason": "после ночного рейса из Сургута важно, чтобы в квартире можно было выспаться с первой ночи",
+  "title": "Первая ночь в новой квартире: сон сразу или до 2:00 не спится?",
+  "paragraphs": [
+    "Один знакомый после шести часов на трассе засыпает в машине ещё до подъезда. Другой лежит на незнакомой подушке, слушает лифт и просыпается каждый час. Оба приезжают в Тюмень на два дня — и оба правы.",
+    "Мы не спрашиваем про сон в анкете, но по переписке видно: кому-то важнее тёмные шторы и тишина во дворе, кому-то — привычная сторона кровати и розетка у изголовья. От этого зависит, каким будет суббота."
+  ],
+  "question": "Вы на новом месте засыпаете с первой ночи или раскачиваетесь пару суток?",
+  "entities": [],
+  "event_date": "",
+  "sources": [],
+  "image_headline": "Сон с первой ночи?",
+  "image": {
+    "kind": "city",
+    "reference_url": "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "cozy bedroom in a rental apartment at night, soft lamp light, curtains closed, calm realistic interior, no people"
+  },
+  "_published": {
+    "message_id": 580,
+    "image_url": "https://file8.aitohumanize.com/file/fbff3850a2654460b3990246d4454d53.png",
+    "image_mode": "generated",
+    "reference": "https://images.pexels.com/photos/271624/pexels-photo-271624.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+  }
+}
