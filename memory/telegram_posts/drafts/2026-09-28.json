@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-28",
+  "pillar": "market_news",
+  "format": "explainer",
+  "topic_seed": "live",
+  "apartment_code": "",
+  "topic_id": "market_neighbors_consent_rnrf_20260904",
+  "clusters": [],
+  "hook_type": "insider",
+  "audience": "guests",
+  "stay_reason": "снимает квартиру в Тюмени на выходные и хочет понимать, что краткий найм не противоречит закону",
+  "title": "4 сентября: соседи не голосуют за вашу посутку — что сказал суд",
+  "paragraphs": [
+    "4 сентября РНРФ снова разобрало посутку: минимальный срок найма не ограничен, а норма об обязательном согласии соседей в закон так и не вошла. Страх «без подписей нельзя» — миф.",
+    "Для гостя важнее другое: квартиру в Тюмени на сутки или двое можно снять по договору найма. Граница — не мешать соседям и не перегружать подъезд. В марте 2024 года в статью 30 ЖК РФ внесли поправки, прямо допускающие краткий найм.",
+    "У нас цена и сроки видны до оплаты, правила — в переписке. Если едете на пару ночей, спокойнее понимать: спор не о формате, а о поведении, а не о голосовании у лифта."
+  ],
+  "question": "",
+  "entities": [
+    "Конституционный суд",
+    "РНРФ",
+    "ЖК РФ"
+  ],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://rnrf.ru/news/30385-posutochnaya-arenda-kvartir-oficialno-razreshena-konstitucionnym-sudom/",
+      "published": "2026-09-04",
+      "must_contain": [
+        "обязательного согласия соседей",
+        "статью 30 ЖК РФ"
+      ]
+    }
+  ],
+  "image_headline": "Посутка без голосования",
+  "image": {
+    "kind": "city",
+    "reference_url": "https://images.pexels.com/photos/6920439/pexels-photo-6920439.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "bright modern apartment living room in a Russian city, daylight through curtains, tidy sofa and table, realistic photo, no people, no text"
+  },
+  "_published": {
+    "message_id": 581,
+    "image_url": "https://file6.aitohumanize.com/file/a55b8b7025c84b11986926b2546eb76d.png",
+    "image_mode": "generated",
+    "reference": "https://images.pexels.com/photos/6920439/pexels-photo-6920439.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+  }
+}
