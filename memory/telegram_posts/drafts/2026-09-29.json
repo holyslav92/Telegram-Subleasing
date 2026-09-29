@@ -1,0 +1,47 @@
+{
+  "date": "2026-09-29",
+  "pillar": "guest_guide",
+  "format": "story",
+  "topic_seed": "guide_11",
+  "apartment_code": "",
+  "topic_id": "guide_11_spot_fake_reviews_2026",
+  "clusters": [
+    "districts"
+  ],
+  "hook_type": "surprise_fact",
+  "audience": "guests",
+  "stay_reason": "Гость выбирает квартиру в Тюмени на выходные и сверяет отзывы на площадках перед бронью",
+  "title": "«Суперхозяин» в 30 отзывах подряд: когда рейтинг не про квартиру",
+  "paragraphs": [
+    "Открываете карточку — десятки пятёрок, а в тексте одно и то же: восторг без деталей. Ни шума за окном, ни дивана, ни того, как открывается дверь.",
+    "Живые комментарии обычно скучнее. Люди пишут про скрипучую дверь шкафа и про то, был ли фен. Смотрите свежие отзывы за последние месяцы, а не общий балл двухлетней давности.",
+    "На нашем Авито отзывы можно читать рядом с каталогом на сайте — те же адреса и фото. Условия и оплата у нас заранее, без сюрпризов у порога."
+  ],
+  "question": "",
+  "entities": [
+    "Авито"
+  ],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://msk1.ru/text/world/2026/07/17/76536553/",
+      "published": "2026-07-17",
+      "must_contain": [
+        "скрипучую дверь шкафа",
+        "отсутствие фена"
+      ]
+    }
+  ],
+  "image_headline": "Читайте не только звёзды",
+  "image": {
+    "kind": "city",
+    "reference_url": "https://images.pexels.com/photos/6920439/pexels-photo-6920439.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "Person reading reviews on smartphone at kitchen table, warm indoor light, realistic lifestyle photo"
+  },
+  "_published": {
+    "message_id": 582,
+    "image_url": "https://file7.aitohumanize.com/file/8ab663677fe14fa5b6f79cb2a33d7e9a.png",
+    "image_mode": "generated",
+    "reference": "https://images.pexels.com/photos/6920439/pexels-photo-6920439.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+  }
+}
