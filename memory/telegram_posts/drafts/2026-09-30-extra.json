@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-30",
+  "pillar": "apartment_week",
+  "format": "portrait",
+  "topic_seed": "apartment",
+  "apartment_code": "201166",
+  "topic_id": "apt_dzerzhinskogo_23_city_wall",
+  "clusters": [],
+  "hook_type": "insider",
+  "audience": "couples",
+  "stay_reason": "гости на выходные хотят жить в старом центре Тюмени и гулять пешком до Набережной",
+  "takeaway": "чем квартира на Дзержинского, 23 отличается от остальных, сколько в ней места, что есть внутри и кому она подходит",
+  "title": "Дзержинского, 23: квартира, где город начинается в прихожей",
+  "paragraphs": [
+    "Открываете дверь — и вместо голой стены видите старинные фотографии, авторские карты и таблички с тайнами Тюмени. Рядом — изделия местных мастеров. Так встречает гостей наша двушка на Дзержинского, 23.",
+    "Дом стоит на Тюменском Арбате, в старом центре. До Набережной, Центрального парка и филармонии — пешком. Вечером можно выйти погулять без такси и вернуться, когда захочется.",
+    "Внутри 67 квадратных метров: двуспальная кровать и раскладной диван, кухня с духовкой, ванна, стиральная машина с сушилкой и балкон. Квартира подойдёт паре на выходные, семье с детьми и тому, кто приехал в командировку и хочет вечером увидеть город."
+  ],
+  "question": "",
+  "entities": ["Тюменский Арбат"],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://добрыйдомтюмень.рф/booking/?room-type=201166",
+      "must_contain": ["изделия местных мастеров", "авторские карты", "таблички с тайнами города", "Тюменском Арбате"]
+    }
+  ],
+  "image_headline": "Квартира на Дзержинского, 23",
+  "image": {
+    "kind": "apartment",
+    "reference_url": "https://secure.travelline.ru/resource/images/rt/201166/638933501645347953-95478bf2-67d1-44b9-8dc5-e27c78fb2e02",
+    "scene": "the real hallway of our apartment: a wall with framed old photographs and info sheets about Tyumen, a wooden wall cabinet with a book, maps and local handicrafts, a doorway into a bright room; keep everything exactly as in the reference, only better daylight"
+  }
+}
