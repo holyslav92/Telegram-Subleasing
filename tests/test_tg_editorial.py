@@ -22,6 +22,7 @@ def good_draft(**over) -> dict:
         "audience": "fans",
         "topic_seed": "live",
         "stay_reason": "концерт заканчивается поздно, ехать ночью в Сургут или Тобольск неудобно",
+        "takeaway": "дата, зал, цена билета и почему после концерта лучше остаться до утра",
         "topic_id": "concert_orchestra_tyumen_20261010",
         "clusters": ["concert"],
         "title": "Через 16 дней в Тюмени сыграет оркестр «Русская филармония»",
@@ -44,6 +45,7 @@ def seed_draft(**over) -> dict:
     d = {
         "date": "2026-09-21", "pillar": "how_we_work", "format": "story", "hook_type": "insider", "audience": "guests",
         "topic_seed": "hww_02", "topic_id": "how_we_answer_in_5_minutes", "clusters": [],
+        "takeaway": "ночью на связи живой человек, а в инструкции есть фото подъезда и этаж",
         "title": "23:40, гость пишет «не могу найти подъезд» — что дальше",
         "paragraphs": [
             "Такие сообщения приходят чаще, чем кажется. Поздний рейс, новый район, одинаковые дома во дворе.",
@@ -162,6 +164,42 @@ class ValidateTests(unittest.TestCase):
         history = [{"date": "2026-08-01", "title": d["title"] + "!", "text": " ".join(d["paragraphs"]), "clusters": []}]
         res = self.run_v(d, history)
         self.assertTrue(any("похож" in e for e in res["errors"]))
+
+    def test_brand_overdose_in_city_rubric_fails(self):
+        paras = good_draft()["paragraphs"][:2] + [
+            "У нас условия и оплата заранее. Мы отвечаем за пять минут, а наши квартиры рядом с залом."]
+        res = self.run_v(good_draft(paragraphs=paras))
+        self.assertTrue(any("о «Добром доме»" in e for e in res["errors"]))
+
+    def test_brand_stats_outside_brand_rubrics_fail(self):
+        paras = good_draft()["paragraphs"][:2] + ["Девяносто три процента гостей приходят к нам по совету, приезжайте и вы."]
+        res = self.run_v(good_draft(paragraphs=paras))
+        self.assertTrue(any("статистика бренда" in e for e in res["errors"]))
+
+    def test_travelline_jargon_banned(self):
+        paras = good_draft()["paragraphs"][:2] + ["Бронь на сайте через модуль TravelLine, чтобы приехать в Тюмень спокойно."]
+        res = self.run_v(good_draft(paragraphs=paras))
+        self.assertTrue(any("travelline" in e for e in res["errors"]))
+
+    def test_takeaway_and_concrete_details_required(self):
+        d = good_draft(takeaway="", paragraphs=[
+            "Большой вечер оркестра в концертном зале: Чайковский и Рахманинов, красивая программа для всех.",
+            "Концерт идёт почти весь вечер, поэтому гостям из Тобольска проще приехать днём и остаться на ночь."])
+        res = self.run_v(d)
+        self.assertTrue(any("takeaway" in e for e in res["errors"]))
+        self.assertTrue(any("мало конкретики" in e for e in res["errors"]))
+
+    def test_reviews_theme_not_on_adjacent_days(self):
+        history = [{"date": "2026-09-23", "title": "Как читать отзывы", "text": "отзывы и рейтинг, свежие отзывы",
+                    "clusters": ["reviews"], "hook_type": "number"}]
+        blocked = ed.blocked_clusters(history, self.cfg, TODAY)
+        self.assertIn("reviews", blocked)
+
+    def test_faq_is_city_questions_for_visitors(self):
+        faq = self.cfg["pillars"]["faq"]
+        self.assertEqual(faq["fact_policy"], "web")
+        self.assertTrue(all(s["id"].startswith("ask_") for s in faq["seeds"]))
+        self.assertLessEqual(faq["brand_sentences_max"], 1)
 
 
 class RenderTests(unittest.TestCase):

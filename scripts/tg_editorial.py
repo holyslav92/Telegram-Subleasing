@@ -263,9 +263,10 @@ def load_history(cfg: dict, include_channel: bool = True) -> list[dict]:
         seen.add(key)
         if fp:
             seen.add(fp)
-        if not item.get("clusters"):
-            # у старых постов CTA-хвосты многословны — нужен порог выше, чтобы не ловить случайные слова
-            item["clusters"] = strong_clusters(item.get("title", ""), item.get("text", ""), cfg, min_hits=3)
+        # кластеры пересчитываются по тексту: новые темы (например, «отзывы») видны и у старых постов;
+        # у старых постов CTA-хвосты многословны — нужен порог выше, чтобы не ловить случайные слова
+        detected = strong_clusters(item.get("title", ""), item.get("text", ""), cfg, min_hits=3)
+        item["clusters"] = sorted(set(item.get("clusters") or []) | set(detected))
         items.append(item)
 
     for e in load_json_list(PUBLISHED_PATH):
@@ -324,7 +325,7 @@ def cluster_last_used(history: list[dict]) -> dict[str, date]:
     last: dict[str, date] = {}
     for h in history:
         d = parse_day(h.get("date", ""))
-        if not d:
+        if not d or h.get("deleted"):
             continue
         for c in h.get("clusters") or []:
             if c not in last or d > last[c]:
@@ -573,6 +574,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "hook_type": "один из hook_types (не как в прошлом посте)",
         "audience": "один из audiences — для кого пост",
         "stay_reason": "одной фразой: почему этот человек приедет/останется в Тюмени (для проверки, в текст не выводится)",
+        "takeaway": "одной фразой: что конкретно унесёт читатель — место и время, цена, маршрут, приём (для проверки, в текст не выводится)",
         "title": "Заголовок 18–80 символов: имя, число или «название» — конкретика, не общие слова",
         "paragraphs": ["2–3 абзаца прозой по 40–320 символов, каждый с новым; списков нет"],
         "question": "вопрос подписчикам (обязателен для fact_question, иначе пусто)",
@@ -594,6 +596,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "pillar_name": pillar["name"],
         "goal": pillar["goal"],
         "how_to_write": pillar.get("how_to_write", ""),
+        "brand_sentences_max": pillar.get("brand_sentences_max", 1),
+        "yesterday": {"title": history[-1].get("title"), "clusters": history[-1].get("clusters")} if history else {},
         "topic_source": topic_source,
         "seed_candidates": seeds_free,
         "blog_candidates": blog_free,
@@ -623,7 +627,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
             "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); apartments → одну квартиру из apartment_candidates (topic_seed = \"apartment\", apartment_code = её code); live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
             "1.1 Картинка: если пост про нашу квартиру — только реальное фото этой квартиры из каталога (apartment_photos_rule). Скачай 6–8 фото, посмотри и выбери самое светлое и красивое.",
             "2. Факты: о «Добром доме» — только brand_facts (источник — сайт); о городе и рынке — WebSearch + python3 scripts/tg_editorial.py fetch <url> --find \"<фраза>\".",
-            "3. Пиши по how_to_write и writing_rules: 2–3 абзаца прозой, без списков, короткими живыми предложениями. Не повторяй rubric_past_titles.",
+            "3. Пиши по how_to_write и writing_rules: 2–3 абзаца прозой, без списков, короткими живыми предложениями. Не повторяй rubric_past_titles и тему yesterday. Сначала сформулируй takeaway — что читатель унесёт; если он общий («читайте отзывы»), тема не та.",
             f"4. Запиши черновик в {draft_path.relative_to(ROOT)} строго по draft_template.",
             f"5. python3 scripts/tg_editorial.py validate {draft_path.relative_to(ROOT)} — чини ошибки, пока не будет PASS (при тупике — следующая тема из кандидатов).",
             f"6. python3 scripts/tg_editorial.py publish {draft_path.relative_to(ROOT)} — картинка, публикация, память в main.",
@@ -726,6 +730,34 @@ def check_brand_value(d: dict, cfg: dict, title: str, paras: list[str], body: st
     concrete = bool(re.search(r"\d", title)) or "«" in title or any(w[:1].isupper() for w in t_words[1:])
     if not concrete:
         errors.append("заголовок без конкретики: добавь число, имя или «название»")
+    errors += check_reader_value(d, cfg, title, body, pillar)
+    return errors
+
+
+BRAND_SENTENCE_RE = re.compile(r"(?<![а-яa-z])(мы|нас|нам|нами|наш[а-я]*)(?![а-яa-z])|добр[а-я]* дом")
+BRAND_STATS_RE = re.compile(r"93\s*%|девяност\w* тр\w* процент|10\s?000 (гост|клиент)|десят\w* тысяч\w* (гост|клиент)")
+
+
+def brand_sentences(text: str) -> list[str]:
+    return [s for s in _sentences(text) if BRAND_SENTENCE_RE.search(norm(s))]
+
+
+def check_reader_value(d: dict, cfg: dict, title: str, body: str, pillar: dict) -> list[str]:
+    """Пост ценен для приезжего, даже если он у нас не живёт: конкретика, польза, бренд — дозированно."""
+    errors = []
+    limit = pillar.get("brand_sentences_max", 1)
+    mentions = brand_sentences(f"{title}. {body}")
+    if len(mentions) > limit:
+        errors.append(f"о «Добром доме» {len(mentions)} фраз(ы), в этой рубрике максимум {limit}: "
+                      f"«{mentions[-1][:60]}…» — пост о пользе для читателя, ссылку добавят кнопки")
+    if not pillar.get("brand_stats_allowed") and BRAND_STATS_RE.search(norm(body)):
+        errors.append("статистика бренда («93%», «10 000 гостей») — только в рубриках «Как мы работаем» и «Собственнику»")
+    if len((d.get("takeaway") or "").strip()) < 30:
+        errors.append("takeaway: одной фразой — что конкретно унесёт читатель (место и время, цена, маршрут, приём)")
+    need = pillar.get("min_concrete_details", 2 if pillar.get("fact_policy") in ("web", "blog", "blog_or_web", "web_or_brand") else 0)
+    details = re.findall(r"\d+(?:[.,:]\d+)?", body)
+    if len(details) < need:
+        errors.append(f"мало конкретики: {len(details)} чисел (время, цена, минуты, год), нужно ≥{need} — общие слова не сохраняют")
     return errors
 
 
@@ -1146,6 +1178,8 @@ def build_image_prompt(d: dict, has_reference: bool) -> str:
 
 def choose_reference(d: dict, cfg: dict, pages: list[dict] | None = None) -> str:
     img = d.get("image") or {}
+    if img.get("reference_url") == "none" and img.get("kind") != "apartment":
+        return ""
     candidates = []
     if img.get("reference_url"):
         candidates.append(img["reference_url"])
@@ -1154,7 +1188,7 @@ def choose_reference(d: dict, cfg: dict, pages: list[dict] | None = None) -> str
         candidates += (apt or {}).get("images", [])[:5] or cfg.get("site_photos", [])
     else:
         for p in pages or []:
-            if p.get("og_image"):
+            if p.get("og_image") and not re.search(r"logo|favicon|icon", p["og_image"], re.I):
                 candidates.append(p["og_image"])
     for c in candidates:
         if is_image_url(c):
