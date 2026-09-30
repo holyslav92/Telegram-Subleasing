@@ -17,12 +17,19 @@
     "Внутри 67 квадратных метров: двуспальная кровать и раскладной диван, кухня с духовкой, ванна, стиральная машина с сушилкой и балкон. Квартира подойдёт паре на выходные, семье с детьми и тому, кто приехал в командировку и хочет вечером увидеть город."
   ],
   "question": "",
-  "entities": ["Тюменский Арбат"],
+  "entities": [
+    "Тюменский Арбат"
+  ],
   "event_date": "",
   "sources": [
     {
       "url": "https://добрыйдомтюмень.рф/booking/?room-type=201166",
-      "must_contain": ["изделия местных мастеров", "авторские карты", "таблички с тайнами города", "Тюменском Арбате"]
+      "must_contain": [
+        "изделия местных мастеров",
+        "авторские карты",
+        "таблички с тайнами города",
+        "Тюменском Арбате"
+      ]
     }
   ],
   "image_headline": "Квартира на Дзержинского, 23",
@@ -30,5 +37,11 @@
     "kind": "apartment",
     "reference_url": "https://secure.travelline.ru/resource/images/rt/201166/638933501645347953-95478bf2-67d1-44b9-8dc5-e27c78fb2e02",
     "scene": "the real hallway of our apartment: a wall with framed old photographs and info sheets about Tyumen, a wooden wall cabinet with a book, maps and local handicrafts, a doorway into a bright room; keep everything exactly as in the reference, only better daylight"
+  },
+  "_published": {
+    "message_id": 585,
+    "image_url": "https://file6.aitohumanize.com/file/dfd2db5e6a364fee93bb0c7e3520f85d.png",
+    "image_mode": "preapproved",
+    "reference": ""
   }
 }

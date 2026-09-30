@@ -198,5 +198,10 @@
     "id": "ask_central_market_fish_stroganina",
     "category_id": "faq",
     "published_at": "2026-09-30 06:09:34"
+  },
+  {
+    "id": "apt_dzerzhinskogo_23_city_wall",
+    "category_id": "apartment_week",
+    "published_at": "2026-09-30 06:22:14"
   }
 ]
