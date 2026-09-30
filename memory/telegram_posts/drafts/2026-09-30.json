@@ -5,7 +5,10 @@
   "topic_seed": "ask_20",
   "apartment_code": "",
   "topic_id": "ask_central_market_fish_stroganina",
-  "clusters": ["food", "transport"],
+  "clusters": [
+    "food",
+    "transport"
+  ],
   "hook_type": "money_time",
   "audience": "tourists",
   "stay_reason": "приезжий в первый день ищет, где попробовать сибирскую рыбу и что увезти домой в дорогу",
@@ -17,16 +20,29 @@
     "Строганину — ледяную рыбу тонкой стружкой с «макалом», смесью соли и перца, — лучше есть в ресторане. Например, в «Чуме» на Малыгина, 59, он работает до часу ночи. А если на рынок не успели, муксун и кедровые орехи продают в «Добыче» на 2 этаже аэропорта Рощино."
   ],
   "question": "",
-  "entities": ["Центральный рынок", "Чум", "Добыча"],
+  "entities": [
+    "Центральный рынок",
+    "Чум",
+    "Добыча"
+  ],
   "event_date": "",
   "sources": [
     {
       "url": "https://visittyumen.ru/what-to-do/prigoditsya-v-puteshestvii/sibir-na-vkus-vash-gastronomicheskiy-gid-po-tyumenskoy-oblasti/",
-      "must_contain": ["ул. Герцена, 95", "последний понедельник месяца", "аэропорт Рощино, 2 этаж", "смесью соли и перца", "кедровые орехи"]
+      "must_contain": [
+        "ул. Герцена, 95",
+        "последний понедельник месяца",
+        "аэропорт Рощино, 2 этаж",
+        "смесью соли и перца",
+        "кедровые орехи"
+      ]
     },
     {
       "url": "https://chum-rest.ru/",
-      "must_contain": ["Малыгина, 59", "Ежедневно с 11:00 до 01:00"]
+      "must_contain": [
+        "Малыгина, 59",
+        "Ежедневно с 11:00 до 01:00"
+      ]
     }
   ],
   "image_headline": "Что взять на Центральном рынке",
@@ -34,5 +50,11 @@
     "kind": "city",
     "reference_url": "none",
     "scene": "a real indoor food market counter in Tyumen, Siberia: whole smoked and salted northern whitefish (muksun) laid out on ice and paper, open paper bags of small brown Siberian cedar pine nuts in shells next to a few cedar cones, jars of red lingonberry and orange cloudberry jam, blank kraft price cards, early autumn season: no snow, no fir branches, no Christmas decor, warm market lighting, shot at eye level like a documentary smartphone photo, no people faces"
+  },
+  "_published": {
+    "message_id": 584,
+    "image_url": "https://file5.aitohumanize.com/file/50879a32b7d34dc1a9f1d20ae63c493f.png",
+    "image_mode": "preapproved",
+    "reference": ""
   }
 }
