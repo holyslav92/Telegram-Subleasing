@@ -44,7 +44,7 @@ LEDGER_PATH = POSTS_DIR / "ledger.json"
 DRAFTS_DIR = POSTS_DIR / "drafts"
 CHANNEL_URL = "https://t.me/s/Dobriy_dom_72"
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
-OWN_SITE_MARKERS = ("xn---72-9cdob8azaodt6k", "добрыйдом-72")
+OWN_SITE_MARKERS = ("xn---72-9cdob8azaodt6k", "добрыйдом-72", "xn--90afbestajcdt2a6iwa0a", "добрыйдомтюмень")
 
 MONTHS_GEN = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа",
               "сентября", "октября", "ноября", "декабря"]
@@ -382,6 +382,34 @@ def pillar_for(today: date, cfg: dict) -> str:
     return cyc["days"][(today - anchor).days % len(cyc["days"])]
 
 
+STORIES_PATH = ROOT / "shared" / "tg-brand-stories.json"
+
+
+def load_stories() -> list[dict]:
+    """Банк правдивых историй о компании и людях (заполняет владелец); публикуются только publish_ok."""
+    try:
+        data = json.loads(STORIES_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return [s for s in data.get("stories") or [] if s.get("id") and s.get("publish_ok") and s.get("facts")]
+
+
+def story_candidates(history: list[dict], n: int = 5) -> list[dict]:
+    used = used_seed_ids(history)
+    return [s for s in load_stories() if s["id"] not in used][:n]
+
+
+def resolve_pillar(today: date, cfg: dict, history: list[dict]) -> str:
+    """Рубрика дня; если у рубрики кончился материал (банк историй пуст) — её запасная рубрика."""
+    pid = pillar_for(today, cfg)
+    pillar = cfg["pillars"][pid]
+    if pillar.get("topic_source") == "stories" and not story_candidates(history):
+        fallbacks = pillar.get("fallback_pillars") or []
+        if fallbacks:
+            return max(fallbacks, key=lambda f: len(seed_candidates(f, cfg, history, today, n=1000)))
+    return pid
+
+
 BLOG_INDEX_PATH = ROOT / "shared" / "tg-blog-index.json"
 APARTMENTS_PATH = ROOT / "shared" / "tg-apartments.json"
 TL_HOTEL_CODE = "25160"
@@ -437,7 +465,8 @@ def apartment_candidates(pillar_id: str, history: list[dict], today: date, n: in
         except Exception:
             pass
     apts = load_apartments()
-    used = {h.get("apartment_code") for h in history if h.get("pillar") == pillar_id and h.get("apartment_code")}
+    # ротация общая для всех рубрик: квартира не повторяется, пока не покажем весь каталог
+    used = {str(h.get("apartment_code")) for h in history if h.get("apartment_code") and not h.get("deleted")}
     free = [a for a in apts if a["code"] not in used] or apts
     if not free:
         return []
@@ -542,7 +571,7 @@ def published_today(history: list[dict], today: date) -> list[dict]:
 def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dict:
     history = history if history is not None else load_history(cfg)
     nov = cfg["novelty"]
-    pillar_id = pillar_for(today, cfg)
+    pillar_id = resolve_pillar(today, cfg, history)
     pillar = cfg["pillars"][pillar_id]
     last_posts = history[-12:]
     recent_formats = [h.get("format") for h in last_posts if h.get("format")]
@@ -553,6 +582,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
     seeds_free = seed_candidates(pillar_id, cfg, history, today) if topic_source == "seeds" else []
     blog_free = blog_candidates(history, today, kind=pillar.get("blog_kind", "story")) if topic_source == "blog" else []
     apt_free = apartment_candidates(pillar_id, history, today) if topic_source == "apartments" else []
+    stories_free = story_candidates(history) if topic_source == "stories" else []
     tokens["seed"] = seeds_free[0]["topic"] if seeds_free else ""
     tokens["place"] = tokens["seed"]
     blocked = blocked_clusters(history, cfg, today)
@@ -567,7 +597,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "date": today.isoformat(),
         "pillar": pillar_id,
         "format": formats[0],
-        "topic_seed": "id темы из seed_candidates (seeds) | \"live\" (живые рубрики) | \"blog\" (истории из блога) | \"apartment\" (квартира недели)",
+        "topic_seed": "id темы из seed_candidates (seeds) | id истории из story_candidates (stories) | \"live\" (живые рубрики) | \"blog\" (истории из блога) | \"apartment\" (квартирные рубрики)",
         "apartment_code": "код квартиры из каталога, если пост про нашу квартиру (иначе пусто)",
         "topic_id": "латиница_через_подчёркивание_уникально",
         "clusters": ["1–3 id из free_clusters, о чём пост на самом деле"],
@@ -602,6 +632,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "seed_candidates": seeds_free,
         "blog_candidates": blog_free,
         "apartment_candidates": apt_free,
+        "story_candidates": stories_free,
         "apartment_photos_rule": "Если пост про нашу квартиру (в любой рубрике): apartment_code из каталога (python3 scripts/tg_editorial.py apartments), image.kind=apartment, image.reference_url — самое красивое фото ЭТОЙ квартиры из каталога (посмотри: python3 scripts/tg_editorial.py apartment <code> --download 8). Одно фото — один раз.",
         "fact_policy": pillar.get("fact_policy", "web"),
         "brand_facts": cfg.get("brand_facts", {}),
@@ -624,7 +655,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "draft_template": template,
         "next_steps": [
             "0. Если already_published_today не пуст — сегодня пост уже вышел: ничего не публикуй, заверши работу.",
-            "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); apartments → одну квартиру из apartment_candidates (topic_seed = \"apartment\", apartment_code = её code); live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
+            "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); apartments → одну квартиру из apartment_candidates (topic_seed = \"apartment\", apartment_code = её code); stories → одну историю из story_candidates (topic_seed = её id), только её факты; live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
             "1.1 Картинка: если пост про нашу квартиру — только реальное фото этой квартиры из каталога (apartment_photos_rule). Скачай 6–8 фото, посмотри и выбери самое светлое и красивое.",
             "2. Факты: о «Добром доме» — только brand_facts (источник — сайт); о городе и рынке — WebSearch + python3 scripts/tg_editorial.py fetch <url> --find \"<фраза>\".",
             "3. Пиши по how_to_write и writing_rules: 2–3 абзаца прозой, без списков, короткими живыми предложениями. Не повторяй rubric_past_titles и тему yesterday. Сначала сформулируй takeaway — что читатель унесёт; если он общий («читайте отзывы»), тема не та.",
@@ -792,9 +823,15 @@ def check_topic_seed(d: dict, cfg: dict, history: list[dict], pillar_id: str, to
         code = str(d.get("apartment_code") or "")
         if not apartment_by_code(code):
             errors.append("apartment_code не найден в каталоге — возьми из apartment_candidates")
-        elif any(h.get("pillar") == pillar_id and str(h.get("apartment_code")) == code for h in history) and \
-                len({h.get("apartment_code") for h in history if h.get("pillar") == pillar_id}) < len(load_apartments()):
-            errors.append(f"квартира {code} уже была в этой рубрике — возьми другую из apartment_candidates")
+        elif any(str(h.get("apartment_code")) == code and not h.get("deleted") for h in history) and \
+                len({str(h.get("apartment_code")) for h in history if h.get("apartment_code")}) < len(load_apartments()):
+            errors.append(f"квартира {code} уже была в канале — возьми другую из apartment_candidates")
+    elif src == "stories":
+        ids = {s["id"] for s in load_stories()}
+        if seed not in ids:
+            errors.append("история не из банка shared/tg-brand-stories.json (publish_ok) — о людях и компании ничего не выдумываем")
+        elif seed in used_seed_ids(history):
+            errors.append(f"история {seed} уже была — возьми другую из story_candidates")
     elif seed != "live":
         errors.append("для живой рубрики topic_seed = \"live\"")
     rubric_hist = [h for h in history if h.get("pillar") == pillar_id and h.get("text")]
@@ -904,7 +941,7 @@ def verify_sources(d: dict, today: date, pillar: dict, offline: bool) -> tuple[l
 
 
 def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None = None,
-                   offline: bool = False) -> dict:
+                   offline: bool = False, extra: bool = False) -> dict:
     errors: list[str] = []
     warnings: list[str] = []
     lim = cfg["limits"]
@@ -923,13 +960,15 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
 
     if parse_day(d["date"]) != today:
         errors.append(f"date={d['date']}, а сегодня {today.isoformat()} — черновик должен быть сегодняшним")
-    expected_pillar = pillar_for(today, cfg)
+    expected_pillar = resolve_pillar(today, cfg, history)
     pillar_id = d["pillar"]
     if pillar_id not in cfg["pillars"]:
         errors.append(f"неизвестная рубрика {pillar_id}")
         return {"ok": False, "errors": errors, "warnings": warnings}
     if pillar_id != expected_pillar:
-        if d.get("pillar_override_reason", "").strip():
+        if extra:
+            warnings.append(f"дополнительный пост по просьбе владельца: рубрика {pillar_id} вместо {expected_pillar}")
+        elif d.get("pillar_override_reason", "").strip():
             warnings.append(f"рубрика {pillar_id} вместо {expected_pillar}: {d['pillar_override_reason']}")
         else:
             errors.append(f"сегодня рубрика {expected_pillar}; другую можно только с pillar_override_reason (срочное большое событие)")
@@ -985,7 +1024,7 @@ def validate_draft(d: dict, cfg: dict, today: date, history: list[dict] | None =
     errors += check_brand_value(d, cfg, title, paras, body, history, pillar)
     errors += check_style(body, cfg)
     errors += check_topic_seed(d, cfg, history, pillar_id, today)
-    if published_today(history, today) and not d.get("_published"):
+    if published_today(history, today) and not d.get("_published") and not extra:
         errors.append("сегодня пост уже опубликован — второй пост в день не выпускаем")
 
     # Свежесть событий
@@ -1383,7 +1422,7 @@ def cmd_validate(args) -> int:
     cfg = load_config()
     d = load_draft(args.draft)
     today = date.fromisoformat(args.date) if args.date else today_local(cfg)
-    res = validate_draft(d, cfg, today, offline=args.offline)
+    res = validate_draft(d, cfg, today, offline=args.offline, extra=args.extra)
     print_report(res)
     if res["ok"]:
         print("\n--- предпросмотр подписи ---\n")
@@ -1417,7 +1456,7 @@ def cmd_publish(args) -> int:
         for h in history:
             if h.get("message_id") == args.replace:
                 h["deleted"] = True
-    res = validate_draft(d, cfg, today, history=history)
+    res = validate_draft(d, cfg, today, history=history, extra=args.extra)
     print_report(res)
     if not res["ok"]:
         return 1
@@ -1533,6 +1572,7 @@ def main() -> int:
     p.add_argument("draft")
     p.add_argument("--date")
     p.add_argument("--offline", action="store_true", help="без проверки источников по сети (только для тестов)")
+    p.add_argument("--extra", action="store_true", help="дополнительный пост, только если владелец прямо попросил")
     p.set_defaults(fn=cmd_validate)
     p = sub.add_parser("render", help="показать подпись")
     p.add_argument("draft")
@@ -1548,6 +1588,7 @@ def main() -> int:
     p.add_argument("--no-sync", action="store_true")
     p.add_argument("--image-url", help="готовая картинка из предыдущего --dry-run (не генерировать заново)")
     p.add_argument("--replace", type=int, help="message_id сегодняшнего поста, который заменить (удалить после публикации)")
+    p.add_argument("--extra", action="store_true", help="дополнительный пост сегодня, только если владелец прямо попросил")
     p.set_defaults(fn=cmd_publish)
     p = sub.add_parser("apartments", help="каталог всех наших квартир (TravelLine)")
     p.add_argument("--refresh", action="store_true")

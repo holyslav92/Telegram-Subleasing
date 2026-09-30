@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import tg_editorial as ed  # noqa: E402
 
 APT = ed.load_apartments()[0]
-TODAY = date(2026, 9, 24)  # четверг → reason_to_come
+TODAY = date(2026, 10, 1)  # четверг недели B → reason_to_come
 
 
 def good_draft(**over) -> dict:
@@ -89,7 +89,7 @@ class ValidateTests(unittest.TestCase):
         self.assertTrue(any("повтор" in e for e in res["errors"]))
 
     def test_cluster_cooldown_blocks(self):
-        history = [{"date": "2026-09-20", "title": "Большой концерт", "text": "концерт гастроли",
+        history = [{"date": "2026-09-27", "title": "Большой концерт", "text": "концерт гастроли",
                     "clusters": ["concert"], "format": "route", "pillar": "trip"}]
         res = self.run_v(good_draft(), history)
         self.assertFalse(res["ok"])
@@ -112,7 +112,7 @@ class ValidateTests(unittest.TestCase):
         self.assertTrue(any("Русская филармония" in e for e in res["errors"]))
 
     def test_event_too_soon_fails(self):
-        res = self.run_v(good_draft(event_date="2026-09-25"))
+        res = self.run_v(good_draft(event_date="2026-10-03"))
         self.assertTrue(any("меньше 5 дн" in e for e in res["errors"]))
 
     def test_weather_post_rejected_as_local(self):
@@ -136,7 +136,7 @@ class ValidateTests(unittest.TestCase):
         self.assertTrue(any("audience" in e for e in res["errors"]))
 
     def test_hook_rotation(self):
-        history = [{"date": "2026-09-23", "title": "Иное", "text": "иное", "clusters": [], "hook_type": "countdown"}]
+        history = [{"date": "2026-09-30", "title": "Иное", "text": "иное", "clusters": [], "hook_type": "countdown"}]
         res = self.run_v(good_draft(), history)
         self.assertTrue(any("крючок countdown" in e for e in res["errors"]))
 
@@ -145,7 +145,7 @@ class ValidateTests(unittest.TestCase):
         self.assertTrue(any("без конкретики" in e for e in res["errors"]))
 
     def test_wrong_pillar_without_reason_fails(self):
-        res = self.run_v(good_draft(pillar="weekend_idea", format="story"))
+        res = self.run_v(good_draft(pillar="day_trip", format="route_story"))
         self.assertTrue(any("сегодня рубрика reason_to_come" in e for e in res["errors"]))
 
     def test_links_and_emoji_in_text_fail(self):
@@ -195,11 +195,37 @@ class ValidateTests(unittest.TestCase):
         blocked = ed.blocked_clusters(history, self.cfg, TODAY)
         self.assertIn("reviews", blocked)
 
-    def test_faq_is_city_questions_for_visitors(self):
+    def test_channel_is_about_us_not_afisha(self):
+        days = self.cfg["cycle"]["days"]
+        about_us = [p for p in days if self.cfg["pillars"][p].get("fact_policy") in ("brand", "blog", "blog_or_web", "web_or_brand")]
+        self.assertGreaterEqual(len(about_us), 9, about_us)
+        self.assertNotIn("market_news", days)
+        self.assertNotIn("weekend_idea", days)
         faq = self.cfg["pillars"]["faq"]
-        self.assertEqual(faq["fact_policy"], "web")
-        self.assertTrue(all(s["id"].startswith("ask_") for s in faq["seeds"]))
-        self.assertLessEqual(faq["brand_sentences_max"], 1)
+        self.assertEqual(faq["fact_policy"], "brand")
+        self.assertTrue(all(s["id"].startswith("faq_") for s in faq["seeds"]))
+
+    def test_story_rubric_falls_back_without_owner_stories(self):
+        our_story_day = date(2026, 9, 28)
+        self.assertEqual(ed.pillar_for(our_story_day, self.cfg), "our_story")
+        if not ed.load_stories():
+            self.assertIn(ed.resolve_pillar(our_story_day, self.cfg, []), self.cfg["pillars"]["our_story"]["fallback_pillars"])
+
+    def test_invented_story_rejected(self):
+        d = seed_draft(pillar="our_story", topic_seed="story_invented", format="story", date="2026-09-28")
+        errs = ed.check_topic_seed(d, self.cfg, [], "our_story", date(2026, 9, 28))
+        self.assertTrue(any("ничего не выдумываем" in e for e in errs))
+
+    def test_apartment_rotation_is_global(self):
+        apts = ed.load_apartments()
+        hist = [{"date": "2026-09-22", "pillar": "apartment_week", "apartment_code": apts[0]["code"]}]
+        codes = [c["code"] for c in ed.apartment_candidates("apartment_for", hist, date(2026, 9, 29), n=60)]
+        self.assertNotIn(apts[0]["code"], codes)
+
+    def test_extra_post_allowed_only_with_flag(self):
+        history = [{"source": "published", "date": "2026-09-21", "title": "Уже вышло", "text": "x", "clusters": []}]
+        res = ed.validate_draft(seed_draft(), self.cfg, date(2026, 9, 21), history=history, offline=True, extra=True)
+        self.assertFalse(any("уже опубликован" in e for e in res["errors"]))
 
 
 class RenderTests(unittest.TestCase):
@@ -258,7 +284,8 @@ class PlanAndMemoryTests(unittest.TestCase):
 
     def test_schedule_two_weeks(self):
         self.assertEqual(ed.pillar_for(date(2026, 9, 21), self.cfg), "how_we_work")
-        self.assertEqual(ed.pillar_for(date(2026, 9, 28), self.cfg), "market_news")
+        self.assertEqual(ed.pillar_for(date(2026, 9, 28), self.cfg), "our_story")
+        self.assertEqual(ed.pillar_for(date(2026, 9, 30), self.cfg), "faq")
         self.assertEqual(ed.pillar_for(date(2026, 10, 5), self.cfg), "how_we_work")
 
     def test_seed_used_once(self):
@@ -300,7 +327,7 @@ class PlanAndMemoryTests(unittest.TestCase):
         hist, start = [], date(2026, 9, 21)
         for i in range(365):
             x = start + timedelta(days=i)
-            pid = ed.pillar_for(x, self.cfg)
+            pid = ed.resolve_pillar(x, self.cfg, hist)
             src = self.cfg["pillars"][pid].get("topic_source")
             if src == "seeds":
                 c = ed.seed_candidates(pid, self.cfg, hist, x)
@@ -310,6 +337,10 @@ class PlanAndMemoryTests(unittest.TestCase):
                 c = ed.blog_candidates(hist, x)
                 self.assertTrue(c, f"нет истории на {x}")
                 hist.append({"date": x.isoformat(), "pillar": pid, "sources": [c[0]["url"]]})
+            elif src == "stories":
+                c = ed.story_candidates(hist)
+                self.assertTrue(c, f"нет истории компании на {x}")
+                hist.append({"date": x.isoformat(), "pillar": pid, "topic_seed": c[0]["id"]})
             elif src == "apartments":
                 c = ed.apartment_candidates(pid, hist, x)
                 self.assertTrue(c, f"нет квартиры на {x}")
