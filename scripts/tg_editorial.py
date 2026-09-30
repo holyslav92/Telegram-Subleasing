@@ -399,15 +399,43 @@ def story_candidates(history: list[dict], n: int = 5) -> list[dict]:
     return [s for s in load_stories() if s["id"] not in used][:n]
 
 
+CONTENT_PLAN_PATH = ROOT / "shared" / "tg-content-plan.json"
+
+
+def plan_entry(today: date, cfg: dict) -> dict:
+    """Запись месячного контент-плана на дату (или {}), только с существующей рубрикой."""
+    try:
+        data = json.loads(CONTENT_PLAN_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    for e in data.get("days") or []:
+        if e.get("date") == today.isoformat() and e.get("pillar") in cfg["pillars"]:
+            return e
+    return {}
+
+
 def resolve_pillar(today: date, cfg: dict, history: list[dict]) -> str:
-    """Рубрика дня; если у рубрики кончился материал (банк историй пуст) — её запасная рубрика."""
-    pid = pillar_for(today, cfg)
+    """Рубрика дня: из контент-плана, иначе по циклу; если материала нет (банк историй пуст) — запасная."""
+    entry = plan_entry(today, cfg)
+    pid = entry.get("pillar") or pillar_for(today, cfg)
     pillar = cfg["pillars"][pid]
     if pillar.get("topic_source") == "stories" and not story_candidates(history):
+        fb = (entry.get("fallback") or {}).get("pillar")
+        if fb in cfg["pillars"]:
+            return fb
         fallbacks = pillar.get("fallback_pillars") or []
         if fallbacks:
             return max(fallbacks, key=lambda f: len(seed_candidates(f, cfg, history, today, n=1000)))
     return pid
+
+
+def planned_seed(today: date, cfg: dict, pillar_id: str) -> str:
+    """id темы, которую план назначил на сегодня для этой рубрики (с учётом запасной)."""
+    entry = plan_entry(today, cfg)
+    if entry.get("pillar") == pillar_id and entry.get("seed"):
+        return entry["seed"]
+    fb = entry.get("fallback") or {}
+    return fb.get("seed", "") if fb.get("pillar") == pillar_id else ""
 
 
 BLOG_INDEX_PATH = ROOT / "shared" / "tg-blog-index.json"
@@ -457,7 +485,16 @@ def used_image_refs(history: list[dict]) -> set[str]:
     return {h.get("image_reference") for h in history if h.get("image_reference")}
 
 
-def apartment_candidates(pillar_id: str, history: list[dict], today: date, n: int = 5) -> list[dict]:
+def apartment_matches(a: dict, prefer: dict) -> bool:
+    if prefer.get("min_occupancy") and (a.get("max_occupancy") or 0) < prefer["min_occupancy"]:
+        return False
+    if prefer.get("amenity") and prefer["amenity"] not in (a.get("amenities") or []):
+        return False
+    return True
+
+
+def apartment_candidates(pillar_id: str, history: list[dict], today: date, n: int = 5,
+                         prefer: dict | None = None) -> list[dict]:
     if os.environ.get("TG_OFFLINE") != "1":
         try:
             if not APARTMENTS_PATH.exists() or time.time() - APARTMENTS_PATH.stat().st_mtime > 7 * 86400:
@@ -471,8 +508,11 @@ def apartment_candidates(pillar_id: str, history: list[dict], today: date, n: in
     if not free:
         return []
     shift = (today.toordinal() * 3) % len(free)
+    ordered = free[shift:] + free[:shift]
+    if prefer:
+        ordered = [a for a in ordered if apartment_matches(a, prefer)] + [a for a in ordered if not apartment_matches(a, prefer)]
     out = []
-    for a in (free[shift:] + free[:shift])[:n]:
+    for a in ordered[:n]:
         out.append({k: a[k] for k in ("code", "name", "address", "size_m2", "max_occupancy", "amenities", "pets", "description", "url")}
                    | {"photos": a["images"][:8]})
     return out
@@ -498,7 +538,11 @@ def seed_candidates(pillar_id: str, cfg: dict, history: list[dict], today: date,
         return []
     # детерминированный сдвиг по дате — разные модели получают одинаковый список
     shift = today.toordinal() % len(free)
-    return (free[shift:] + free[:shift])[:n]
+    ordered = free[shift:] + free[:shift]
+    planned = planned_seed(today, cfg, pillar_id)
+    if planned:
+        ordered = [s for s in ordered if s["id"] == planned] + [s for s in ordered if s["id"] != planned]
+    return ordered[:n]
 
 
 BLOG_GUIDE_RE = r"гид|\bгде\b|как выбрать|как снять|районы|\bтоп\b|лучш|\bчто\b|\bкак\b|советы|почему|сравнен|\bили\b|обзор|цены на|стоимость|критери|шаг"
@@ -581,7 +625,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
     topic_source = pillar.get("topic_source", "live")
     seeds_free = seed_candidates(pillar_id, cfg, history, today) if topic_source == "seeds" else []
     blog_free = blog_candidates(history, today, kind=pillar.get("blog_kind", "story")) if topic_source == "blog" else []
-    apt_free = apartment_candidates(pillar_id, history, today) if topic_source == "apartments" else []
+    entry = plan_entry(today, cfg)
+    apt_free = apartment_candidates(pillar_id, history, today, prefer=entry.get("apartment_prefer")) if topic_source == "apartments" else []
     stories_free = story_candidates(history) if topic_source == "stories" else []
     tokens["seed"] = seeds_free[0]["topic"] if seeds_free else ""
     tokens["place"] = tokens["seed"]
@@ -624,6 +669,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "already_published_today": [h.get("title") for h in published_today(history, today)],
         "pillar": pillar_id,
         "pillar_name": pillar["name"],
+        "content_plan_today": {k: entry[k] for k in ("angle", "why", "seed", "fallback", "apartment_prefer") if entry.get(k)}
+        if entry and not entry.get("done") else {},
         "goal": pillar["goal"],
         "how_to_write": pillar.get("how_to_write", ""),
         "brand_sentences_max": pillar.get("brand_sentences_max", 1),
@@ -656,6 +703,7 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "next_steps": [
             "0. Если already_published_today не пуст — сегодня пост уже вышел: ничего не публикуй, заверши работу.",
             "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); apartments → одну квартиру из apartment_candidates (topic_seed = \"apartment\", apartment_code = её code); stories → одну историю из story_candidates (topic_seed = её id), только её факты; live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
+            "1.0 Если content_plan_today не пуст — это план месяца (shared/tg-content-plan.json): тема уже стоит первой в кандидатах, пиши под angle. Угол — направление, не факты: факты всё равно только из brand_facts, карточек и источников.",
             "1.1 Картинка: если пост про нашу квартиру — только реальное фото этой квартиры из каталога (apartment_photos_rule). Скачай 6–8 фото, посмотри и выбери самое светлое и красивое.",
             "2. Факты: о «Добром доме» — только brand_facts (источник — сайт); о городе и рынке — WebSearch + python3 scripts/tg_editorial.py fetch <url> --find \"<фраза>\".",
             "3. Пиши по how_to_write и writing_rules: 2–3 абзаца прозой, без списков, короткими живыми предложениями. Не повторяй rubric_past_titles и тему yesterday. Сначала сформулируй takeaway — что читатель унесёт; если он общий («читайте отзывы»), тема не та.",

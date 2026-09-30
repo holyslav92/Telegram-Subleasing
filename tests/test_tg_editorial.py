@@ -10,6 +10,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import tg_editorial as ed  # noqa: E402
 
 APT = ed.load_apartments()[0]
+REAL_PLAN_PATH = ed.CONTENT_PLAN_PATH
+# базовые тесты проверяют 14-дневный цикл без месячного плана; план — в ContentPlanTests
+ed.CONTENT_PLAN_PATH = Path("/nonexistent/tg-content-plan.json")
 TODAY = date(2026, 10, 1)  # четверг недели B → reason_to_come
 
 
@@ -380,5 +383,70 @@ class PlanAndMemoryTests(unittest.TestCase):
         self.assertNotIn("family", ed.strong_clusters("Семь причин", "семь дней", self.cfg))
 
 
+class ContentPlanTests(unittest.TestCase):
+    def setUp(self):
+        self.cfg = ed.load_config()
+        ed.CONTENT_PLAN_PATH = REAL_PLAN_PATH
+
+    def tearDown(self):
+        ed.CONTENT_PLAN_PATH = Path("/nonexistent/tg-content-plan.json")
+
+    def test_plan_file_is_valid(self):
+        import json
+        from datetime import timedelta
+        data = json.loads(REAL_PLAN_PATH.read_text(encoding="utf-8"))
+        days = data["days"]
+        start = date.fromisoformat(data["period"]["from"])
+        self.assertEqual([e["date"] for e in days], [(start + timedelta(i)).isoformat() for i in range(len(days))])
+        self.assertGreaterEqual(len(days), 30)
+        seeds = [e.get("seed") for e in days if e.get("seed") not in ("", "live", "blog", "apartment")]
+        self.assertEqual(len(seeds), len(set(seeds)), "тема в плане не должна повторяться")
+        for e in days:
+            self.assertIn(e["pillar"], self.cfg["pillars"])
+            self.assertTrue(e.get("angle") and e.get("why"), e["date"])
+            for pid, sid in ((e["pillar"], e.get("seed")), ((e.get("fallback") or {}).get("pillar"), (e.get("fallback") or {}).get("seed"))):
+                if not pid or sid in (None, "", "live", "blog", "apartment"):
+                    continue
+                seed = next((s for s in self.cfg["pillars"][pid].get("seeds") or [] if s["id"] == sid), None)
+                self.assertIsNotNone(seed, f"{e['date']}: {sid} нет в рубрике {pid}")
+                d = date.fromisoformat(e["date"])
+                self.assertTrue(not seed.get("months") or d.month in seed["months"], f"{sid} не по сезону")
+            src = self.cfg["pillars"][e["pillar"]].get("topic_source")
+            if e.get("seed") in ("live", "blog", "apartment"):
+                self.assertEqual({"live": "live", "blog": "blog", "apartment": "apartments"}[e["seed"]], src, e["date"])
+
+    def test_plan_sets_pillar_and_first_seed(self):
+        day = date(2026, 10, 1)
+        self.assertEqual(ed.resolve_pillar(day, self.cfg, []), "travel_tips")
+        plan = ed.build_plan(self.cfg, day, [])
+        self.assertEqual(plan["seed_candidates"][0]["id"], "tip_29")
+        self.assertIn("День пожилых", plan["content_plan_today"]["angle"])
+
+    def test_plan_story_day_uses_planned_fallback(self):
+        day = date(2026, 10, 12)
+        self.assertEqual(ed.resolve_pillar(day, self.cfg, []), "how_we_work")
+        self.assertEqual(ed.seed_candidates("how_we_work", self.cfg, [], day)[0]["id"], "hww_07")
+
+    def test_plan_used_seed_falls_back_to_rotation(self):
+        day = date(2026, 10, 1)
+        hist = [{"date": "2026-09-20", "pillar": "travel_tips", "topic_seed": "tip_29", "source": "published"}]
+        self.assertNotEqual(ed.seed_candidates("travel_tips", self.cfg, hist, day)[0]["id"], "tip_29")
+
+    def test_plan_apartment_preference(self):
+        day = date(2026, 10, 13)
+        self.assertEqual(ed.resolve_pillar(day, self.cfg, []), "apartment_for")
+        first = ed.build_plan(self.cfg, day, [])["apartment_candidates"][0]
+        self.assertGreaterEqual(first["max_occupancy"], 8)
+
+    def test_plan_draft_validates_on_planned_day(self):
+        day = date(2026, 10, 1)
+        d = seed_draft(date=day.isoformat(), pillar="travel_tips", topic_seed="tip_29")
+        res = ed.validate_draft(d, self.cfg, day, history=[], offline=True)
+        self.assertFalse([e for e in res["errors"] if e.startswith("сегодня рубрика")], res["errors"])
+        res = ed.validate_draft(good_draft(date=day.isoformat()), self.cfg, day, history=[], offline=True)
+        self.assertTrue([e for e in res["errors"] if e.startswith("сегодня рубрика travel_tips")], res["errors"])
+
+
 if __name__ == "__main__":
     unittest.main()
+
