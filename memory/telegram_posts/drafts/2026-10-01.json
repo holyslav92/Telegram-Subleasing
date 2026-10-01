@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-01",
+  "pillar": "travel_tips",
+  "format": "explainer",
+  "topic_seed": "tip_29",
+  "apartment_code": "",
+  "topic_id": "weekend_elderly_parents_oct_2026",
+  "clusters": [
+    "history",
+    "exhibition",
+    "day_trip"
+  ],
+  "hook_type": "number",
+  "audience": "families",
+  "stay_reason": "Сын или дочь привозят родителей на выходные и ищут спокойную программу без спешки и удобную ночёвку в городе.",
+  "takeaway": "С 12:00 1 октября — музеи и дома культуры с местами посидеть; 3 октября в парке Заречный — «Культ Поход»; афиша на портале «Активное долголетие по-тюменски».",
+  "title": "Выходные с мамой: музеи с 12:00 и «Культ Поход» 3 октября",
+  "paragraphs": [
+    "Пятница вечером вы везёте маму в Тюмень на два дня. Главный вопрос простой: где ей легко дышать и присесть между прогулками. 1 октября — День пожилых людей, и под него город собрал отдельную афишу.",
+    "Утром 1 октября в экопарке «Затюменский» в 8:30 стартует марафон «Движение — жизнь!». Короткий круг — и можно вернуться отдохнуть. С 12:00 музеи зовут на вечера и экскурсии. Концерты — в домах культуры, во Дворце «Строитель» и в Региональном центре активного долголетия.",
+    "3 октября в парке Заречный — «Культ Поход»: маршрут и скандинавская ходьба с инструктором. Афиша на портале «Активное долголетие по-тюменски». На ночь бронируйте жильё заранее: после прогулок удобнее бесконтактный заезд по инструкции, без встреч у подъезда."
+  ],
+  "question": "",
+  "entities": [
+    "Затюменский",
+    "Движение — жизнь!",
+    "Дворец национальных культур «Строитель»",
+    "Культ Поход",
+    "Активное долголетие по-тюменски"
+  ],
+  "event_date": "2026-10-03",
+  "sources": [
+    {
+      "url": "https://newstyumen.ru/society/2026/09/29/99811.html",
+      "published": "2026-09-29",
+      "must_contain": [
+        "Региональный центр активного долголетия",
+        "Культ Поход"
+      ]
+    }
+  ],
+  "image_headline": "Выходные с мамой в Тюмени",
+  "image": {
+    "kind": "city",
+    "reference_url": "https://images.pexels.com/photos/8796066/pexels-photo-8796066.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "Autumn park walkway in a Russian city, elderly woman and adult daughter walking slowly together, benches and trees, soft daylight, realistic photo"
+  },
+  "_published": {
+    "message_id": 586,
+    "image_url": "https://file2.aitohumanize.com/file/72956f58aab04c4da59cf889f25065f8.png",
+    "image_mode": "generated",
+    "reference": "https://images.pexels.com/photos/8796066/pexels-photo-8796066.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+  }
+}
