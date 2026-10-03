@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-03",
+  "pillar": "day_trip",
+  "format": "route_story",
+  "topic_seed": "trip_34",
+  "apartment_code": "",
+  "topic_id": "trip_34_thermal_yar_oct_2026",
+  "clusters": [
+    "thermal"
+  ],
+  "hook_type": "surprise_fact",
+  "audience": "north_weekenders",
+  "stay_reason": "Приехали в Тюмень на субботу-воскресенье и хотят один день провести в термах без ночёвки на базе.",
+  "takeaway": "«Тюменский» в посёлке Яр: из центра Тюмени около 25 минут; с 2026 года дневной вход 1200 ₽ до 21:00, ночной — 2500 ₽; на базе два бассейна, тарифы от 800 до 1300 ₽ за разные форматы.",
+  "title": "«Тюменский» в Яре: 1200 ₽ до 21:00 и два бассейна",
+  "paragraphs": [
+    "Суббота, за окном плюс семь, а на ладони хочется тепла. Источник «Тюменский» в посёлке Яр — один из тех адресов, куда тюменцы уезжают на день, не меняя ночлег в городе.",
+    "Путь из центра Тюмени занимает 25 минут. На территории — гостиница, беседки и два бассейна: элитный и экономкласса; вход в старый чашу от 800 рублей, полный пакет — до 1300 рублей. С начала 2026 года тариф упростили: 1200 рублей до 21:00 и 2500 рублей ночью — это заметно дороже, чем прежние 800 и 1000 рублей.",
+    "К вечеру вы снова в городе, с мокрыми волосами и лёгкой усталостью в ногах. Если ночуете у нас, после дороги проще зайти по инструкции в тёплую квартиру — без встреч у подъезда."
+  ],
+  "question": "",
+  "entities": [
+    "Тюменский",
+    "посёлок Яр"
+  ],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://72.ru/text/entertainment/2026/02/13/76260847/",
+      "published": "2026-02-13",
+      "must_contain": [
+        "1200 рублей",
+        "Яру"
+      ]
+    },
+    {
+      "url": "https://72.ru/text/entertainment/2025/04/10/75274559/",
+      "published": "2025-04-10",
+      "must_contain": [
+        "25 минут",
+        "800 рублей"
+      ]
+    },
+    {
+      "url": "https://72.ru/text/entertainment/2025/04/25/75375992/",
+      "published": "2025-04-25",
+      "must_contain": [
+        "поселке Яр",
+        "1300 рублей"
+      ]
+    }
+  ],
+  "image_headline": "Термы в Яре: цена и дорога",
+  "image": {
+    "kind": "city",
+    "reference_url": "https://images.pexels.com/photos/11132693/pexels-photo-11132693.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "Outdoor thermal pool with steam rising in cold autumn air, pine trees in background, no people close-up, realistic Siberian resort"
+  },
+  "_published": {
+    "message_id": 588,
+    "image_url": "https://file7.aitohumanize.com/file/6c18e421d69a410db08a67a92d77349c.png",
+    "image_mode": "generated",
+    "reference": "https://images.pexels.com/photos/11132693/pexels-photo-11132693.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+  }
+}
