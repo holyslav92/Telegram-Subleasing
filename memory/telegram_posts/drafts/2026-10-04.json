@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-04",
+  "pillar": "community",
+  "format": "fact_question",
+  "topic_seed": "talk_27",
+  "apartment_code": "",
+  "topic_id": "talk_27_best_memory_oct_2026",
+  "clusters": [
+    "embankment"
+  ],
+  "hook_type": "debate",
+  "audience": "subscribers",
+  "stay_reason": "вспоминают прошлый приезд в Тюмень или планируют вернуться на выходные",
+  "takeaway": "сравнить своё главное воспоминание с вечерним маршрутом в 19:30 как ориентиром времени и места",
+  "title": "«Огни вечерней Тюмени» в 19:30: ваше воспоминание?",
+  "paragraphs": [
+    "Воскресенье, листаете галерею в телефоне — и один кадр из Тюмени всплывает раньше остальных. Не открытка с башнями, а мелочь: свет в окне соседнего дома, шаги по мокрому асфальту, тёплый пар от чашки на подоконнике.",
+    "У вечера в городе есть якорь: остановка «Сквер Немцова», старт в 19:30, маршрут «Огни вечерней Тюмени» на 2 часа, билет 1 700 рублей — всё это на странице наших экскурсий. Но в памяти чаще остаётся не расписание, а случайный разговор в лифте или вид из окна квартиры на рассвете."
+  ],
+  "question": "Какое воспоминание о Тюмени у вас первое — вечерний огонь у воды или утренний кофе во дворе?",
+  "entities": [
+    "Сквер Немцова",
+    "Огни вечерней Тюмени"
+  ],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://добрыйдомтюмень.рф/excursions/",
+      "published": "",
+      "must_contain": [
+        "Начало экскурсии - в 19:30",
+        "1 700 руб"
+      ]
+    }
+  ],
+  "image_headline": "Ваше воспоминание",
+  "image": {
+    "kind": "city",
+    "reference_url": "https://images.pexels.com/photos/21789946/pexels-photo-21789946.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+    "scene": "Evening city lights reflecting on a river embankment, soft autumn dusk, no people close-up"
+  },
+  "_published": {
+    "message_id": 589,
+    "image_url": "https://file8.aitohumanize.com/file/149bd366b78144ccb6edd16a8b535955.png",
+    "image_mode": "generated",
+    "reference": "https://images.pexels.com/photos/21789946/pexels-photo-21789946.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+  }
+}
