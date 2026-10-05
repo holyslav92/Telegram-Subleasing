@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-05",
+  "pillar": "how_we_work",
+  "format": "story",
+  "topic_seed": "hww_18",
+  "topic_id": "hww_18_checkin_instruction_oct_2026",
+  "clusters": [
+    "checkin"
+  ],
+  "title": "Что внутри нашей инструкции по заселению",
+  "image_headline": "Сразу к своей двери",
+  "image": {
+    "kind": "city",
+    "reference_url": "none",
+    "scene": "Realistic evening photo: a traveler with a small suitcase standing at the entrance of a cozy residential apartment building in Tyumen, warm light from the doorway and windows, autumn leaves on the ground, hand holding a smartphone showing a blurred photo-style instruction screen with no readable text, intercom panel softly visible near the door, calm and confident mood, no logos, no readable text"
+  },
+  "text_html": "<b>Что внутри нашей инструкции по заселению</b>\n\nНемного закулисья. У нас около 50 квартир в разных районах Тюмени, и к каждой есть своя инструкция. Заселяем мы без встреч, так что инструкция работает вместо человека с ключами. В ней фото подъезда, домофон, этаж и как попасть внутрь. Фото нужно, чтобы вы сразу узнали свой вход и не сверяли номера домов во дворе. Этаж указан, чтобы не подниматься наугад и не стоять у чужой двери.\n\nЗаезд с 15:00, выезд до 12:00. Если на месте что-то непонятно, пишите нам в мессенджер. Отвечаем до 5 минут и на связи круглосуточно. Можно и позвонить: +7 (993) 574-83-22.\n\n<i>А что вам обычно сложнее всего найти в незнакомом доме: подъезд или квартиру?</i>\n\nЗабронировать напрямую можно <a href=\"https://добрыйдом-72.рф/booking/\">на сайте</a>, а с вопросами пишите <a href=\"https://t.me/Dobriy_dom_Tyumen\">менеджеру</a>.",
+  "text_source": "claude-opus-5-5 / Derouter effort=high — опубликован без изменений по просьбе владельца",
+  "entities": [],
+  "event_date": "",
+  "sources": [],
+  "_image": {
+    "url": "https://file3.aitohumanize.com/file/af2d4b4c2dea4baab16bc561ced07584.png",
+    "mode": "generated"
+  },
+  "_published": {
+    "message_id": 590,
+    "image_url": "https://file3.aitohumanize.com/file/af2d4b4c2dea4baab16bc561ced07584.png",
+    "image_mode": "generated",
+    "reference": ""
+  }
+}
