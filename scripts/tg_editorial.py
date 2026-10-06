@@ -38,6 +38,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 ROOT = SCRIPT_DIR.parent
 CONFIG_PATH = ROOT / "shared" / "telegram-editorial.json"
+AUTOMATION_HOLD_PATH = ROOT / "shared" / "telegram-automation-hold.json"
 POSTS_DIR = ROOT / "memory" / "telegram_posts"
 PUBLISHED_PATH = POSTS_DIR / "published.json"
 LEDGER_PATH = POSTS_DIR / "ledger.json"
@@ -64,6 +65,18 @@ _CHANNEL_CACHE: list[dict] | None = None
 def load_config() -> dict:
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def automation_hold_info(today: date) -> dict | None:
+    """Если сегодня в hold_dates — automation не публикует (ручная пачка владельца)."""
+    try:
+        data = json.loads(AUTOMATION_HOLD_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    ds = today.isoformat()
+    if ds not in (data.get("hold_dates") or []):
+        return None
+    return {"date": ds, "reason": data.get("reason", ""), "source": str(AUTOMATION_HOLD_PATH.relative_to(ROOT))}
 
 
 def norm(text: str) -> str:
@@ -660,8 +673,10 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "image": {"kind": "city|event|apartment", "reference_url": "реальное фото места (og:image из fetch) или пусто", "scene": "описание сцены по-английски, реалистично"},
     }
     last_hooks = [h.get("hook_type") for h in history if h.get("hook_type")][-2:]
+    hold = automation_hold_info(today)
     return {
         "brand_goal": cfg.get("brand_goal", ""),
+        "automation_hold": hold or {},
         "date": today.isoformat(),
         "weekday": WEEKDAYS[today.weekday()],
         "hook_types": {k: v for k, v in cfg.get("hook_types", {}).items() if k not in last_hooks},
@@ -701,7 +716,8 @@ def build_plan(cfg: dict, today: date, history: list[dict] | None = None) -> dic
         "draft_path": str(draft_path.relative_to(ROOT)),
         "draft_template": template,
         "next_steps": [
-            "0. Если already_published_today не пуст — сегодня пост уже вышел: ничего не публикуй, заверши работу.",
+            "0. Если automation_hold не пуст — СТОП: автоматическая публикация на эту дату отключена в shared/telegram-automation-hold.json. Ничего не пиши и не публикуй, заверши работу (ручная пачка владельца).",
+            "0.1 Если already_published_today не пуст — сегодня пост уже вышел: ничего не публикуй, заверши работу.",
             "1. Тема: seeds → возьми ПЕРВУЮ подходящую из seed_candidates (topic_seed = её id); blog → одну статью из blog_candidates (topic_seed = \"blog\"); apartments → одну квартиру из apartment_candidates (topic_seed = \"apartment\", apartment_code = её code); stories → одну историю из story_candidates (topic_seed = её id), только её факты; live → найди свежее событие/новость по search_queries (topic_seed = \"live\").",
             "1.0 Если content_plan_today не пуст — это план месяца (shared/tg-content-plan.json): тема уже стоит первой в кандидатах, пиши под angle. Угол — направление, не факты: факты всё равно только из brand_facts, карточек и источников.",
             "1.1 Картинка: если пост про нашу квартиру — только реальное фото этой квартиры из каталога (apartment_photos_rule). Скачай 6–8 фото, посмотри и выбери самое светлое и красивое.",
@@ -1440,6 +1456,18 @@ def print_report(res: dict) -> None:
         print(f"  ! {w}")
 
 
+def cmd_hold_status(args) -> int:
+    cfg = load_config()
+    today = date.fromisoformat(args.date) if args.date else today_local(cfg)
+    hold = automation_hold_info(today)
+    if hold:
+        print(json.dumps({"hold": True, **hold}, ensure_ascii=False, indent=2))
+        print("STOP: автоматика на эту дату не публикует (см. shared/telegram-automation-hold.json)")
+        return 2
+    print(json.dumps({"hold": False, "date": today.isoformat()}, ensure_ascii=False))
+    return 0
+
+
 def cmd_plan(args) -> int:
     cfg = load_config()
     today = date.fromisoformat(args.date) if args.date else today_local(cfg)
@@ -1499,6 +1527,11 @@ def cmd_publish(args) -> int:
     cfg = load_config()
     d = load_draft(args.draft)
     today = date.fromisoformat(args.date) if args.date else today_local(cfg)
+    hold = automation_hold_info(today)
+    if hold and not args.manual_batch:
+        print(f"Публикация заблокирована: {hold['date']} в {hold['source']} (автоматика). "
+              "Ручная пачка владельца: publish … --manual-batch")
+        return 5
     history = load_history(cfg)
     if args.replace:
         for h in history:
@@ -1637,6 +1670,7 @@ def main() -> int:
     p.add_argument("--image-url", help="готовая картинка из предыдущего --dry-run (не генерировать заново)")
     p.add_argument("--replace", type=int, help="message_id сегодняшнего поста, который заменить (удалить после публикации)")
     p.add_argument("--extra", action="store_true", help="дополнительный пост сегодня, только если владелец прямо попросил")
+    p.add_argument("--manual-batch", action="store_true", help="ручная публикация владельца в день automation_hold")
     p.set_defaults(fn=cmd_publish)
     p = sub.add_parser("apartments", help="каталог всех наших квартир (TravelLine)")
     p.add_argument("--refresh", action="store_true")
