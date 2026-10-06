@@ -233,5 +233,45 @@
     "id": "apt_296070_korenevskogo_bath_oct_2026",
     "category_id": "apartment_week",
     "published_at": "2026-10-06 03:21:28"
+  },
+  {
+    "id": "apt_331062_popova7_bath_warmfloor_oct_2026",
+    "category_id": "apartment_week",
+    "published_at": "2026-10-06 04:16:19"
+  },
+  {
+    "id": "own_12_october_offseason_oct_2026",
+    "category_id": "owners",
+    "published_at": "2026-10-06 04:16:23"
+  },
+  {
+    "id": "care_37_train_delay_shift_checkin_oct_2026",
+    "category_id": "care",
+    "published_at": "2026-10-06 04:16:27"
+  },
+  {
+    "id": "blog_buh_check_my_ne_gostinica_oct_2026",
+    "category_id": "guest_stories",
+    "published_at": "2026-10-06 04:16:29"
+  },
+  {
+    "id": "city_02_tura_embankment_october_morning_oct_2026",
+    "category_id": "city_eyes",
+    "published_at": "2026-10-06 04:16:33"
+  },
+  {
+    "id": "talk_28_checkin_instruction_wishes_oct_2026",
+    "category_id": "community",
+    "published_at": "2026-10-06 04:16:36"
+  },
+  {
+    "id": "hww_07_10_years_first_guests_oct_2026",
+    "category_id": "how_we_work",
+    "published_at": "2026-10-06 04:16:39"
+  },
+  {
+    "id": "apt_235318_griboedova13_company_oct_2026",
+    "category_id": "apartment_for",
+    "published_at": "2026-10-06 04:16:46"
   }
 ]
