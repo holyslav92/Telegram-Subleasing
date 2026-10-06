@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-06",
+  "pillar": "apartment_week",
+  "format": "portrait",
+  "topic_seed": "apartment",
+  "apartment_code": "296070",
+  "topic_id": "apt_296070_korenevskogo_bath_oct_2026",
+  "clusters": ["family", "districts"],
+  "hook_type": "number",
+  "audience": "north_weekenders",
+  "stay_reason": "Семья с детьми после долгой дороги из северных городов хочет согреться и выспаться в Тюмени",
+  "takeaway": "Кореневского 7: 45 м² на 4-м этаже, ванна после дороги, до 4 гостей, рядом РЖД-медицина",
+  "title": "Кореневского, 7: 45 м² тепла после северной дороги",
+  "paragraphs": [
+    "После долгой дороги из северного города особенно хочется тепла и тишины. На Кореневского, 7 можно набрать ванну, согреться и провести спокойный вечер всей семьёй.",
+    "Квартира площадью 45 м² находится на 4-м этаже 15-этажного дома. Здесь разместятся до 4 гостей: родители могут занять двуспальную кровать, а детям подойдёт диван-кровать. На кухне удобно приготовить ужин, Wi-Fi поможет включить мультфильм, а кондиционер настроит комфортную температуру.",
+    "Рядом работает клиника РЖД-медицина, во дворе есть детские площадки, поблизости магазины и кафе. С питомцем можно приехать по согласованию, доплата указана в карточке квартиры."
+  ],
+  "question": "",
+  "entities": ["Кореневского", "РЖД-медицина"],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://добрыйдомтюмень.рф/booking/?room-type=296070",
+      "published": "",
+      "must_contain": ["четвёртом этаже", "ванна"]
+    }
+  ],
+  "image_headline": "Ванна и тепло после дороги",
+  "image": {
+    "kind": "apartment",
+    "reference_url": "https://secure.travelline.ru/resource/images/rt/296070/638610471015479115-5625c28a-d3a8-4735-930f-24b15348925e",
+    "scene": "Bright modern one-bedroom apartment living room in Tyumen with large window, grey sofa, warm natural daylight, clean neutral interior"
+  },
+  "text_source": "claude-opus-5-5 / Derouter effort=high"
+}
