@@ -55,7 +55,8 @@ Cover-text (Gemini) || Schema (inherit) → Cover (inherit); Indexer; Publish; m
 остаться на ночь, сохранить или переслать. Пишем для приезжих, а не сводку для местных.
 
 1. python3 scripts/telegram_doctor.py
-2. python3 scripts/tg_editorial.py plan — прочитай бриф целиком.
+1a. python3 scripts/tg_editorial.py hold-status — если код выхода 2, СТОП (дата в shared/telegram-automation-hold.json).
+2. python3 scripts/tg_editorial.py plan — прочитай бриф целиком; если automation_hold не пуст — СТОП.
 3. Найди в интернете (WebSearch) свежие факты по search_queries брифа.
    Каждый источник проверь: python3 scripts/tg_editorial.py fetch "<url>" --find "<фраза>".
 4. Напиши черновик JSON по draft_template в memory/telegram_posts/drafts/<дата>.json:
