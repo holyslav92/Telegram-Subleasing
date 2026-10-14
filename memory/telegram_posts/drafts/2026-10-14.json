@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-14",
+  "pillar": "faq",
+  "format": "qa",
+  "topic_seed": "faq_36",
+  "apartment_code": "334256",
+  "topic_id": "faq_36_company_ten_novin_oct_2026",
+  "clusters": [
+    "family",
+    "safety"
+  ],
+  "hook_type": "insider",
+  "audience": "families",
+  "stay_reason": "Приедут большой семьёй или дружной компанией на выходные в Тюмень и хотят жить в одной квартире.",
+  "takeaway": "Поймут, что в каталоге есть варианты до 10 гостей (пример — ЖК «Новин», 70 м²) и что вечеринки в квартирах запрещены правилами.",
+  "title": "50 лет Октября: компания до 10 гостей, без вечеринки",
+  "paragraphs": [
+    "«Есть квартира, где поместится компания из десяти человек?» Так пишут перед большим семейным приездом. Да: в каталоге есть двухкомнатная в ЖК «Новин» — 70 м², до 10 гостей, адрес 50 лет Октября, 57Ак1.",
+    "Подберём вариант под ваш состав и положим бельё ровно по числу забронированных мест. В этой двухкомнатной 70 м² есть кондиционер и два телевизора — удобно, когда людей много и каждому нужен свой уголок отдыха.",
+    "И сразу про ожидания: квартиры только для проживания, отмечать праздники и проводить мероприятия нельзя. Так спокойнее соседям и следующим гостям — а вам остаётся нормальный сон после дороги."
+  ],
+  "question": "",
+  "entities": [
+    "ЖК Новин",
+    "50 лет Октября"
+  ],
+  "event_date": "",
+  "sources": [
+    {
+      "url": "https://добрыйдомтюмень.рф/about/",
+      "published": "",
+      "must_contain": [
+        "только для проживания",
+        "Отмечать праздники"
+      ]
+    }
+  ],
+  "image_headline": "10 гостей — да, вечеринка — нет",
+  "image": {
+    "kind": "apartment",
+    "reference_url": "https://secure.travelline.ru/resource/images/rt/334256/638790932380740903-6c9dffc0-34cb-4ac4-a1d9-4c851b56a612",
+    "scene": "Bright realistic interior photo of a two-room apartment living room in Tyumen, natural daylight, clean modern furniture, no people, no text, no logos"
+  },
+  "text_source": "claude-opus-5-5 / Derouter effort=high (api.derouter.ai/openai/v1)",
+  "_published": {
+    "message_id": 617,
+    "image_url": "https://file3.aitohumanize.com/file/338dc6689b954733ac2f0c65abe18f59.png",
+    "image_mode": "generated",
+    "reference": "https://secure.travelline.ru/resource/images/rt/334256/638790932380740903-6c9dffc0-34cb-4ac4-a1d9-4c851b56a612"
+  }
+}
