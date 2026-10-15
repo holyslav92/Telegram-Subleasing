@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-15",
+  "pillar": "reason_to_come",
+  "format": "big_event",
+  "topic_seed": "live",
+  "apartment_code": "",
+  "topic_id": "cagmo_sting_candles_nov_2026",
+  "clusters": [
+    "concert"
+  ],
+  "hook_type": "countdown",
+  "audience": "fans",
+  "stay_reason": "Приедут на вечерний концерт «Симфония Стинг» 18 ноября и останутся ночевать, а не ехать домой после десяти вечера.",
+  "takeaway": "18 ноября 2026, 19:00, ДК «Нефтяник», ул. Осипенко, 1, билеты от 1 900 ₽, шоу около трёх часов — финал ближе к 22:00.",
+  "title": "Через 34 дня: «Симфония Стинг» при свечах на Осипенко",
+  "paragraphs": [
+    "Через 34 дня в Большом зале на ул. Осипенко, 1 зажгут сотни свечей: оркестр CAGMO играет «Симфонию Стинг» — саксофон, акустическая гитара и струнные без яркого концертного света.",
+    "Старт 18 ноября в 19:00, билеты от 1 900 ₽, на афише указаны три часа. Прозвучат Shape Of My Heart, Every Breath You Take и другие песни Полиса и соло-карьеры Стинга.",
+    "После финала около десяти вечера тянуться в область по трассе уже не хочется — логичнее ночь провести в городе и утром уехать на свежую голову. Можно подобрать квартиру ближе к Осипенко и не тратить полночь на дорогу."
+  ],
+  "question": "",
+  "entities": [
+    "CAGMO",
+    "Стинг",
+    "ДК Нефтяник"
+  ],
+  "event_date": "2026-11-18",
+  "sources": [
+    {
+      "url": "https://tmn.kassir.ru/koncert/orkestr-cagmo-simfoniya-sting-pri-svechah-9",
+      "published": "",
+      "must_contain": [
+        "Билеты от 1 900 ₽",
+        "ул Осипенко, 1"
+      ]
+    }
+  ],
+  "image_headline": "Стинг при свечах · 18.11",
+  "image": {
+    "kind": "event",
+    "reference_url": "https://images.pexels.com/photos/27028361/pexels-photo-27028361.jpeg",
+    "scene": "Orchestra on a dark stage surrounded by hundreds of glowing candles, warm cinematic light, wide shot, no close-up faces"
+  },
+  "_published": {
+    "message_id": 620,
+    "image_url": "https://images.pexels.com/photos/27028361/pexels-photo-27028361.jpeg",
+    "image_mode": "reference_photo",
+    "reference": "https://images.pexels.com/photos/27028361/pexels-photo-27028361.jpeg"
+  }
+}
